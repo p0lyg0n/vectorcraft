@@ -1060,6 +1060,10 @@ Hue	色相
 Saturation	彩度
 Luminosity	輝度
 
+# Appearance panel
+Opacity: {}	不透明度：{}
+Click to choose a swatch	クリックでスウォッチを選択
+
 # Words that read differently in one place
 @Document Setup
 Type	テキスト
