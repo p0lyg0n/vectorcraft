@@ -894,3 +894,204 @@ Toggle single/double column	1 列／2 列を切り替え
 # Words that read differently in one place
 @Document Setup
 Type	テキスト
+
+# Edit > Preferences: categories, sections and settings
+@Preferences
+Preferences	環境設定
+General	一般
+Selection & Anchor Display	選択範囲・アンカー表示
+Type	テキスト
+Units	単位
+Guides & Grid	ガイド・グリッド
+Smart Guides	スマートガイド
+Slices	スライス
+Hyphenation	ハイフネーション
+Performance & Storage	プラグイン・仮想記憶ディスク
+User Interface	ユーザーインターフェイス
+Performance	パフォーマンス
+File Handling	ファイル管理
+Clipboard Handling	クリップボードの処理
+Appearance of Black	ブラックのアピアランス
+Devices	デバイス
+Options	オプション
+Keyboard Increment	キー増加
+Constrain Angle	角度の制限
+Corner Radius	角丸の半径
+Paste Offset	ペーストのオフセット
+Disable Auto Add/Delete	ペンツールでパス上にアンカーポイントを自動で追加 / 削除しない
+Use Precise Cursors	十字カーソルを使用
+Show Tool Tips	ツールヒントを表示
+Anti-aliased Artwork	アートワークのアンチエイリアス
+Select Same Tint %	同じ濃度を選択
+Show The Home Screen When No Documents Are Open	ドキュメントを開いていないときにホーム画面を表示
+Use Preview Bounds	プレビュー境界を使用
+Display Print Size at 100% Zoom	100% ズームで印刷サイズを表示
+Double Click To Isolate	ダブルクリックして編集モード
+Transform Pattern Tiles	パターンを変形
+Scale Corners	角を拡大・縮小
+Scale Strokes & Effects	線幅と効果も拡大・縮小
+Zoom with Mouse Wheel	マウスホイールでズーム
+Use Japanese Crop Marks	日本式トンボを使用
+Appearance Panel	アピアランスパネル
+New Art Has Basic Appearance	新規オブジェクトにアピアランスを適用しない
+Transform Panel	変形パネル
+Constrain Width and Height Proportions	縦横比を固定
+Enable Contextual Task Bar	コンテキストタスクバーを有効にする
+Selection	選択範囲
+Tolerance	許容値
+Object Selection by Path Only	オブジェクトの選択範囲をパスに制限
+Snap to Point	ポイントにスナップ
+Command Click to Select Objects Behind	Ctrl + クリックで背面のオブジェクトを選択
+Zoom to Selection	選択範囲へズーム
+Move Locked and Hidden Artwork with Artboard	ロックまたは非表示オブジェクトをアートボードと一緒に移動
+Anchor Points, Handle, and Bounding Box Display	アンカーポイント、ハンドル、およびバウンディングボックスの表示
+Size	サイズ
+Enable Rubber Band for	ラバーバンドを有効にする対象
+Pen Tool	ペンツール
+Curvature Tool	曲線ツール
+Size/Leading	サイズ / 行送り
+Tracking	トラッキング
+Baseline Shift	ベースラインシフト
+Language Options	言語オプション
+Show East Asian Options	東アジア言語のオプションを表示
+Show Indic Options	インド言語のオプションを表示
+Type Object Selection by Path Only	テキストオブジェクトの選択範囲をパスに制限
+Show Font Names in English	フォント名を英語表記
+Auto Size New Area Type	新規エリア内文字の自動サイズ調整
+Enable in-menu font previews	フォントメニュー内のフォントプレビューを表示
+Font Preview Size	フォントプレビューのサイズ
+Number of Recent Fonts	最近使用したフォントの表示数
+Enable Missing Glyph Protection	見つからない字形の保護を有効にする
+Highlight Alternate Glyphs	選択された文字の異体字を表示
+Fill New Type Objects With Placeholder Text	新規テキストオブジェクトにサンプルテキストを割り付け
+Graphic Styles	グラフィックスタイル
+Override Character Color	文字カラーを上書き
+Stroke	線
+East Asian Type	東アジア言語のオプション
+Numbers Without Units Are Points	数値のみの入力はポイントを単位とする
+Identify Objects By	オブジェクトの識別方法
+Guides	ガイド
+Grid	グリッド
+Color	カラー
+Style	スタイル
+Gridline every	グリッド
+Subdivisions	分割数
+Grids In Back	背面にグリッドを表示
+Show Pixel Grid (Above 600% Zoom)	ピクセルグリッドを表示（600% ズーム以上）
+Pattern Editing	パターン編集
+Tile Edge Color	タイルの境界線のカラー
+Smart Guides (View → Smart Guides)	スマートガイド（表示 → スマートガイド）
+Snap to Grid	グリッドにスナップ
+Display Options	表示オプション
+Alignment Guides	整列ガイド
+Object Highlighting	オブジェクトのハイライト表示
+Transform Tools	変形ツール
+Construction Guides	コンストラクションガイド
+Anchor/Path Labels	参照ラベル
+Measurement Labels	計測のヒント表示
+Spacing Guides	間隔ガイド
+Snapping Tolerance	スナップの許容値
+Show Slice Numbers	スライス番号を表示
+Line Color	線のカラー
+Exceptions (comma separated)	ハイフネーションの例外（カンマ区切り）
+Plug-ins	プラグイン
+Additional Plug-ins Folder	追加プラグインフォルダー
+Scratch Disks	仮想記憶ディスク
+Primary	ディスク 1
+Secondary	ディスク 2
+Canvas Color	カンバスカラー
+Auto-Collapse Iconic Panels	自動的にアイコンパネル化
+Open Documents As Tabs	タブでドキュメントを開く
+Large Tabs	大きなタブ
+UI Scaling	UI スケール
+Scale	UI スケール
+Scale Cursor Proportional to UI	比率を保持してカーソルを拡大・縮小
+GPU Performance	GPU パフォーマンス
+Animated Zoom	アニメーションズーム
+History States	ヒストリー数
+Real-time Drawing and Editing	リアルタイムの描画と編集
+Render Threads (-1 = Automatic)	描画スレッド数（-1 = 自動）
+Enable Background Save	バックグラウンドで保存
+Enable Background Export	バックグラウンドで書き出し
+Data Recovery	復帰データ
+Automatically Save Recovery Data	復帰データを次の間隔で自動保存
+Every (minutes)	間隔（分）
+Folder	フォルダー
+Turn off Data Recovery for complex documents	複雑なドキュメントでは復帰データを保存しない
+Files	ファイル
+Number of Recent Files to Display	最近使用したファイルの表示数
+Use Low Resolution Proxy for Linked EPS	リンクされた EPS に低解像度の表示用画像を使用
+Display Bitmaps as Anti-aliased Images in Pixel Preview	ピクセルプレビューでビットマップ画像をアンチエイリアス処理した画像として表示
+Templates Folder	テンプレートフォルダー
+Mark Older Files as [Converted] When Opened	以前のバージョンファイルを開くときに [更新済み] をファイル名に追加
+Use Compression	圧縮を使用
+On Copy	コピー時
+Include SVG Code	SVG コードを含める
+PDF	PDF
+Legacy vector clipboard (no transparency)	従来のベクタークリップボード（透明サポートなし）
+On Screen	スクリーン
+Printing / Exporting	プリント / 書き出し
+Enable Touch Workspace	タッチワークスペースを有効にする
+Enable Touch Gestures	タッチジェスチャーを有効にする
+Reset Preferences	環境設定をリセット
+Smaller ↔ Larger	小 ↔ 大
+Points	ポイント
+Picas	パイカ
+Inches	インチ
+Millimeters	ミリメートル
+Centimeters	センチメートル
+Meters	メートル
+Pixels	ピクセル
+Feet	フィート
+Feet & Inches	フィートとインチ
+Yards	ヤード
+Lines	ライン
+Dots	点線
+Display All Blacks Accurately	すべてのブラックを正確に表示
+Display All Blacks as Rich Black	すべてのブラックをリッチブラックとして表示
+Output All Blacks Accurately	すべてのブラックを正確に出力
+Output All Blacks as Rich Black	すべてのブラックをリッチブラックとして出力
+30° Angles	30° 角度
+45° Angles	45° 角度
+60° Angles	60° 角度
+90° & 45° & 30° Angles	90° & 45° & 30° 角度
+90° & 45° Angles	90° & 45° 角度
+90° Angles	90° 角度
+Angles	角度
+Ask When Modified	修正されるときに確認
+Automatically	自動
+Manually	手動
+Dark	暗い
+Medium Dark	やや暗い
+Medium Light	やや明るい
+Light	明るい
+Default Language	デフォルトの言語
+English: USA	英語：米国
+English: UK	英語：英国
+French	フランス語
+German	ドイツ語
+Italian	イタリア語
+Spanish	スペイン語
+Portuguese	ポルトガル語
+Dutch	オランダ語
+Handles	ハンドルスタイル
+Solid	塗りつぶし
+Hollow	中抜き
+Hide Corner Widget for angles greater than	次の角度より大きいときにコーナーウィジェットを隠す
+Highlight anchors on mouse over	カーソルを合わせたときにアンカーを強調表示
+Show handles when multiple anchors are selected	複数アンカーを選択時にハンドルを表示
+Keep Formatting	書式を保持
+Keep Plain Text	プレーンテキストを保持
+Legacy vector clipboard	従来のベクタークリップボード
+Match User Interface Brightness	明るさの設定に一致させる
+White	ホワイト
+Object Name	オブジェクト名
+XML ID	XML ID
+On Paste	ペースト時
+Preserve Appearance and Overprints	アピアランスとオーバープリントを保持
+Preserve Paths	パスを保持
+Small	小
+Medium	中
+Large	大
+Update Links	リンクを更新
+When pasting text	テキストのペースト時

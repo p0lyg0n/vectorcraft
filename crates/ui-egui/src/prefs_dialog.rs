@@ -13,6 +13,14 @@ use crate::theme::{self, Brightness, Tokens};
 use crate::{VectorcraftApp, widgets};
 
 /// UI-only fields shown in the dialog (backed by `UiState`, not engine prefs).
+/// Catalogue context of the dialog's text ("Type" is the テキスト category here).
+const TR: &str = "Preferences";
+
+/// `text` as the dialog shows it in the interface language.
+fn tr(text: &str) -> &str {
+    crate::i18n::t_in(TR, text)
+}
+
 const UI_FIELDS: &[(&str, &str, &str)] = &[
     ("__smartGuides", "Smart Guides", "Smart Guides (View → Smart Guides)"),
     ("__snapToGrid", "Guides & Grid", "Snap to Grid"),
@@ -122,7 +130,7 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         .frame(egui::Frame::window(&ctx.global_style()).fill(t.panel).inner_margin(egui::Margin::same(20)))
         .show(ctx, |ui| {
             ui.set_width(760.0);
-            ui.label(egui::RichText::new("Preferences").font(theme::semibold(16.0)).color(t.text));
+            ui.label(egui::RichText::new(tr("Preferences")).font(theme::semibold(16.0)).color(t.text));
             ui.add_space(12.0);
             ui.horizontal_top(|ui| {
                 // Category list.
@@ -135,7 +143,7 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
                             ui.spacing_mut().item_spacing.y = 1.0;
                             for c in PREF_CATEGORIES {
                                 let sel = *c == cat;
-                                let text = egui::RichText::new(*c).size(12.5).color(if sel { t.text_strong } else { t.text });
+                                let text = egui::RichText::new(tr(c)).size(12.5).color(if sel { t.text_strong } else { t.text });
                                 let b = egui::Button::selectable(sel, text).frame_when_inactive(false).min_size(egui::vec2(184.0, 24.0));
                                 if ui.add(b).clicked() {
                                     d.fields.insert("__category".into(), json!(c));
@@ -148,7 +156,7 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
                 // Fields.
                 ui.vertical(|ui| {
                     ui.set_width(530.0);
-                    ui.label(egui::RichText::new(cat).font(theme::semibold(14.0)).color(t.text_strong));
+                    ui.label(egui::RichText::new(tr(cat)).font(theme::semibold(14.0)).color(t.text_strong));
                     ui.add_space(8.0);
                     egui::ScrollArea::vertical().id_salt(("prefs", cat)).max_height(400.0).auto_shrink([false, false]).show(ui, |ui| {
                         category_fields(ui, &mut d, cat);
@@ -216,7 +224,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
                 if !first {
                     ui.add_space(8.0);
                 }
-                ui.label(egui::RichText::new(section).font(theme::semibold(12.5)).color(t.text_strong));
+                ui.label(egui::RichText::new(tr(section)).font(theme::semibold(12.5)).color(t.text_strong));
                 ui.add_space(2.0);
             }
         }
@@ -228,7 +236,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
                 labeled(ui, sp.label, |ui| {
                     let mut x = v.as_f64().unwrap_or(min);
                     let r = if sp.key == "uiScaling" {
-                        ui.add(egui::Slider::new(&mut x, min..=max).step_by(0.05).text("Smaller ↔ Larger"))
+                        ui.add(egui::Slider::new(&mut x, min..=max).step_by(0.05).text(tr("Smaller ↔ Larger")))
                     } else {
                         let speed = if max - min > 100.0 { 0.5 } else { 0.05 };
                         ui.add(egui::DragValue::new(&mut x).range(min..=max).speed(speed).max_decimals(3).suffix(format!(" {unit}")))
@@ -252,7 +260,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
                 labeled(ui, sp.label, |ui| {
                     let mut x = v.as_i64().unwrap_or(min);
                     let r = if sp.key == "anchorSize" {
-                        ui.add(egui::Slider::new(&mut x, min..=max).show_value(false).text("Size"))
+                        ui.add(egui::Slider::new(&mut x, min..=max).show_value(false).text(tr("Size")))
                     } else {
                         ui.add(egui::DragValue::new(&mut x).range(min..=max).speed(0.2))
                     };
@@ -264,8 +272,8 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
             PrefKind::Choice(opts) => {
                 labeled(ui, sp.label, |ui| {
                     let cur = v.as_str().unwrap_or("");
-                    let cur_label = opts.iter().find(|o| o.0 == cur).map(|o| o.1).unwrap_or(cur);
-                    let labels: Vec<&str> = opts.iter().map(|o| o.1).collect();
+                    let cur_label = tr(opts.iter().find(|o| o.0 == cur).map(|o| o.1).unwrap_or(cur));
+                    let labels: Vec<&str> = opts.iter().map(|o| tr(o.1)).collect();
                     if let Some(i) = widgets::dropdown(ui, sp.key, cur_label, &labels, 260.0) {
                         d.fields.insert(sp.key.into(), json!(opts[i].0));
                     }
@@ -296,7 +304,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
 
 fn bool_row(ui: &mut egui::Ui, d: &mut Dialog, key: &str, label: &str) {
     let mut b = d.bool(key);
-    if ui.checkbox(&mut b, label).changed() {
+    if ui.checkbox(&mut b, tr(label)).changed() {
         d.fields.insert(key.into(), json!(b));
     }
 }
@@ -306,7 +314,9 @@ fn labeled(ui: &mut egui::Ui, label: &str, add: impl FnOnce(&mut egui::Ui)) {
     ui.horizontal(|ui| {
         ui.allocate_ui_with_layout(egui::vec2(210.0, 22.0), egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.set_min_width(210.0);
-            ui.add(egui::Label::new(egui::RichText::new(format!("{label}:")).color(t.text)).truncate());
+            // Japanese labels end in a full-width colon.
+            let colon = if crate::i18n::current() == crate::i18n::Language::Ja { "：" } else { ":" };
+            ui.add(egui::Label::new(egui::RichText::new(format!("{}{colon}", tr(label))).color(t.text)).truncate());
         });
         add(ui);
     });
@@ -337,6 +347,38 @@ mod tests {
         assert_eq!(a.session.prefs.ui_brightness, "light");
         assert!(!a.ui.view.smart_guides);
         assert_eq!(a.ui.engine_prefs["keyboardIncrement"], json!(4.0));
+    }
+
+    /// Every category, section, setting and choice of the dialog has its Japanese name.
+    #[test]
+    fn every_preference_is_translated() {
+        use crate::i18n::Language;
+        let ja = |s: &str| Language::Ja.tr_in(TR, s) != s || matches!(s, "PDF" | "XML ID" | "");
+        let mut missing: Vec<&str> = PREF_CATEGORIES.iter().copied().filter(|c| !ja(c)).collect();
+        for sp in PREF_SPECS {
+            missing.extend([sp.section, sp.label].into_iter().filter(|s| !ja(s)));
+            if let PrefKind::Choice(opts) = sp.kind {
+                missing.extend(opts.iter().map(|o| o.1).filter(|s| !ja(s)));
+            }
+        }
+        missing.extend(UI_FIELDS.iter().map(|f| f.2).filter(|s| !ja(s)));
+        missing.sort_unstable();
+        missing.dedup();
+        assert!(missing.is_empty(), "no Japanese for: {missing:?}");
+    }
+
+    #[test]
+    fn the_dialog_draws_in_japanese() {
+        let mut a = app();
+        open(&mut a, Some("type"));
+        let text = crate::tests_labels::painted_text(&mut a, |app, ui| {
+            crate::i18n::set_current(crate::i18n::Language::Ja);
+            show(app, ui.ctx());
+        });
+        crate::i18n::set_current(crate::i18n::Language::En);
+        for label in ["環境設定", "一般", "テキスト", "東アジア言語のオプションを表示", "トラッキング："] {
+            assert!(text.contains(label), "{label} in {text}");
+        }
     }
 
     #[test]
