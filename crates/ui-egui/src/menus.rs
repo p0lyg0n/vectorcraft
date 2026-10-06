@@ -2176,7 +2176,8 @@ fn render_items(app: &VectorcraftApp, ui: &mut egui::Ui, menu: &str, items: &[It
                     continue;
                 }
                 let label = dynamic_label(app, id, label);
-                let label = app.ui.language.tr_owned(menu, &label);
+                // Font names are names, not interface text ("Symbol" is a font).
+                let label = if *id == "text.setStyle" { label } else { app.ui.language.tr_owned(menu, &label) };
                 let sc = item_shortcut(id, p).map(pretty_shortcut).unwrap_or_default();
                 let chk = checked(app, id, p);
                 let text = match chk {
@@ -2488,25 +2489,30 @@ fn insert_items(list: &[(&'static str, &'static str)]) -> Vec<Item> {
 /// rebuilding doesn't allocate forever.
 fn font_items() -> Vec<Item> {
     static NAMES: std::sync::Mutex<std::collections::BTreeSet<&'static str>> = std::sync::Mutex::new(std::collections::BTreeSet::new());
-    static ITEMS: std::sync::Mutex<(u64, Vec<Item>)> = std::sync::Mutex::new((u64::MAX, Vec::new()));
+    // (font generation, whether Japanese names are shown) the items were built for.
+    static ITEMS: std::sync::Mutex<((u64, bool), Vec<Item>)> = std::sync::Mutex::new(((u64::MAX, false), Vec::new()));
     let db = vectorcraft_text::FontDb::global();
     // Read first: fonts that load meanwhile make the next frame build the list again.
-    let generation = db.generation();
+    let generation = (db.generation(), crate::i18n::local_font_names());
     let fams = db.family_list();
     let (Ok(mut names), Ok(mut items)) = (NAMES.lock(), ITEMS.lock()) else { return vec![] };
     if items.0 != generation {
         let list = fams
             .iter()
             .map(|f| {
-                let label: &'static str = match names.get(f.as_str()) {
-                    Some(n) => n,
-                    None => {
-                        let n: &'static str = Box::leak(f.clone().into_boxed_str());
-                        names.insert(n);
-                        n
+                // Each name is interned once (labels are 'static); the shown one labels the item.
+                let mut intern = |s: &str| -> &'static str {
+                    match names.get(s) {
+                        Some(n) => n,
+                        None => {
+                            let n: &'static str = Box::leak(s.to_string().into_boxed_str());
+                            names.insert(n);
+                            n
+                        }
                     }
                 };
-                cp(label, "text.setStyle", json!({ "font": label }))
+                let label = intern(&crate::i18n::font_label(f));
+                cp(label, "text.setStyle", json!({ "font": f }))
             })
             .collect();
         *items = (generation, list);

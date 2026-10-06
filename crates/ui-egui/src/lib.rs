@@ -796,6 +796,7 @@ impl VectorcraftApp {
         }
         let t0 = now_ms();
         self.ui_fonts.set_language(&ctx, self.ui.language);
+        i18n::set_local_font_names(!self.session.prefs.font_names_in_english);
         let t = theme::Tokens::get(&ctx);
         if self.ui.screen_mode < 2 {
             chrome::app_bar(self, ui);

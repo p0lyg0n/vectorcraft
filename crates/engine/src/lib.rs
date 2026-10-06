@@ -546,7 +546,7 @@ impl Default for Prefs {
             show_east_asian_options: false,
             show_indic_options: false,
             type_selection_by_path_only: false,
-            font_names_in_english: true,
+            font_names_in_english: false,
             auto_size_area_type: false,
             font_preview: true,
             font_preview_size: s("medium"),

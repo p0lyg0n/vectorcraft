@@ -146,6 +146,8 @@ impl FontFace {
 #[derive(Debug, Default)]
 struct CatalogFamily {
     name: String,
+    /// The family's Japanese name, when the font has one ("MS ゴシック" for MS Gothic).
+    local: Option<String>,
     /// (style, file) of each face.
     faces: Vec<(String, PathBuf)>,
 }
@@ -257,11 +259,28 @@ fn face_names(f: &skrifa::FontRef<'_>) -> Option<(String, String)> {
     Some((family, style))
 }
 
-/// A face's (family, style, PostScript name).
+/// The names the system font scan keeps of a face.
 #[cfg(not(target_arch = "wasm32"))]
-fn face_names_ps(f: &skrifa::FontRef<'_>) -> Option<(String, String, Option<String>)> {
+struct ScannedFace {
+    family: String,
+    style: String,
+    postscript: Option<String>,
+    /// The family's Japanese name.
+    local: Option<String>,
+}
+
+/// A face's family name in Japanese, if its name table has one.
+fn japanese_family(f: &skrifa::FontRef<'_>) -> Option<String> {
+    [StringId::TYPOGRAPHIC_FAMILY_NAME, StringId::FAMILY_NAME].iter().find_map(|id| {
+        f.localized_strings(*id).find(|s| s.language().is_some_and(|l| l.starts_with("ja"))).map(|s| s.to_string()).filter(|s| !s.is_empty())
+    })
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn scanned_face(f: &skrifa::FontRef<'_>) -> Option<ScannedFace> {
     let (family, style) = face_names(f)?;
-    Some((family, style, name(f, &[StringId::POSTSCRIPT_NAME])))
+    let local = japanese_family(f).filter(|l| *l != family);
+    Some(ScannedFace { family, style, postscript: name(f, &[StringId::POSTSCRIPT_NAME]), local })
 }
 
 /// Parse every face in `data` (a font file or collection). Returns `(index, family, style)`.
@@ -283,7 +302,7 @@ fn enumerate_faces(data: &[u8]) -> Vec<(u32, String, String)> {
 /// table directories and `name` tables: a scan opens hundreds of font files, many of them
 /// megabytes long.
 #[cfg(not(target_arch = "wasm32"))]
-fn file_face_names(path: &Path) -> Vec<(String, String, Option<String>)> {
+fn file_face_names(path: &Path) -> Vec<ScannedFace> {
     use std::io::{Read, Seek, SeekFrom};
     /// Caps on what a (possibly damaged) file can make the scan read.
     const MAX_FACES: u32 = 256;
@@ -325,7 +344,7 @@ fn file_face_names(path: &Path) -> Vec<(String, String, Option<String>)> {
                 font.extend_from_slice(&u32::to_be_bytes(v));
             }
             font.extend_from_slice(&table);
-            face_names_ps(&skrifa::FontRef::new(&font).ok()?)
+            scanned_face(&skrifa::FontRef::new(&font).ok()?)
         })
         .collect()
 }
@@ -611,13 +630,16 @@ impl FontDb {
                 if !matches!(ext.as_deref(), Some("ttf" | "otf" | "ttc" | "otc")) {
                     continue;
                 }
-                for (family, style, ps) in file_face_names(&p) {
+                for ScannedFace { family, style, postscript: ps, local } in file_face_names(&p) {
                     if let Some(ps) = ps {
                         postscript.insert(ps.to_ascii_lowercase(), (family.clone(), style.clone()));
                     }
                     let entry = catalog.entry(family.to_ascii_lowercase()).or_default();
                     if entry.name.is_empty() {
                         entry.name = family;
+                    }
+                    if entry.local.is_none() {
+                        entry.local = local;
                     }
                     entry.faces.push((style, p.clone()));
                     n += 1;
@@ -629,6 +651,18 @@ impl FontDb {
         *self.postscript.write().unwrap_or_else(|e| e.into_inner()) = postscript;
         self.changed();
         n
+    }
+
+    /// The Japanese name of installed `family`, when its fonts have one ("MS ゴシック" for MS
+    /// Gothic). Menus show it unless Preferences ▸ Type ▸ Show Font Names in English is on.
+    pub fn local_name(&self, family: &str) -> Option<String> {
+        self.read_catalog().get(&family.to_ascii_lowercase()).and_then(|c| c.local.clone())
+    }
+
+    /// The family whose Japanese name is `name` ("MS ゴシック" → "MS Gothic"): documents and
+    /// people name Japanese fonts either way.
+    pub fn family_of_local_name(&self, name: &str) -> Option<String> {
+        self.read_catalog().values().find(|c| c.local.as_deref() == Some(name)).map(|c| c.name.clone())
     }
 
     /// The (family, style) of the installed face whose PostScript name is `name` (ignoring ASCII
@@ -660,6 +694,14 @@ impl FontDb {
     /// only if no font at all is loaded (the bundled fonts failed to parse), in which case text has
     /// no glyphs.
     pub fn face(&self, family: &str, style: &str) -> Option<Arc<FontFace>> {
+        // A Japanese family name ("MS ゴシック") is the family it names.
+        #[cfg(not(target_arch = "wasm32"))]
+        if !family.is_ascii()
+            && !self.is_loaded(family)
+            && let Some(f) = self.family_of_local_name(family)
+        {
+            return self.face(&f, style);
+        }
         let found = self.find(family, style);
         if found.as_ref().is_some_and(|f| norm(&f.style) == norm(style)) {
             return found;

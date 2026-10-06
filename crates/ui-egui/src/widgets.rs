@@ -474,7 +474,8 @@ fn combo<R>(
 /// chosen family.
 pub fn font_dropdown(ui: &mut Ui, id: impl std::hash::Hash + std::fmt::Debug, current: &str, width: f32) -> Option<String> {
     let state = ui.id().with(&id).with("font-search");
-    combo(ui, id, current, width, true, |ui| {
+    let shown = crate::i18n::font_label(current);
+    combo(ui, id, &shown, width, true, |ui| {
         // Each time the list opens: unfiltered, with the current font in view. Typing goes to the
         // search field.
         let pass = ui.ctx().cumulative_pass_nr();
@@ -499,9 +500,15 @@ pub fn font_dropdown(ui: &mut Ui, id: impl std::hash::Hash + std::fmt::Debug, cu
         let (mut chosen, mut first) = (None, None);
         // The search field stays put over the list as it scrolls.
         menu_scroll(ui, |ui| {
-            for f in families.iter().filter(|f| query.is_empty() || f.to_lowercase().contains(&query)) {
+            // Found by either name; listed by the one shown.
+            let mut listed: Vec<(&String, std::borrow::Cow<'_, str>)> = families.iter().map(|f| (f, crate::i18n::font_label(f))).collect();
+            listed.sort_by_key(|(_, l)| l.to_lowercase());
+            for (f, label) in
+                listed.iter().filter(|(f, l)| query.is_empty() || f.to_lowercase().contains(&query) || l.to_lowercase().contains(&query))
+            {
+                let f = *f;
                 first.get_or_insert(f);
-                let r = ui.add(egui::Button::selectable(f == current, f.as_str()));
+                let r = ui.add(egui::Button::selectable(f == current, label.as_ref()));
                 if opening && f == current {
                     r.scroll_to_me(Some(egui::Align::Center));
                 }

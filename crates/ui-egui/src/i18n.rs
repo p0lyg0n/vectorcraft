@@ -80,6 +80,32 @@ thread_local! {
     static CURRENT: Cell<Language> = const { Cell::new(Language::En) };
 }
 
+thread_local! {
+    /// Font menus show families by their Japanese names (Preferences ▸ Type ▸ Show Font Names in
+    /// English is off): set every frame from the preference.
+    static LOCAL_FONT_NAMES: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Show families by their Japanese names in font menus on this thread (or not).
+pub fn set_local_font_names(on: bool) {
+    LOCAL_FONT_NAMES.with(|c| c.set(on));
+}
+
+/// Do font menus show Japanese family names on this thread?
+pub fn local_font_names() -> bool {
+    LOCAL_FONT_NAMES.with(Cell::get)
+}
+
+/// How font menus name `family`: its Japanese name when it has one and they show them.
+pub fn font_label(family: &str) -> std::borrow::Cow<'_, str> {
+    if LOCAL_FONT_NAMES.with(Cell::get)
+        && let Some(local) = vectorcraft_text::FontDb::global().local_name(family)
+    {
+        return local.into();
+    }
+    family.into()
+}
+
 /// Make `lang` the language [`t`] and [`t_in`] translate to on this thread.
 pub fn set_current(lang: Language) {
     CURRENT.with(|c| c.set(lang));

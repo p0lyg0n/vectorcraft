@@ -176,3 +176,22 @@ fn installed_faces_are_found_by_postscript_name() {
     assert_eq!(db.by_postscript_name("sourcesans3-regular"), Some((FAMILY.to_string(), "Regular".to_string())), "any case");
     assert_eq!(db.by_postscript_name("Rounded-X-Mplus-1c-black"), None);
 }
+
+/// Japanese fonts carry their Japanese family name ("ＭＳ ゴシック" for MS Gothic): the scan keeps
+/// it, and a lookup by it finds the family. Checked against whatever Japanese fonts are installed.
+#[test]
+fn installed_japanese_fonts_are_found_by_their_japanese_name() {
+    let db = FontDb::with_font_dirs(system_font_dirs());
+    let named: Vec<(String, String)> = db.families().into_iter().filter_map(|f| db.local_name(&f).map(|l| (f, l))).collect();
+    if named.is_empty() {
+        eprintln!("no installed font has a Japanese family name: nothing to check");
+        return;
+    }
+    for (family, local) in named.iter().take(20) {
+        assert!(!local.is_ascii(), "{family}: {local}");
+        assert_eq!(db.family_of_local_name(local).as_deref(), Some(family.as_str()));
+        let face = db.face(local, "Regular").unwrap();
+        assert!(face.family.eq_ignore_ascii_case(family), "{local} resolved to {}", face.family);
+    }
+    assert_eq!(db.local_name("Source Sans 3"), None);
+}
