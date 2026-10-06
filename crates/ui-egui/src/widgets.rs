@@ -601,7 +601,7 @@ pub fn blend_dropdown(ui: &mut Ui, id: impl std::hash::Hash + std::fmt::Debug, c
             if blend_separator_before(i) {
                 ui.separator();
             }
-            if ui.selectable_label(Some(m) == current, m.label()).clicked() {
+            if ui.selectable_label(Some(m) == current, crate::i18n::t(m.label())).clicked() {
                 chosen = Some(m);
             }
         }

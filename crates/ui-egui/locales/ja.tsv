@@ -1042,6 +1042,24 @@ Postcard	はがき
 
 Show favorite fonts only	お気に入りのフォントのみ表示
 
+Grid View	グリッド表示
+
+# Blending modes (Transparency panel)
+Darken	比較 (暗)
+Multiply	乗算
+Color Burn	焼き込みカラー
+Lighten	比較 (明)
+Screen	スクリーン
+Color Dodge	覆い焼きカラー
+Overlay	オーバーレイ
+Soft Light	ソフトライト
+Hard Light	ハードライト
+Difference	差の絶対値
+Exclusion	除外
+Hue	色相
+Saturation	彩度
+Luminosity	輝度
+
 # Words that read differently in one place
 @Document Setup
 Type	テキスト

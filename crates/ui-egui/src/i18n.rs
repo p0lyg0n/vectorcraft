@@ -377,6 +377,14 @@ mod tests {
     }
 
     #[test]
+    fn every_blending_mode_has_its_japanese_name() {
+        for m in vectorcraft_color::BlendMode::ALL {
+            assert_ne!(Language::Ja.tr(m.label()), m.label(), "{m:?}");
+        }
+        assert_eq!(Language::Ja.tr("Multiply"), "乗算");
+    }
+
+    #[test]
     fn current_language_is_per_thread() {
         set_current(Language::Ja);
         assert_eq!(t("File"), "ファイル");
