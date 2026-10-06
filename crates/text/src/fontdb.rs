@@ -3,7 +3,7 @@
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
 
 use kurbo::BezPath;
@@ -16,9 +16,6 @@ use skrifa::{GlyphId, MetadataProvider};
 /// The family used when a requested family is unknown (Illustrator's Myriad Pro analogue).
 pub const FALLBACK_FAMILY: &str = "Source Sans 3";
 
-/// Bundled Japanese font bytes, shared with UI glyph fallback.
-pub static SHIPPORI_MINCHO_REGULAR: &[u8] = include_bytes!("../../../assets/fonts/ShipporiMincho-Regular.ttf");
-
 static BUNDLED: &[&[u8]] = &[
     include_bytes!("../../../assets/fonts/SourceSans3-Regular.ttf"),
     include_bytes!("../../../assets/fonts/SourceSans3-Semibold.ttf"),
@@ -29,7 +26,7 @@ static BUNDLED: &[&[u8]] = &[
     include_bytes!("../../../assets/fonts/Inter-Medium.ttf"),
     include_bytes!("../../../assets/fonts/Inter-SemiBold.ttf"),
     include_bytes!("../../../assets/fonts/JetBrainsMono-Regular.ttf"),
-    SHIPPORI_MINCHO_REGULAR,
+    include_bytes!("../../../assets/fonts/ShipporiMincho-Regular.ttf"),
 ];
 
 enum FontBytes {
@@ -172,6 +169,9 @@ pub struct FontDb {
     /// [`FontDb::family_list`], built on demand and dropped when fonts are added or rescanned.
     family_cache: Mutex<Option<Arc<[String]>>>,
     generation: AtomicU64,
+    /// Han characters (shared by Chinese, Japanese and Korean) and kana fall back to a Japanese
+    /// font first, so kanji take Japanese glyph shapes ([`FontDb::set_japanese_first`]).
+    japanese_first: AtomicBool,
     /// System fallback state: characters no system font covers.
     #[cfg(not(target_arch = "wasm32"))]
     sys: Mutex<SysFallback>,
@@ -213,6 +213,30 @@ const SYSTEM_FALLBACKS: &[&str] = &[
     "Apple Color Emoji",
     "Noto Color Emoji",
 ];
+
+/// Japanese families tried first for Han characters and kana when [`FontDb::set_japanese_first`]
+/// is on: the systems' UI gothics, then other Japanese gothics, then the bundled Shippori Mincho
+/// (the only one on the web).
+pub(crate) const JAPANESE_FALLBACKS: &[&str] = &[
+    "Yu Gothic UI",
+    "Yu Gothic",
+    "Meiryo UI",
+    "Meiryo",
+    "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN",
+    "Noto Sans CJK JP",
+    "Noto Sans JP",
+    "Source Han Sans JP",
+    "BIZ UDPGothic",
+    "MS PGothic",
+    "Shippori Mincho",
+];
+
+/// Han ideographs, kana and CJK punctuation: the characters Japanese and Chinese fonts both cover
+/// but draw differently.
+fn is_han_or_kana(c: char) -> bool {
+    matches!(c as u32, 0x3000..=0x30FF | 0x3190..=0x31FF | 0x3400..=0x4DBF | 0x4E00..=0x9FFF | 0xF900..=0xFAFF | 0xFF00..=0xFFEF | 0x20000..=0x3FFFF)
+}
 
 static NEXT_ID: AtomicU32 = AtomicU32::new(1);
 const OUTLINE_CACHE_MAX: usize = 50_000;
@@ -403,8 +427,17 @@ impl FontDb {
             cataloged: std::sync::OnceLock::new(),
             family_cache: Mutex::new(None),
             generation: AtomicU64::new(0),
+            japanese_first: AtomicBool::new(false),
             #[cfg(not(target_arch = "wasm32"))]
             sys: Mutex::new(SysFallback { enabled: true, ..Default::default() }),
+        }
+    }
+
+    /// Prefer Japanese fonts for Han characters and kana the requested font lacks (the interface
+    /// is in Japanese). Off by default: the system fallback order then decides.
+    pub fn set_japanese_first(&self, on: bool) {
+        if self.japanese_first.swap(on, Ordering::Relaxed) != on {
+            self.changed();
         }
     }
 
@@ -669,6 +702,12 @@ impl FontDb {
     /// First face (fallback family first, then load order) that covers `c`; on native, system
     /// fonts are loaded lazily the first time no loaded face covers a character.
     pub(crate) fn fallback_for(&self, c: char, exclude: u32) -> Option<Arc<FontFace>> {
+        if self.japanese_first.load(Ordering::Relaxed)
+            && is_han_or_kana(c)
+            && let Some(f) = self.japanese_fallback(c, exclude)
+        {
+            return Some(f);
+        }
         if let Some(f) = self.loaded_fallback(c, exclude) {
             return Some(f);
         }
@@ -684,6 +723,31 @@ impl FontDb {
     /// are remembered, so they are looked for once.
     pub fn face_covering(&self, c: char) -> Option<Arc<FontFace>> {
         self.fallback_for(c, 0)
+    }
+
+    /// The first of [`JAPANESE_FALLBACKS`] that covers `c`: loaded, or (native) installed and
+    /// loaded now.
+    fn japanese_fallback(&self, c: char, exclude: u32) -> Option<Arc<FontFace>> {
+        for fam in JAPANESE_FALLBACKS {
+            let loaded = |db: &FontDb| {
+                db.read_faces()
+                    .iter()
+                    .filter(|f| f.id != exclude && f.family.eq_ignore_ascii_case(fam) && f.covers(c))
+                    .min_by_key(|f| (f.italic, (f.weight - 400.0).abs() as i32))
+                    .cloned()
+            };
+            if let Some(f) = loaded(self) {
+                return Some(f);
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            if !self.is_loaded(fam)
+                && self.load_cataloged(fam)
+                && let Some(f) = loaded(self)
+            {
+                return Some(f);
+            }
+        }
+        None
     }
 
     fn loaded_fallback(&self, c: char, exclude: u32) -> Option<Arc<FontFace>> {

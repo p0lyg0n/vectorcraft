@@ -24,9 +24,26 @@ pub(crate) struct UiFonts {
     /// The faces covering the characters being looked for (native: looked for on a thread).
     #[cfg(not(target_arch = "wasm32"))]
     pending: Option<std::sync::mpsc::Receiver<Vec<Arc<FontFace>>>>,
+    /// The interface language the fallbacks were chosen for.
+    language: crate::i18n::Language,
 }
 
 impl UiFonts {
+    /// Follow the interface language: in Japanese, kanji and kana fall back to a Japanese font
+    /// (not a Chinese one) in the UI and on the canvas. A change drops the fallbacks found so far,
+    /// so they are looked for again in the new order.
+    pub(crate) fn set_language(&mut self, ctx: &egui::Context, language: crate::i18n::Language) {
+        crate::i18n::set_current(language);
+        if language == self.language {
+            return;
+        }
+        FontDb::global().set_japanese_first(language == crate::i18n::Language::Ja);
+        if !self.added.is_empty() || !self.seen.is_empty() {
+            crate::theme::install_fonts(ctx);
+        }
+        *self = UiFonts { language, ..UiFonts::default() };
+    }
+
     /// After a frame is laid out: add the fallback fonts found since the last frame, and look for
     /// fonts covering the characters this frame painted that the UI fonts lack.
     pub(crate) fn frame(&mut self, ctx: &egui::Context) {
@@ -193,5 +210,41 @@ mod tests {
         // Looked for once: a later frame starts no search.
         frame(&ctx, &mut fonts, text);
         assert!(fonts.pending.is_none());
+    }
+
+    #[test]
+    fn japanese_interface_draws_kanji_in_a_japanese_font() {
+        let text = "日本語のファイル名";
+        let ctx = egui::Context::default();
+        crate::theme::install_fonts(&ctx);
+        let mut fonts = UiFonts::default();
+        fonts.set_language(&ctx, crate::i18n::Language::Ja);
+        frame(&ctx, &mut fonts, text);
+        fonts.finish(&ctx);
+        frame(&ctx, &mut fonts, text);
+        assert!(has_glyph(&ctx, '日'));
+        // Only Japanese fonts were added (the bundled Shippori Mincho when none is installed).
+        assert!(!fonts.added.is_empty());
+        for name in &fonts.added {
+            assert!(
+                [
+                    "Yu Gothic",
+                    "Meiryo",
+                    "Hiragino",
+                    "Noto Sans CJK JP",
+                    "Noto Sans JP",
+                    "Source Han Sans JP",
+                    "BIZ UD",
+                    "MS PGothic",
+                    "Shippori Mincho"
+                ]
+                .iter()
+                .any(|j| name.starts_with(j)),
+                "{name} is not a Japanese font"
+            );
+        }
+        // Back to English: the fallbacks are dropped and looked for again.
+        fonts.set_language(&ctx, crate::i18n::Language::En);
+        assert!(fonts.added.is_empty() && fonts.seen.is_empty());
     }
 }

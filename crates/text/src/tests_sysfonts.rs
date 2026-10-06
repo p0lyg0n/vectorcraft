@@ -142,3 +142,25 @@ fn installed_styles_of_a_loaded_family_load_when_asked_for() {
     // A style nobody has still gets the closest one.
     assert_eq!(db.face(FAMILY, "Black").unwrap().style, "Bold");
 }
+
+/// With the interface in Japanese, kanji and kana the requested font lacks take a Japanese font,
+/// never a Chinese one (Microsoft YaHei, PingFang SC) that happens to come first otherwise.
+#[test]
+fn japanese_first_picks_a_japanese_font_for_kanji() {
+    let db = FontDb::with_font_dirs(system_font_dirs());
+    db.set_japanese_first(true);
+    for c in ['日', '本', 'あ', 'ア', '。'] {
+        let f = db.face_covering(c).unwrap();
+        assert!(fontdb::JAPANESE_FALLBACKS.iter().any(|j| f.family.eq_ignore_ascii_case(j)), "{c} drawn in {}", f.family);
+    }
+    // Latin letters keep the normal fallback.
+    assert!(!fontdb::JAPANESE_FALLBACKS.contains(&db.face_covering('A').unwrap().family.as_str()));
+}
+
+/// Without installed fonts (the web), the bundled Japanese font covers kanji and kana.
+#[test]
+fn japanese_first_without_system_fonts_uses_the_bundled_font() {
+    let db = FontDb::with_font_dirs(vec![]);
+    db.set_japanese_first(true);
+    assert_eq!(db.face_covering('漢').unwrap().family, "Shippori Mincho");
+}

@@ -786,6 +786,7 @@ impl VectorcraftApp {
             return;
         }
         let t0 = now_ms();
+        self.ui_fonts.set_language(&ctx, self.ui.language);
         let t = theme::Tokens::get(&ctx);
         if self.ui.screen_mode < 2 {
             chrome::app_bar(self, ui);
