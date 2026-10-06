@@ -48,7 +48,7 @@ pub const BASIC: &[(&str, &[&[&str]])] = &[
     ("Color", &[&["gradient", "mesh"], &["eyedropper", "measure"]]),
 ];
 
-fn tip(t: &ToolInfo) -> String {
+pub(crate) fn tip(t: &ToolInfo) -> String {
     match crate::shortcut_editor::tool_shortcut(t.id) {
         Some(s) => format!("{} ({})", t.label, s),
         None => t.label.to_string(),
