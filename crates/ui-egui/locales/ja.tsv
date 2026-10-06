@@ -1011,6 +1011,14 @@ Suffix	サフィックス
 Scale	拡大・縮小
 Export Settings	書き出し設定
 
+# Canvas context menu
+Paste…	ペースト…
+Make Clipping Mask	クリッピングマスクを作成
+Release Clipping Mask	クリッピングマスクを解除
+Make Compound Path	複合パスを作成
+Release Compound Path	複合パスを解除
+Select All	すべてを選択
+
 # Words that read differently in one place
 @Document Setup
 Type	テキスト
