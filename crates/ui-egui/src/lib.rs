@@ -16,6 +16,7 @@ pub mod cursors;
 pub mod dialogs;
 pub mod dock;
 pub mod find_font;
+pub mod font_preview;
 pub mod i18n;
 pub mod icon_data;
 pub mod icons;
@@ -797,6 +798,7 @@ impl VectorcraftApp {
         let t0 = now_ms();
         self.ui_fonts.set_language(&ctx, self.ui.language);
         i18n::set_local_font_names(!self.session.prefs.font_names_in_english);
+        font_preview::set_enabled(self.session.prefs.font_preview);
         let t = theme::Tokens::get(&ctx);
         if self.ui.screen_mode < 2 {
             chrome::app_bar(self, ui);

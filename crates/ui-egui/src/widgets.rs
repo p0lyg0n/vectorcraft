@@ -508,7 +508,7 @@ pub fn font_dropdown(ui: &mut Ui, id: impl std::hash::Hash + std::fmt::Debug, cu
             {
                 let f = *f;
                 first.get_or_insert(f);
-                let r = ui.add(egui::Button::selectable(f == current, label.as_ref()));
+                let r = crate::font_preview::row(ui, f, label, f == current);
                 if opening && f == current {
                     r.scroll_to_me(Some(egui::Align::Center));
                 }
