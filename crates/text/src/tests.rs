@@ -478,3 +478,49 @@ fn kinsoku_keeps_punctuation_off_line_starts_and_brackets_off_line_ends() {
     assert!(weak.iter().any(|l| l.starts_with('っ')), "{weak:?}");
     assert!(strong.iter().all(|l| !l.starts_with('っ')), "{strong:?}");
 }
+
+/// Width of `text` set as point type in the bundled Japanese font, styled by `f`.
+fn ja_width(text: &str, f: impl FnOnce(&mut TextObject)) -> f64 {
+    let mut t = point(text, CharStyle { font_family: "Shippori Mincho".into(), ..style(20.0) });
+    f(&mut t);
+    let l = layout(db(), &t);
+    l.lines[0].x1 - l.lines[0].x0
+}
+
+/// Does the bundled Japanese font have OpenType feature `tag` (else these checks can't tell)?
+fn ja_font_has(tag: &[u8; 4]) -> bool {
+    let face = db().face("Shippori Mincho", "Regular").unwrap();
+    let data = face.file_data();
+    data.windows(4).any(|w| w == tag)
+}
+
+/// Solid setting keeps every character on its full square: proportional metrics close it up,
+/// Japanese equal-width kerning keeps it full even with them on.
+#[test]
+fn proportional_metrics_close_up_and_japanese_equal_width_keeps_full_squares() {
+    if !ja_font_has(b"palt") {
+        eprintln!("the bundled Japanese font has no palt: nothing to check");
+        return;
+    }
+    let text = "「あいう」、テスト。";
+    let solid = ja_width(text, |_| {});
+    assert!((solid - 20.0 * text.chars().count() as f64).abs() < 0.5, "full squares: {solid}");
+    let palt = ja_width(text, |t| t.runs[0].style.features = vec!["palt".into()]);
+    assert!(palt < solid - 5.0, "proportional metrics close it up: {palt} vs {solid}");
+    let equal = ja_width(text, |t| {
+        t.runs[0].style.features = vec!["palt".into()];
+        t.runs[0].style.kerning_method = vectorcraft_doc::KerningMethod::JapaneseEqual;
+    });
+    assert!((equal - solid).abs() < 0.5, "Japanese equal width: {equal} vs {solid}");
+}
+
+/// Tight setting closes up brackets and commas to half widths (from the font's half-width forms,
+/// else by halving their squares); the full stop keeps its space.
+#[test]
+fn tight_setting_halves_brackets_and_commas_but_not_the_full_stop() {
+    let tight = |s: &str| ja_width(s, |t| t.para.mojikumi = vectorcraft_doc::Mojikumi::Tight);
+    let solid = |s: &str| ja_width(s, |t| t.para.mojikumi = vectorcraft_doc::Mojikumi::Solid);
+    assert!((solid("「あ」、") - 80.0).abs() < 0.5);
+    assert!(tight("「あ」、") < 60.0 + 0.5, "three half-width marks: {}", tight("「あ」、"));
+    assert!((tight("あ。") - solid("あ。")).abs() < 0.5, "the full stop keeps its space");
+}

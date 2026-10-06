@@ -35,6 +35,10 @@ pub struct CharStyle {
     /// Kerning: None = Auto (metrics), Some(v) = manual in 1/1000 em.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub kerning: Option<f64>,
+    /// How Auto kerning treats Japanese text: from the font's kerning, or equal widths (no
+    /// kerning or proportional widths for CJK characters, as solid composition sets them).
+    #[serde(default, skip_serializing_if = "KerningMethod::is_default")]
+    pub kerning_method: KerningMethod,
     #[serde(default)]
     pub baseline_shift: f64,
     #[serde(default = "hundred")]
@@ -156,6 +160,7 @@ impl Default for CharStyle {
             leading: None,
             tracking: 0.0,
             kerning: None,
+            kerning_method: KerningMethod::Metrics,
             baseline_shift: 0.0,
             h_scale: 100.0,
             v_scale: 100.0,
@@ -264,6 +269,83 @@ fn default_align_on() -> char {
 /// Distance between default tab stops when no explicit stop applies (½ inch).
 pub const DEFAULT_TAB_INTERVAL: f64 = 36.0;
 
+/// How Auto kerning treats CJK characters.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum KerningMethod {
+    /// The font's kerning everywhere.
+    #[default]
+    Metrics,
+    /// CJK characters keep their full widths (no kerning, no proportional metrics); other
+    /// characters kern from the font.
+    JapaneseEqual,
+}
+
+impl KerningMethod {
+    pub fn key(self) -> &'static str {
+        match self {
+            Self::Metrics => "metrics",
+            Self::JapaneseEqual => "japaneseEqual",
+        }
+    }
+
+    pub fn parse(s: &str) -> Option<Self> {
+        [Self::Metrics, Self::JapaneseEqual].into_iter().find(|k| k.key().eq_ignore_ascii_case(s))
+    }
+
+    fn is_default(&self) -> bool {
+        *self == Self::default()
+    }
+}
+
+/// How a paragraph sets Japanese text (mojikumi): with full-width characters side by side (solid),
+/// or with punctuation and brackets closed up to their half widths (tight).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum Mojikumi {
+    /// The font's own widths.
+    #[default]
+    None,
+    /// Solid setting (beta-gumi): every character on its full square, nothing closed up.
+    Solid,
+    /// Tight setting (tsume-gumi): brackets, commas and middle dots take their half-width forms
+    /// (OpenType `halt`/`vhal`); a full stop keeps its space, as it marks the end of a sentence.
+    Tight,
+}
+
+impl Mojikumi {
+    pub const ALL: [Self; 3] = [Self::None, Self::Solid, Self::Tight];
+
+    pub fn key(self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::Solid => "solid",
+            Self::Tight => "tight",
+        }
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::None => "None",
+            Self::Solid => "Solid Setting",
+            Self::Tight => "Tight Setting",
+        }
+    }
+
+    pub fn parse(s: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|k| k.key().eq_ignore_ascii_case(s))
+    }
+
+    fn is_default(&self) -> bool {
+        *self == Self::default()
+    }
+
+    /// Does tight setting close up `c` (brackets, commas, middle dots: not the full stop)?
+    pub fn closes_up(self, c: char) -> bool {
+        self == Self::Tight && "、，・：；（）「」『』［］｛｝〔〕〈〉《》【】〘〙〖〗〝〟‘’“”".contains(c)
+    }
+}
+
 /// Japanese line-break rules (kinsoku shori): characters a line may not start or end with.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -343,6 +425,9 @@ pub struct ParaStyle {
     /// Japanese line-break rules.
     #[serde(default, skip_serializing_if = "Kinsoku::is_default")]
     pub kinsoku: Kinsoku,
+    /// Solid or tight setting of Japanese text.
+    #[serde(default, skip_serializing_if = "Mojikumi::is_default")]
+    pub mojikumi: Mojikumi,
     /// Tab stops (Tabs panel), sorted by position.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tabs: Vec<TabStop>,

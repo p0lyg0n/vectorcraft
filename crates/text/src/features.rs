@@ -27,6 +27,12 @@ pub struct OtFeatures {
     pub ordinals: bool,
     /// Swashes (`swsh`).
     pub swash: bool,
+    /// Proportional metrics (`palt`, `vpal` in vertical text): CJK characters in their
+    /// proportional widths.
+    pub proportional_metrics: bool,
+    /// Half-width punctuation (`halt`, `vhal`) for the brackets and commas tight setting closes
+    /// up; set per paragraph from its mojikumi.
+    pub tight_punctuation: bool,
 }
 
 impl Default for OtFeatures {
@@ -42,6 +48,8 @@ impl Default for OtFeatures {
             tabular_figures: false,
             ordinals: false,
             swash: false,
+            proportional_metrics: false,
+            tight_punctuation: false,
         }
     }
 }
@@ -70,6 +78,7 @@ impl OtFeatures {
             (self.tabular_figures, d.tabular_figures, "tnum"),
             (self.ordinals, d.ordinals, "ordn"),
             (self.swash, d.swash, "swsh"),
+            (self.proportional_metrics, d.proportional_metrics, "palt"),
         ] {
             if on != def {
                 v.push(if on { tag.to_string() } else { format!("-{tag}") });
@@ -81,7 +90,7 @@ impl OtFeatures {
     /// Is `tag` (optionally prefixed with `-` or `+`) one this set understands?
     pub fn known_tag(tag: &str) -> bool {
         let t = tag.trim_start_matches(['-', '+']);
-        matches!(t, "liga" | "calt" | "dlig" | "smcp" | "frac" | "onum" | "tnum" | "ordn" | "swsh")
+        matches!(t, "liga" | "calt" | "dlig" | "smcp" | "frac" | "onum" | "tnum" | "ordn" | "swsh" | "palt")
     }
 
     /// This set with `tags` applied on top.
@@ -102,6 +111,7 @@ impl OtFeatures {
                 "tnum" => o.tabular_figures = on,
                 "ordn" => o.ordinals = on,
                 "swsh" => o.swash = on,
+                "palt" => o.proportional_metrics = on,
                 _ => {}
             }
         }
@@ -136,6 +146,7 @@ impl OtFeatures {
             (s.tabular_figures, b"tnum"),
             (s.ordinals, b"ordn"),
             (s.swash, b"swsh"),
+            (s.proportional_metrics, if self.vertical { b"vpal" } else { b"palt" }),
         ] {
             if on {
                 v.push(f(tag, true));

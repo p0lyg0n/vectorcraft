@@ -397,3 +397,32 @@ fn vertical_text_creation_orientation_and_persistence() {
     let old: TextObject = serde_json::from_value(old).unwrap();
     assert!(!old.vertical);
 }
+
+/// Solid and tight setting each set what they need together, and the parts set one by one.
+#[test]
+fn solid_and_tight_composition_set_their_settings_together() {
+    let mut s = Session::new();
+    s.execute("file.new", &json!({"width": 400, "height": 300})).unwrap();
+    let id = vectorcraft_doc::NodeId(
+        s.execute("text.create", &json!({"x": 10, "y": 40, "text": "「あいう」、テスト。"})).unwrap()["id"].as_u64().unwrap(),
+    );
+    let text = |s: &Session| match &s.doc().unwrap().doc.node(id).unwrap().kind {
+        vectorcraft_doc::NodeKind::Text(t) => (**t).clone(),
+        _ => panic!("text"),
+    };
+    s.execute("text.setFormat", &json!({"ids": [id.0], "kerning": 50, "composition": "tight"})).unwrap();
+    let t = text(&s);
+    let st = &t.runs[0].style;
+    assert_eq!(t.para.mojikumi, vectorcraft_doc::Mojikumi::Tight);
+    assert_eq!(t.para.kinsoku, vectorcraft_doc::Kinsoku::Weak);
+    assert!(st.features.iter().any(|f| f == "palt") && st.kerning.is_none() && st.kerning_method == vectorcraft_doc::KerningMethod::Metrics);
+    s.execute("text.setFormat", &json!({"ids": [id.0], "composition": "solid"})).unwrap();
+    let t = text(&s);
+    let st = &t.runs[0].style;
+    assert_eq!(t.para.mojikumi, vectorcraft_doc::Mojikumi::Solid);
+    assert!(!st.features.iter().any(|f| f == "palt") && st.kerning_method == vectorcraft_doc::KerningMethod::JapaneseEqual);
+    s.execute("text.setFormat", &json!({"ids": [id.0], "proportionalMetrics": true, "mojikumi": "none"})).unwrap();
+    let t = text(&s);
+    assert!(t.runs[0].style.features.iter().any(|f| f == "palt") && t.para.mojikumi == vectorcraft_doc::Mojikumi::None);
+    assert!(s.execute("text.setFormat", &json!({"ids": [id.0], "composition": "loose"})).is_err());
+}

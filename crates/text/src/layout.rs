@@ -118,6 +118,7 @@ pub fn layout_with(db: &FontDb, t: &TextObject, opts: &LayoutOptions) -> TextLay
     paras.push(s..text.len());
     let mut vertical_opts = opts.clone();
     vertical_opts.features.vertical = t.vertical;
+    vertical_opts.features.tight_punctuation = t.para.mojikumi == vectorcraft_doc::Mojikumi::Tight;
     let opts = &vertical_opts;
     let is_on_path = matches!(&t.kind, TextKind::OnPath { .. });
     let mut cx = Ctx {

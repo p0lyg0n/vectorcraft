@@ -24,7 +24,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Character / Paragraph",
             [],
             None,
-            "{ids?|id?, kerning?: 1/1000 em|\"auto\", baselineShift?: pt, hScale?: %, vScale?: %, rotation?: deg, underline?, strikethrough?, allCaps?, smallCaps?: bool, position?: \"normal\"|\"superscript\"|\"subscript\" (sizes from Document Setup), leftIndent?, rightIndent?, firstLineIndent?, spaceBefore?, spaceAfter?: pt, hyphenate?: bool}",
+            "{ids?|id?, kerning?: 1/1000 em|\"auto\", baselineShift?: pt, hScale?: %, vScale?: %, rotation?: deg, underline?, strikethrough?, allCaps?, smallCaps?: bool, position?: \"normal\"|\"superscript\"|\"subscript\" (sizes from Document Setup), leftIndent?, rightIndent?, firstLineIndent?, spaceBefore?, spaceAfter?: pt, hyphenate?: bool, kinsoku?: \"none\"|\"weak\"|\"strong\", kerningMethod?: \"metrics\"|\"japaneseEqual\", proportionalMetrics?: bool, mojikumi?: \"none\"|\"solid\"|\"tight\", composition?: \"solid\"|\"tight\" (solid or tight setting with the settings it needs: kerning, proportional metrics, tracking, weak kinsoku)}",
             has_doc,
             set_format
         ),
@@ -102,6 +102,10 @@ fn set_format(s: &mut Session, p: &Value) -> Result<Value> {
         "spaceAfter",
         "hyphenate",
         "kinsoku",
+        "kerningMethod",
+        "proportionalMetrics",
+        "mojikumi",
+        "composition",
     ];
     if !keys.iter().any(|k| p.get(*k).is_some()) {
         return Err(bad(C, "nothing to change"));
@@ -110,6 +114,27 @@ fn set_format(s: &mut Session, p: &Value) -> Result<Value> {
     let kinsoku = match p.get("kinsoku").and_then(Value::as_str) {
         Some(k) => Some(vectorcraft_doc::Kinsoku::parse(k).ok_or_else(|| bad(C, "kinsoku must be none, weak or strong"))?),
         None if p.get("kinsoku").is_some() => return Err(bad(C, "kinsoku must be none, weak or strong")),
+        None => None,
+    };
+    let kerning_method = match p.get("kerningMethod") {
+        Some(v) => {
+            Some(v.as_str().and_then(vectorcraft_doc::KerningMethod::parse).ok_or_else(|| bad(C, "kerningMethod must be metrics or japaneseEqual"))?)
+        }
+        None => None,
+    };
+    let mojikumi = match p.get("mojikumi") {
+        Some(v) => Some(v.as_str().and_then(vectorcraft_doc::Mojikumi::parse).ok_or_else(|| bad(C, "mojikumi must be none, solid or tight"))?),
+        None => None,
+    };
+    // A composition sets what solid or tight setting needs together: solid keeps every CJK
+    // character on its square (equal-width kerning, no proportional metrics, no tracking), tight
+    // closes characters up to their proportional widths and its marks to half widths; both with
+    // the weak kinsoku rules.
+    let composition = match p.get("composition") {
+        Some(v) => match v.as_str().and_then(vectorcraft_doc::Mojikumi::parse) {
+            Some(m @ (vectorcraft_doc::Mojikumi::Solid | vectorcraft_doc::Mojikumi::Tight)) => Some(m),
+            _ => return Err(bad(C, "composition must be solid or tight")),
+        },
         None => None,
     };
     s.edit("Character", |d, _| {
@@ -147,6 +172,25 @@ fn set_format(s: &mut Session, p: &Value) -> Result<Value> {
                 if let Some(v) = small_caps {
                     st.small_caps = v;
                 }
+                if let Some(v) = kerning_method {
+                    st.kerning_method = v;
+                }
+                let palt = flag("proportionalMetrics").or(composition.map(|c| c == vectorcraft_doc::Mojikumi::Tight));
+                if let Some(on) = palt {
+                    st.features.retain(|f| f.trim_start_matches(['-', '+']) != "palt");
+                    if on {
+                        st.features.push("palt".into());
+                    }
+                }
+                if let Some(c) = composition {
+                    st.kerning = None;
+                    st.tracking = 0.0;
+                    st.kerning_method = if c == vectorcraft_doc::Mojikumi::Solid {
+                        vectorcraft_doc::KerningMethod::JapaneseEqual
+                    } else {
+                        vectorcraft_doc::KerningMethod::Metrics
+                    };
+                }
             }
             let para = &mut t.para;
             if let Some(v) = num("leftIndent") {
@@ -169,6 +213,12 @@ fn set_format(s: &mut Session, p: &Value) -> Result<Value> {
             }
             if let Some(k) = kinsoku {
                 para.kinsoku = k;
+            }
+            if let Some(m) = mojikumi.or(composition) {
+                para.mojikumi = m;
+            }
+            if composition.is_some() {
+                para.kinsoku = vectorcraft_doc::Kinsoku::Weak;
             }
             super::typecmd::refresh_bounds(t);
         }

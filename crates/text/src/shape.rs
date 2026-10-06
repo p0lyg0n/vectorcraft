@@ -184,6 +184,7 @@ fn shape_segment(text: &str, seg: &Segment, feats: &OtFeatures, out: &mut Vec<SG
     let xh = face.x_height * km * vs;
     let upper = st.all_caps || small;
     let first_char = |byte: usize| text[byte..].chars().next().unwrap_or(' ');
+    let (feats_tight, vertical_feats) = (feats.tight_punctuation, feats.vertical);
 
     let mut raw: Vec<(u32, u32, i32, i32, i32)> = Vec::with_capacity(text_seg.len()); // gid, cluster, xadv, xoff, yoff
     let shaped = face.hb().map(|hb| {
@@ -201,7 +202,22 @@ fn shape_segment(text: &str, seg: &Segment, feats: &OtFeatures, out: &mut Vec<SG
         }
         buf.set_direction(Direction::LeftToRight);
         buf.guess_segment_properties();
-        let feats: Vec<Feature> = feats.resolve(st);
+        let mut feats: Vec<Feature> = feats.resolve(st);
+        // Japanese equal widths: no kerning or proportional widths for CJK text.
+        if st.kerning_method == vectorcraft_doc::KerningMethod::JapaneseEqual && text_seg.chars().any(is_cjk) {
+            feats.retain(|f| ![b"palt", b"vpal"].iter().any(|t| f.tag == harfrust::Tag::new(t)));
+            feats.push(harfrust::Feature::new(harfrust::Tag::new(b"kern"), 0, ..));
+        }
+        // Tight setting: the punctuation it closes up takes its half-width form.
+        if feats_tight {
+            let tag = harfrust::Tag::new(if vertical_feats { b"vhal" } else { b"halt" });
+            for (i, c) in text_seg.char_indices() {
+                if vectorcraft_doc::Mojikumi::Tight.closes_up(c) {
+                    let cl = range.start + i;
+                    feats.push(harfrust::Feature::new(tag, 1, cl..cl + c.len_utf8()));
+                }
+            }
+        }
         let gb = shaper.shape(buf, ShapeOptions::new().features(&feats));
         for (info, pos) in gb.glyph_infos().iter().zip(gb.glyph_positions()) {
             raw.push((info.glyph_id, info.cluster, pos.x_advance, pos.x_offset, pos.y_offset));
@@ -231,6 +247,19 @@ fn shape_segment(text: &str, seg: &Segment, feats: &OtFeatures, out: &mut Vec<SG
         let last_in_cluster = gi + 1 == n || raw[gi + 1].1 as usize != cl;
         let ch = first_char(cl);
         let mut adv = xa as f64 * k * hs;
+        // Tight setting in a font without half-width forms: close the mark up to half an em
+        // here (an opening bracket loses its left half, a middle mark a quarter on each side).
+        let mut tight_dx = 0.0;
+        let em = size * hs;
+        if feats_tight && !vertical_feats && vectorcraft_doc::Mojikumi::Tight.closes_up(ch) && (adv - em).abs() < em * 0.05 {
+            let half = em / 2.0;
+            if "（「『［｛〔〈《【〘〖〝‘“".contains(ch) {
+                tight_dx = -half;
+            } else if "・：；".contains(ch) {
+                tight_dx = -half / 2.0;
+            }
+            adv -= half;
+        }
         if ch == SOFT_HYPHEN {
             adv = 0.0;
         } else if last_in_cluster {
@@ -243,7 +272,7 @@ fn shape_segment(text: &str, seg: &Segment, feats: &OtFeatures, out: &mut Vec<SG
             len: end.saturating_sub(cl).max(1),
             run,
             adv,
-            dx: xo as f64 * k * hs,
+            dx: xo as f64 * k * hs + tight_dx,
             dy: -(yo as f64) * k * vs,
             sx: k * hs,
             sy: k * vs,
