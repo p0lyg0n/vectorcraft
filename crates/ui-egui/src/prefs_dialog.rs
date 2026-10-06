@@ -357,6 +357,42 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
             }
         }
     }
+    if cat == "Appearance of Black" {
+        black_samples(ui, d);
+    }
+}
+
+/// Appearance of Black: how 100% black ink and a rich black look on screen with the On Screen
+/// choice in the dialog, and what that choice does.
+fn black_samples(ui: &mut egui::Ui, d: &Dialog) {
+    let t = Tokens::get(ui.ctx());
+    let rich = d.str("blackOnScreen") == "rich";
+    let ink = vectorcraft_color::Color::cmyk(0.0, 0.0, 0.0, 1.0).to_rgba8(1.0);
+    let k100 = if rich { egui::Color32::BLACK } else { egui::Color32::from_rgb(ink[0], ink[1], ink[2]) };
+    ui.add_space(10.0);
+    ui.horizontal(|ui| {
+        for (title, color) in [("Black (K100%) Sample", k100), ("Rich Black Sample", egui::Color32::BLACK)] {
+            ui.vertical(|ui| {
+                ui.label(egui::RichText::new(crate::i18n::t(title)).color(t.text));
+                let (r, _) = ui.allocate_exact_size(egui::vec2(200.0, 70.0), egui::Sense::hover());
+                let p = ui.painter();
+                p.rect_filled(r, 0.0, egui::Color32::WHITE);
+                p.rect_stroke(r, 0.0, egui::Stroke::new(1.0, egui::Color32::from_gray(40)), egui::StrokeKind::Inside);
+                let sq = egui::Rect::from_center_size(r.center() - egui::vec2(36.0, 0.0), egui::vec2(32.0, 32.0));
+                p.rect_filled(sq, 0.0, color);
+                p.text(r.center() + egui::vec2(24.0, 0.0), egui::Align2::CENTER_CENTER, "Aa", egui::FontId::proportional(40.0), color);
+            });
+            ui.add_space(16.0);
+        }
+    });
+    ui.add_space(10.0);
+    ui.label(egui::RichText::new(crate::i18n::t("Details")).font(theme::semibold(12.5)).color(t.text_strong));
+    let about = if rich {
+        "Display All Blacks as Rich Black: 100% black ink shows as the deepest black the screen has, like a rich black (inks mixed under black), and the colours between it and white follow. The document's colours don't change."
+    } else {
+        "Display All Blacks Accurately: 100% black ink shows as the dark grey it prints as, and a rich black (inks mixed under black) as the deeper black it is."
+    };
+    ui.label(egui::RichText::new(crate::i18n::t(about)).color(t.text_dim).size(11.5));
 }
 
 /// Is one of the dialog's Units (General, Stroke, Type, East Asian Type) Picas?
