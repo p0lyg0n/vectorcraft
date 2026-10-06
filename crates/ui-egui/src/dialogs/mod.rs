@@ -102,6 +102,9 @@ type DialogResult = Result<Value, String>;
 /// The shared dialog frame's inner margin, and the least room it leaves at the window's edges.
 const MARGIN: i8 = 22;
 const EDGE_GAP: f32 = 8.0;
+/// The widest a dialog gets when its spec sets no width: forms (effects, generic parameter
+/// dialogs) would otherwise stretch across the window and hide the art they preview.
+const DEFAULT_MAX_WIDTH: f32 = 520.0;
 
 /// How a dialog draws and applies itself. Specs start from [`DialogSpec::FORM`] and override what
 /// differs.
@@ -317,13 +320,17 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         .collapsible(false)
         .resizable(false)
         .title_bar(false)
-        .anchor(egui::Align2::CENTER_CENTER, [0.0, -40.0])
+        // Opens centred; drag it by its background to see what it covers.
+        .pivot(egui::Align2::CENTER_CENTER)
+        .default_pos(ctx.content_rect().center() - egui::vec2(0.0, 40.0))
+        .movable(true)
+        .constrain(true)
         .frame(egui::Frame::window(&ctx.global_style()).fill(t.panel).inner_margin(egui::Margin::same(MARGIN)))
         .show(ctx, |ui| {
             // Never wider than the window (a large UI scale in a small window): the text wraps.
             let room = (ctx.content_rect().width() - 2.0 * (f32::from(MARGIN) + EDGE_GAP)).max(EDGE_GAP);
             ui.set_min_width(spec.min_width.min(room));
-            ui.set_max_width(spec.max_width.map_or(room, |w| w.min(room)));
+            ui.set_max_width(spec.max_width.unwrap_or(DEFAULT_MAX_WIDTH).min(room));
             ui.label(egui::RichText::new(heading.as_str()).font(theme::semibold(16.0)).color(t.text));
             ui.add_space(12.0);
             cancel = (spec.body)(app, ui, &mut d);
