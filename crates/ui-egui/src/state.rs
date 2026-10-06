@@ -209,6 +209,9 @@ impl Dialog {
 pub struct UiState {
     #[serde(default)]
     pub language: crate::i18n::Language,
+    /// Font families starred in the font lists.
+    #[serde(default)]
+    pub favorite_fonts: Vec<String>,
     pub brightness: Brightness,
     pub dock_tab: DockTab,
     /// Icon panel currently popped out of the collapsed column.
@@ -345,6 +348,7 @@ impl Default for UiState {
     fn default() -> Self {
         Self {
             language: crate::i18n::Language::default(),
+            favorite_fonts: vec![],
             brightness: Brightness::MediumDark,
             dock_tab: DockTab::Properties,
             open_panel: None,

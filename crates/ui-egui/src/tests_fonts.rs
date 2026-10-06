@@ -78,3 +78,18 @@ fn the_character_panel_menu_refreshes_the_font_list() {
     let text = crate::tests_labels::painted_text(&mut app, crate::panels::character::menu);
     assert!(text.contains("Refresh Font List") && !text.contains("System Fonts"), "{text}");
 }
+
+/// The font list groups Latin, symbol, Japanese and other CJK families, each sorted by name, and
+/// the star filter keeps the favourites.
+#[test]
+fn the_font_list_groups_families_by_script_and_filters_favorites() {
+    let families: Vec<String> = ["Shippori Mincho", "Source Serif 4", "Inter", "Source Sans 3"].map(String::from).to_vec();
+    let order: Vec<&str> = widgets::font_list(&families, "", false).iter().map(|(_, f, _)| f.as_str()).collect();
+    assert_eq!(order, ["Inter", "Source Sans 3", "Source Serif 4", "Shippori Mincho"], "Latin first, Japanese after");
+    let mut favorites = vec!["Source Serif 4".to_string()];
+    crate::font_preview::sync_favorites(&mut favorites);
+    let favs: Vec<&str> = widgets::font_list(&families, "", true).iter().map(|(_, f, _)| f.as_str()).collect();
+    assert_eq!(favs, ["Source Serif 4"]);
+    let found: Vec<&str> = widgets::font_list(&families, "source", false).iter().map(|(_, f, _)| f.as_str()).collect();
+    assert_eq!(found, ["Source Sans 3", "Source Serif 4"]);
+}

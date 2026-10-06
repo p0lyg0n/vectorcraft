@@ -142,9 +142,41 @@ impl FontFace {
     }
 }
 
+/// What a family is for, as font lists group families.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum FontScript {
+    /// Latin and other alphabets.
+    #[default]
+    Latin,
+    /// Symbols, dingbats and emoji.
+    Symbol,
+    /// Japanese (kana and kanji).
+    Japanese,
+    /// Chinese or Korean.
+    OtherCjk,
+}
+
+impl FontScript {
+    /// From the OS/2 table's `ulCodePageRange1` bits: 17 Japanese; 18 and 20 Chinese; 19 and 21
+    /// Korean; 31 symbol.
+    pub(crate) fn from_code_pages(cp1: u32) -> Self {
+        if cp1 & (1 << 17) != 0 {
+            Self::Japanese
+        } else if cp1 & ((1 << 18) | (1 << 19) | (1 << 20) | (1 << 21)) != 0 {
+            Self::OtherCjk
+        } else if cp1 & (1 << 31) != 0 {
+            Self::Symbol
+        } else {
+            Self::Latin
+        }
+    }
+}
+
 /// One installed family found by the system font scan: its name and the file of each style.
 #[derive(Debug, Default)]
 struct CatalogFamily {
+    /// What the family is for.
+    script: FontScript,
     name: String,
     /// The family's Japanese name, when the font has one ("MS ゴシック" for MS Gothic).
     local: Option<String>,
@@ -267,6 +299,7 @@ struct ScannedFace {
     postscript: Option<String>,
     /// The family's Japanese name.
     local: Option<String>,
+    script: FontScript,
 }
 
 /// A face's family name in Japanese, if its name table has one.
@@ -280,7 +313,9 @@ fn japanese_family(f: &skrifa::FontRef<'_>) -> Option<String> {
 fn scanned_face(f: &skrifa::FontRef<'_>) -> Option<ScannedFace> {
     let (family, style) = face_names(f)?;
     let local = japanese_family(f).filter(|l| *l != family);
-    Some(ScannedFace { family, style, postscript: name(f, &[StringId::POSTSCRIPT_NAME]), local })
+    // A Japanese name is a Japanese font whatever its code pages say.
+    let script = if local.is_some() { FontScript::Japanese } else { FontScript::Latin };
+    Some(ScannedFace { family, style, postscript: name(f, &[StringId::POSTSCRIPT_NAME]), local, script })
 }
 
 /// Parse every face in `data` (a font file or collection). Returns `(index, family, style)`.
@@ -344,7 +379,17 @@ fn file_face_names(path: &Path) -> Vec<ScannedFace> {
                 font.extend_from_slice(&u32::to_be_bytes(v));
             }
             font.extend_from_slice(&table);
-            scanned_face(&skrifa::FontRef::new(&font).ok()?)
+            let mut face = scanned_face(&skrifa::FontRef::new(&font).ok()?)?;
+            // The OS/2 table's code pages (version 1 and later), read as 4 bytes at offset 78.
+            if face.script == FontScript::Latin
+                && let Some(os2) = records.as_chunks::<16>().0.iter().find(|r| r.starts_with(b"OS/2"))
+                && be32(os2, 12).is_some_and(|len| len >= 82)
+                && let Some(cp) = be32(os2, 8).and_then(|offset| read_at(u64::from(offset) + 78, 4))
+                && let Some(cp1) = be32(&cp, 0)
+            {
+                face.script = FontScript::from_code_pages(cp1);
+            }
+            Some(face)
         })
         .collect()
 }
@@ -630,7 +675,7 @@ impl FontDb {
                 if !matches!(ext.as_deref(), Some("ttf" | "otf" | "ttc" | "otc")) {
                     continue;
                 }
-                for ScannedFace { family, style, postscript: ps, local } in file_face_names(&p) {
+                for ScannedFace { family, style, postscript: ps, local, script } in file_face_names(&p) {
                     if let Some(ps) = ps {
                         postscript.insert(ps.to_ascii_lowercase(), (family.clone(), style.clone()));
                     }
@@ -641,6 +686,7 @@ impl FontDb {
                     if entry.local.is_none() {
                         entry.local = local;
                     }
+                    entry.script = entry.script.max(script);
                     entry.faces.push((style, p.clone()));
                     n += 1;
                 }
@@ -657,6 +703,25 @@ impl FontDb {
     /// Gothic). Menus show it unless Preferences ▸ Type ▸ Show Font Names in English is on.
     pub fn local_name(&self, family: &str) -> Option<String> {
         self.read_catalog().get(&family.to_ascii_lowercase()).and_then(|c| c.local.clone())
+    }
+
+    /// What `family` is for (font lists group by it): from the installed fonts' code pages, or
+    /// for loaded fonts (bundled, user) from what they cover.
+    pub fn script(&self, family: &str) -> FontScript {
+        if let Some(c) = self.read_catalog().get(&family.to_ascii_lowercase()) {
+            return c.script;
+        }
+        let faces = self.read_faces();
+        let Some(f) = faces.iter().find(|f| f.family.eq_ignore_ascii_case(family)) else { return FontScript::Latin };
+        if f.covers('あ') {
+            FontScript::Japanese
+        } else if f.covers('永') || f.covers('한') {
+            FontScript::OtherCjk
+        } else if f.covers('A') {
+            FontScript::Latin
+        } else {
+            FontScript::Symbol
+        }
     }
 
     /// The family whose Japanese name is `name` ("MS ゴシック" → "MS Gothic"): documents and

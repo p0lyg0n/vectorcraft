@@ -18,6 +18,8 @@ const PER_FRAME: u32 = 3;
 const CACHE_MAX: usize = 400;
 
 thread_local! {
+    /// The starred families (UI state), and whether a list changed them this frame.
+    static FAVORITES: RefCell<(Vec<String>, bool)> = const { RefCell::new((Vec::new(), false)) };
     /// Preferences ▸ Type ▸ Enable in-menu font previews, set every frame.
     static ENABLED: Cell<bool> = const { Cell::new(false) };
     static CACHE: RefCell<HashMap<(String, u32), Option<TextureHandle>>> = RefCell::new(HashMap::new());
@@ -30,11 +32,46 @@ pub fn set_enabled(on: bool) {
     ENABLED.with(|c| c.set(on));
 }
 
-/// The sample text for `family`: Japanese when its fonts have kana and kanji, else Latin.
+/// Keep the lists' favourites and the UI state's in step: a star clicked in a list this frame
+/// goes to `state`, else `state` is what lists show.
+pub fn sync_favorites(state: &mut Vec<String>) {
+    FAVORITES.with(|f| {
+        let mut f = f.borrow_mut();
+        if std::mem::take(&mut f.1) {
+            state.clone_from(&f.0);
+        } else if f.0 != *state {
+            f.0.clone_from(state);
+        }
+    });
+}
+
+pub fn is_favorite(family: &str) -> bool {
+    FAVORITES.with(|f| f.borrow().0.iter().any(|x| x == family))
+}
+
+fn toggle_favorite(family: &str) {
+    FAVORITES.with(|f| {
+        let mut f = f.borrow_mut();
+        match f.0.iter().position(|x| x == family) {
+            Some(i) => {
+                f.0.remove(i);
+            }
+            None => f.0.push(family.to_string()),
+        }
+        f.1 = true;
+    });
+}
+
+/// The sample text for `family`, by what the family is for: Japanese for Japanese fonts (when
+/// they have the kana), Han characters for Chinese and Korean ones, a word for the others.
 pub fn sample_text(family: &str) -> &'static str {
     let db = FontDb::global();
-    match db.face(family, "Regular") {
-        Some(f) if f.family.eq_ignore_ascii_case(family) && ['あ', 'ア', '永'].iter().all(|c| f.covers(*c)) => "あア永",
+    let face = db.face(family, "Regular").filter(|f| f.family.eq_ignore_ascii_case(family));
+    let has = |s: &str| face.as_ref().is_some_and(|f| s.chars().filter(|c| !c.is_whitespace()).all(|c| f.covers(c)));
+    match db.script(family) {
+        vectorcraft_text::FontScript::Japanese if has("文字もじモジ") => "文字もじモジ",
+        vectorcraft_text::FontScript::OtherCjk | vectorcraft_text::FontScript::Japanese if has("字體") => "字體様式",
+        _ if has("Sample") => "Sample",
         _ => "Ag",
     }
 }
@@ -85,20 +122,41 @@ pub fn paint(ui: &Ui, family: &str, rect: Rect, color: egui::Color32) -> bool {
     true
 }
 
-/// A font list row: the name, and the sample to its right when previews are on. Returns the
-/// row's response.
+/// A font list row: the name at the left, the sample (when previews are on) in a column at the
+/// right, and a star to (un)favourite the family. Returns the row's response.
 pub fn row(ui: &mut Ui, family: &str, label: &str, selected: bool) -> egui::Response {
     let preview = ENABLED.with(Cell::get);
-    let width = ui.available_width();
+    let t = crate::theme::Tokens::get(ui.ctx());
     let h = 24.0;
-    let resp = ui.add_sized(vec2(width, h), egui::Button::selectable(selected, label));
-    if preview && ui.is_rect_visible(resp.rect) {
-        let r = Rect::from_min_size(pos2(resp.rect.right() - 92.0, resp.rect.top() + 2.0), vec2(88.0, h - 4.0));
-        let t = crate::theme::Tokens::get(ui.ctx());
-        paint(ui, family, r, t.text);
+    let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width().max(260.0), h), egui::Sense::click());
+    if !ui.is_rect_visible(rect) {
+        return resp;
     }
-    resp
+    if selected || resp.hovered() {
+        ui.painter().rect_filled(rect, 2.0, if selected { t.row_selected } else { t.hover });
+    }
+    let star = Rect::from_min_size(pos2(rect.right() - 22.0, rect.top() + 4.0), vec2(16.0, 16.0));
+    let sample = Rect::from_min_size(pos2(rect.right() - 26.0 - SAMPLE_W, rect.top() + 2.0), vec2(SAMPLE_W, h - 4.0));
+    // The name, clipped before the sample's column.
+    let name_room = Rect::from_min_max(pos2(rect.left() + 8.0, rect.top()), pos2(sample.left() - 6.0, rect.bottom()));
+    ui.painter().with_clip_rect(name_room).text(name_room.left_center(), egui::Align2::LEFT_CENTER, label, egui::FontId::proportional(12.5), t.text);
+    if preview {
+        paint(ui, family, sample, t.text);
+    }
+    let fav = is_favorite(family);
+    let sr = ui.interact(star, ui.id().with(("font-star", family)), egui::Sense::click());
+    if fav || resp.hovered() || sr.hovered() {
+        crate::icons::paint(ui, "star", star, if fav { t.accent } else { t.text_dim });
+    }
+    if sr.clicked() {
+        toggle_favorite(family);
+    }
+    // A click on the star isn't a click on the row.
+    if sr.clicked() { resp.clone().with_new_rect(Rect::NOTHING) } else { resp }
 }
+
+/// Width of the sample column.
+const SAMPLE_W: f32 = 104.0;
 
 #[cfg(test)]
 mod tests {
@@ -106,8 +164,8 @@ mod tests {
 
     #[test]
     fn latin_fonts_sample_latin_and_render() {
-        assert_eq!(sample_text("Source Sans 3"), "Ag", "no kana in Source Sans 3");
-        let doc = sample_doc("Source Sans 3", "Ag", 88.0, 20.0).unwrap();
+        assert_eq!(sample_text("Source Sans 3"), "Sample", "a Latin font samples a word");
+        let doc = sample_doc("Source Sans 3", "Sample", 88.0, 20.0).unwrap();
         let img = vectorcraft_render::Renderer::new().render_region(&doc, vectorcraft_geom::Rect::new(0.0, 0.0, 88.0, 20.0), 1.0, false);
         assert!(img.pixels.chunks(4).any(|p| p[3] > 0), "the sample draws something");
     }
@@ -115,7 +173,18 @@ mod tests {
     #[test]
     fn japanese_fonts_sample_japanese() {
         // The bundled Shippori Mincho has kana and kanji.
-        assert_eq!(sample_text("Shippori Mincho"), "あア永");
+        assert_eq!(sample_text("Shippori Mincho"), "文字もじモジ");
+    }
+
+    #[test]
+    fn favorites_follow_the_ui_state_and_a_star_click() {
+        let mut state = vec!["Inter".to_string()];
+        sync_favorites(&mut state);
+        assert!(is_favorite("Inter") && !is_favorite("Source Sans 3"));
+        toggle_favorite("Source Sans 3");
+        toggle_favorite("Inter");
+        sync_favorites(&mut state);
+        assert_eq!(state, ["Source Sans 3"], "the clicks reach the UI state");
     }
 
     #[test]

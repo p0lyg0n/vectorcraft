@@ -195,3 +195,29 @@ fn installed_japanese_fonts_are_found_by_their_japanese_name() {
     }
     assert_eq!(db.local_name("Source Sans 3"), None);
 }
+
+/// Font lists group families by script, read from the OS/2 code pages during the scan.
+#[test]
+fn installed_families_are_classified_by_script() {
+    assert_eq!(FontScript::from_code_pages(1 << 17), FontScript::Japanese);
+    assert_eq!(FontScript::from_code_pages(1 | (1 << 18)), FontScript::OtherCjk);
+    assert_eq!(FontScript::from_code_pages(1 << 31), FontScript::Symbol);
+    assert_eq!(FontScript::from_code_pages(1), FontScript::Latin);
+    let db = FontDb::with_font_dirs(system_font_dirs());
+    assert_eq!(db.script("Source Sans 3"), FontScript::Latin, "a loaded Latin font");
+    assert_eq!(db.script("Shippori Mincho"), FontScript::Japanese, "a loaded Japanese font");
+    // Installed fonts, where present.
+    for (family, script) in
+        [("MS Gothic", FontScript::Japanese), ("Yu Gothic", FontScript::Japanese), ("Arial", FontScript::Latin), ("Wingdings", FontScript::Symbol)]
+    {
+        if db.has_family(family) {
+            assert_eq!(db.script(family), script, "{family}");
+        }
+    }
+    // Every family with a Japanese name is a Japanese font.
+    for f in db.families() {
+        if db.local_name(&f).is_some() {
+            assert_eq!(db.script(&f), FontScript::Japanese, "{f}");
+        }
+    }
+}

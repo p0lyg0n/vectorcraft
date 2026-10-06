@@ -494,18 +494,34 @@ pub fn font_dropdown(ui: &mut Ui, id: impl std::hash::Hash + std::fmt::Debug, cu
         if ui.memory(|m| m.focused().is_none()) {
             ui.memory_mut(|m| m.request_focus(field.with("edit")));
         }
-        let query = search_field(ui, field, "Search").to_lowercase();
+        ui.set_min_width(340.0);
+        // The search field, and a star that shows only the favourite families.
+        let fav_only_id = state.with("favorites-only");
+        let mut fav_only = ui.data(|d| d.get_temp::<bool>(fav_only_id)).unwrap_or(false);
+        let query = ui
+            .horizontal(|ui| {
+                let star = icon_button(ui, "star", "Show favorite fonts only", fav_only, 22.0);
+                if star.clicked() {
+                    fav_only = !fav_only;
+                    ui.data_mut(|d| d.insert_temp(fav_only_id, fav_only));
+                }
+                search_field(ui, field, "Search").to_lowercase()
+            })
+            .inner;
         let enter = ui.input(|i| i.key_pressed(egui::Key::Enter));
         let families = vectorcraft_text::FontDb::global().family_list();
         let (mut chosen, mut first) = (None, None);
-        // The search field stays put over the list as it scrolls.
-        menu_scroll(ui, |ui| {
-            // Found by either name; listed by the one shown.
-            let mut listed: Vec<(&String, std::borrow::Cow<'_, str>)> = families.iter().map(|f| (f, crate::i18n::font_label(f))).collect();
-            listed.sort_by_key(|(_, l)| l.to_lowercase());
-            for (f, label) in
-                listed.iter().filter(|(f, l)| query.is_empty() || f.to_lowercase().contains(&query) || l.to_lowercase().contains(&query))
-            {
+        let listed = font_list(&families, &query, fav_only);
+        // One scroll area under the search field, as tall as fits the window (the popup itself
+        // never scrolls, so there is a single scroll bar).
+        let room = (ui.ctx().content_rect().bottom() - ui.next_widget_position().y - 24.0).clamp(120.0, 480.0);
+        egui::ScrollArea::vertical().max_height(room).auto_shrink([false, true]).show(ui, |ui| {
+            let mut group = None;
+            for (script, f, label) in &listed {
+                if group.is_some_and(|g| g != *script) {
+                    ui.separator();
+                }
+                group = Some(*script);
                 let f = *f;
                 first.get_or_insert(f);
                 let r = crate::font_preview::row(ui, f, label, f == current);
@@ -529,6 +545,25 @@ pub fn font_dropdown(ui: &mut Ui, id: impl std::hash::Hash + std::fmt::Debug, cu
         }
         chosen
     })
+}
+
+/// The font list's rows: `families` matching `query` (either name; only favourites with
+/// `favorites_only`), grouped by what they are for (Latin, symbols, Japanese, other CJK), each
+/// group sorted by the name shown.
+pub(crate) fn font_list<'a>(
+    families: &'a [String],
+    query: &str,
+    favorites_only: bool,
+) -> Vec<(vectorcraft_text::FontScript, &'a String, std::borrow::Cow<'a, str>)> {
+    let db = vectorcraft_text::FontDb::global();
+    let mut listed: Vec<_> = families
+        .iter()
+        .filter(|f| !favorites_only || crate::font_preview::is_favorite(f))
+        .map(|f| (db.script(f), f, crate::i18n::font_label(f)))
+        .filter(|(_, f, l)| query.is_empty() || f.to_lowercase().contains(query) || l.to_lowercase().contains(query))
+        .collect();
+    listed.sort_by_cached_key(|(script, _, l)| (*script, l.to_lowercase()));
+    listed
 }
 
 /// The body of a menu or popup list: as tall as its items up to the bottom of the window, and
