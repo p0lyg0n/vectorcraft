@@ -230,7 +230,7 @@ fn chip(ui: &Ui, r: Rect, p: &Paint) {
 /// A dotted-underline link drawn at `pos`; returns clicked.
 fn link(ui: &mut Ui, pos: egui::Pos2, id: impl std::hash::Hash + std::fmt::Debug, s: &str) -> bool {
     let t = Tokens::get(ui.ctx());
-    let galley = ui.painter().layout_no_wrap(s.to_string(), egui::FontId::proportional(12.5), t.text_strong);
+    let galley = ui.painter().layout_no_wrap(crate::i18n::t(s).to_string(), egui::FontId::proportional(12.5), t.text_strong);
     let r = Rect::from_min_size(pos2(pos.x, pos.y - galley.size().y / 2.0), galley.size());
     let resp = ui.interact(r, ui.id().with(id), Sense::click());
     ui.painter().galley(r.min, galley, t.text_strong);
@@ -347,11 +347,20 @@ fn default_stack(app: &mut VectorcraftApp, ui: &mut Ui) {
         } else if link(ui, pos2(lx, r.center().y), ("ap-def-link", i), tl!("Stroke:")) {
             app.ui.open_panel = Some("stroke".into());
         }
-        chip(ui, Rect::from_min_size(pos2(r.left() + EYE_W + 76.0, r.center().y - 9.0), vec2(18.0, 18.0)), it.paint());
+        // New art's paint and weight are set here as for a selected object's.
+        let cr = Rect::from_min_size(pos2(r.left() + EYE_W + 76.0, r.center().y - 9.0), vec2(18.0, 18.0));
+        chip(ui, cr, it.paint());
+        let cresp =
+            ui.interact(cr.expand(2.0), ui.id().with(("ap-def-chip", i)), Sense::click()).on_hover_text(crate::i18n::t("Click to choose a swatch"));
+        let stroke = !it.is_fill();
+        egui::Popup::menu(&cresp).show(|ui| default_swatch_picker(app, ui, stroke));
         if let AppearanceItem::Stroke(st) = it {
-            let w = app.session.stroke_unit().format(st.width);
-            text(ui, pos2(r.left() + EYE_W + 106.0, r.center().y), &w, false);
-            stroke_notes(ui, Rect::from_min_max(pos2(r.left() + EYE_W + 166.0, r.top()), pos2(r.right() - 4.0, r.bottom())), st);
+            let fr = Rect::from_min_size(pos2(r.left() + EYE_W + 104.0, r.center().y - 12.0), vec2(56.0, 24.0));
+            let mut child = ui.new_child(egui::UiBuilder::new().max_rect(fr).layout(egui::Layout::left_to_right(egui::Align::Center)));
+            if let Some(w) = widgets::num_field(&mut child, ("ap-def-w", i), Some(st.width), app.session.stroke_unit(), 56.0) {
+                app.run("stroke.set", json!({"weight": w})).ok();
+            }
+            stroke_notes(ui, Rect::from_min_max(pos2(fr.right() + 6.0, r.top()), pos2(r.right() - 4.0, r.bottom())), st);
         }
         for (k, e) in it.effects().iter().enumerate() {
             fx(ui, e, (Some(i), k));
@@ -808,8 +817,9 @@ pub fn humanize(key: &str) -> String {
 }
 
 /// Small swatch grid inside the appearance chip popup.
-fn swatch_picker(app: &mut VectorcraftApp, ui: &mut Ui, index: usize) {
-    let Some(st) = app.session.active() else { return };
+/// The document's swatches as tiles; returns the clicked one (name, whether it is None).
+fn swatch_tiles(app: &VectorcraftApp, ui: &mut Ui) -> Option<(String, bool)> {
+    let st = app.session.active()?;
     let mut all: Vec<(String, Paint)> = st.doc.swatches.iter().map(|s| (s.name.clone(), s.paint.clone())).collect();
     for g in &st.doc.swatch_groups {
         all.extend(g.swatches.iter().map(|s| (s.name.clone(), s.paint.clone())));
@@ -826,7 +836,20 @@ fn swatch_picker(app: &mut VectorcraftApp, ui: &mut Ui, index: usize) {
             }
         }
     });
-    if let Some((name, none)) = chosen {
+    chosen
+}
+
+/// Swatches for new art's fill (or `stroke`), with nothing selected.
+fn default_swatch_picker(app: &mut VectorcraftApp, ui: &mut Ui, stroke: bool) {
+    if let Some((name, none)) = swatch_tiles(app, ui) {
+        let params = if none { json!({"none": true}) } else { json!({"swatch": name}) };
+        app.run(if stroke { "paint.setStroke" } else { "paint.setFill" }, params).ok();
+        ui.close();
+    }
+}
+
+fn swatch_picker(app: &mut VectorcraftApp, ui: &mut Ui, index: usize) {
+    if let Some((name, none)) = swatch_tiles(app, ui) {
         let params = if none { json!({"index": index, "none": true}) } else { json!({"index": index, "swatch": name}) };
         app.run("appearance.setItem", params).ok();
         ui.close();
@@ -961,6 +984,24 @@ pub fn menu(app: &mut VectorcraftApp, ui: &mut Ui) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// With nothing selected, the rows set new art's paint and stroke weight.
+    #[test]
+    fn new_art_paint_and_weight_are_set_from_the_default_rows() {
+        let mut app = VectorcraftApp::new(vectorcraft_engine::Session::new(), Default::default());
+        app.run("file.new", json!({"width": 100, "height": 100})).unwrap();
+        let ui_frame = |app: &mut VectorcraftApp| crate::tests_labels::painted_text(app, show);
+        let text = ui_frame(&mut app);
+        assert!(text.contains("Stroke:") && text.contains("Opacity: Default"), "{text}");
+        // What the swatch tiles and the weight field run.
+        let swatch = app.session.active().unwrap().doc.swatches.iter().find(|s| !s.paint.is_none()).unwrap().name.clone();
+        app.run("paint.setStroke", json!({"swatch": swatch})).unwrap();
+        app.run("stroke.set", json!({"weight": 3.0})).unwrap();
+        let ap = app.session.new_art();
+        let st = ap.items.iter().find_map(|it| if let AppearanceItem::Stroke(s) = it { Some(s.clone()) } else { None }).unwrap();
+        assert_eq!(st.width, 3.0);
+        assert!(!st.paint.is_none());
+    }
 
     #[test]
     fn opacity_labels() {
