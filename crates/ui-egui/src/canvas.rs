@@ -161,6 +161,12 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     handle_input(app, ui, &resp, rect);
     let v = *app.view().unwrap_or(&View::default());
     let xf = Xf::new(rect, &v);
+    if resp.secondary_clicked()
+        && let Some(p) = resp.interact_pointer_pos()
+    {
+        crate::context_menu::select_under(app, xf.to_doc(p), xf.zoom);
+    }
+    resp.context_menu(|ui| crate::context_menu::show(app, ui));
     panel_drop(app, ui, &resp, &xf);
     let painter = ui.painter_at(rect);
     let Some(st) = app.session.active() else { return };

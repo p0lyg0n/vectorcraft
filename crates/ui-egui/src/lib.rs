@@ -10,6 +10,7 @@ mod brand;
 pub mod canvas;
 pub mod chrome;
 pub mod community;
+pub mod context_menu;
 pub mod control;
 pub mod cursors;
 pub mod dialogs;

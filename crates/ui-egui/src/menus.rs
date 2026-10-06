@@ -1372,6 +1372,11 @@ pub fn shortcut_of(id: &str) -> Option<&'static str> {
 }
 
 /// Is a command currently enabled?
+/// Is `id` a command the app runs (an engine command or one of the UI's)?
+pub fn is_command(id: &str) -> bool {
+    vectorcraft_engine::find_command(id).is_some() || UI_COMMANDS.iter().any(|c| c.0 == id)
+}
+
 pub fn enabled(app: &VectorcraftApp, id: &str) -> bool {
     if let Some(c) = vectorcraft_engine::find_command(id) {
         // The system clipboard's contents can be pasted with an empty internal clipboard.
@@ -2131,7 +2136,7 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
 /// A top-level menu's popup: as wide as its widest item (label plus shortcut), at least 230 pt;
 /// it scrolls when it is taller than the window. `menu` is the top-level menu's title, the
 /// context its labels translate in.
-fn menu_body(app: &VectorcraftApp, ui: &mut egui::Ui, menu: &str, items: &[Item], clicked: &mut Option<(String, Value)>) {
+pub(crate) fn menu_body(app: &VectorcraftApp, ui: &mut egui::Ui, menu: &str, items: &[Item], clicked: &mut Option<(String, Value)>) {
     widgets::menu_scroll(ui, |ui| {
         ui.set_min_width(230.0);
         render_items(app, ui, menu, items, clicked);
