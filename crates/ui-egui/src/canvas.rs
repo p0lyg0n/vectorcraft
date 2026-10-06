@@ -400,6 +400,15 @@ fn cursor_icon(c: Cursor) -> egui::CursorIcon {
     }
 }
 
+/// What a scroll does: (zoom factor, scroll left to pan). Alt and, with `wheel_zooms`, a plain
+/// vertical wheel zoom around the pointer; the rest pans.
+fn wheel_zoom(scroll: egui::Vec2, m: egui::Modifiers, wheel_zooms: bool) -> (f64, egui::Vec2) {
+    if scroll.y != 0.0 && (m.alt || (wheel_zooms && !m.shift && !m.command && !m.ctrl)) {
+        return ((scroll.y as f64 * 0.01).exp(), egui::Vec2::ZERO);
+    }
+    (1.0, scroll)
+}
+
 fn handle_input(app: &mut VectorcraftApp, ui: &Ui, resp: &egui::Response, rect: egui::Rect) {
     let (pointer, m, space, scroll, zoom_delta) =
         ui.input(|i| (i.pointer.clone(), i.modifiers, i.key_down(egui::Key::Space), i.smooth_scroll_delta, i.zoom_delta()));
@@ -410,12 +419,11 @@ fn handle_input(app: &mut VectorcraftApp, ui: &Ui, resp: &egui::Response, rect: 
     let view = app.view_info();
     let drag: Option<Drag> = ui.data(|d| d.get_temp(drag_id()));
 
-    // Zoom: pinch / Cmd-scroll / Alt-scroll around the pointer. Plain scroll pans.
+    // Zoom: pinch / Cmd-scroll / Alt-scroll around the pointer, and the plain wheel too with
+    // Preferences ▸ General ▸ Zoom with Mouse Wheel. Other scrolling pans.
     if resp.hovered() {
-        let mut factor = zoom_delta as f64;
-        if m.alt && scroll.y != 0.0 {
-            factor *= (scroll.y as f64 * 0.01).exp();
-        }
+        let (wheel_factor, scroll) = wheel_zoom(scroll, m, app.session.prefs.zoom_with_mouse_wheel);
+        let factor = zoom_delta as f64 * wheel_factor;
         if (factor - 1.0).abs() > 1e-6 {
             if let (Some(p), Some(vm)) = (hover, app.view_mut()) {
                 let before = xf.to_doc(p);
@@ -425,7 +433,6 @@ fn handle_input(app: &mut VectorcraftApp, ui: &Ui, resp: &egui::Response, rect: 
                 vm.center += before - after;
             }
         } else if (scroll.x != 0.0 || scroll.y != 0.0)
-            && !m.alt
             && let Some(vm) = app.view_mut()
         {
             let d = Xf { rect, zoom: vm.zoom, center: vm.center, rot: vm.rotation.to_radians() }.delta_to_doc(scroll);
@@ -1349,6 +1356,21 @@ fn task_bar(app: &mut VectorcraftApp, ui: &mut Ui, xf: &Xf) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Preferences ▸ General ▸ Zoom with Mouse Wheel: the plain wheel zooms (up zooms in),
+    /// Shift and Ctrl/Cmd scrolling still pan; off, the wheel pans and Alt zooms as before.
+    #[test]
+    fn the_wheel_zooms_with_zoom_with_mouse_wheel_on() {
+        let up = egui::vec2(0.0, 40.0);
+        let none = egui::Modifiers::default();
+        let (f, rest) = super::wheel_zoom(up, none, true);
+        assert!(f > 1.0 && rest == egui::Vec2::ZERO);
+        assert!(super::wheel_zoom(-up, none, true).0 < 1.0, "down zooms out");
+        assert_eq!(super::wheel_zoom(up, egui::Modifiers::SHIFT, true), (1.0, up), "Shift pans");
+        assert_eq!(super::wheel_zoom(egui::vec2(30.0, 0.0), none, true), (1.0, egui::vec2(30.0, 0.0)), "sideways pans");
+        assert_eq!(super::wheel_zoom(up, none, false), (1.0, up), "off: the wheel pans");
+        assert!(super::wheel_zoom(up, egui::Modifiers::ALT, false).0 > 1.0, "Alt zooms either way");
+    }
     use vectorcraft_engine::Session;
 
     /// One headless canvas frame on an 800 × 600 window.
