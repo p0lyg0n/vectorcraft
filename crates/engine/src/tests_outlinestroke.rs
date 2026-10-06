@@ -175,7 +175,7 @@ fn a_profiled_curve_outlines_to_few_anchors() {
         let st = s.doc().unwrap();
         let n = st.doc.node(st.selection.objects[0]).unwrap().clone();
         let (path, rule) = (n.path_data().unwrap().clone(), FillRule::NonZero);
-        let AppearanceItem::Stroke(sl) = n.appearance.items.iter().find(|i| !i.is_fill()).unwrap() else { unreachable!() };
+        let AppearanceItem::Stroke(sl) = n.appearance.items.iter().find(|i| !i.is_fill()).unwrap() else { panic!("a stroke") };
         vectorcraft_render::effects::stroke::outline_region(&path, rule, sl)
     };
     let n = outline(&mut s);
