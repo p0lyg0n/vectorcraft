@@ -101,11 +101,17 @@ fn set_format(s: &mut Session, p: &Value) -> Result<Value> {
         "spaceBefore",
         "spaceAfter",
         "hyphenate",
+        "kinsoku",
     ];
     if !keys.iter().any(|k| p.get(*k).is_some()) {
         return Err(bad(C, "nothing to change"));
     }
     let (position, small_caps) = super::docsetup::script_params(p, &s.doc()?.doc.setup, C)?;
+    let kinsoku = match p.get("kinsoku").and_then(Value::as_str) {
+        Some(k) => Some(vectorcraft_doc::Kinsoku::parse(k).ok_or_else(|| bad(C, "kinsoku must be none, weak or strong"))?),
+        None if p.get("kinsoku").is_some() => return Err(bad(C, "kinsoku must be none, weak or strong")),
+        None => None,
+    };
     s.edit("Character", |d, _| {
         for id in &ids {
             let Some(NodeKind::Text(t)) = d.node_mut(*id).map(|n| &mut n.kind) else { continue };
@@ -160,6 +166,9 @@ fn set_format(s: &mut Session, p: &Value) -> Result<Value> {
             }
             if let Some(v) = flag("hyphenate") {
                 para.hyphenate = v;
+            }
+            if let Some(k) = kinsoku {
+                para.kinsoku = k;
             }
             super::typecmd::refresh_bounds(t);
         }

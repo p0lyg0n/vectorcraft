@@ -264,6 +264,65 @@ fn default_align_on() -> char {
 /// Distance between default tab stops when no explicit stop applies (½ inch).
 pub const DEFAULT_TAB_INTERVAL: f64 = 36.0;
 
+/// Japanese line-break rules (kinsoku shori): characters a line may not start or end with.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum Kinsoku {
+    /// Lines break after any CJK character.
+    None,
+    /// Closing brackets and punctuation don't start a line, opening brackets don't end one.
+    Weak,
+    /// [`Kinsoku::Weak`], and small kana, the prolonged sound mark and iteration marks don't
+    /// start a line either.
+    #[default]
+    Strong,
+}
+
+impl Kinsoku {
+    pub const ALL: [Self; 3] = [Self::None, Self::Weak, Self::Strong];
+
+    pub fn key(self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::Weak => "weak",
+            Self::Strong => "strong",
+        }
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::None => "None",
+            Self::Weak => "Soft",
+            Self::Strong => "Hard",
+        }
+    }
+
+    pub fn parse(s: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|k| k.key().eq_ignore_ascii_case(s))
+    }
+
+    fn is_default(&self) -> bool {
+        *self == Self::default()
+    }
+
+    /// May a line not start with `c`?
+    pub fn no_line_start(self, c: char) -> bool {
+        const WEAK: &str = "、。，．・：；？！）」』］｝〕〉》】〙〗〟’”｠»";
+        const STRONG: &str = "ぁぃぅぇぉっゃゅょゎゕゖァィゥェォッャュョヮヵヶㇰㇱㇲㇳㇴㇵㇶㇷㇸㇹㇺㇻㇼㇽㇾㇿーゝゞヽヾ々〻‐゠–〜～";
+        match self {
+            Self::None => false,
+            Self::Weak => WEAK.contains(c),
+            Self::Strong => WEAK.contains(c) || STRONG.contains(c),
+        }
+    }
+
+    /// May a line not end with `c`?
+    pub fn no_line_end(self, c: char) -> bool {
+        const OPENING: &str = "（「『［｛〔〈《【〘〖〝‘“｟«";
+        self != Self::None && OPENING.contains(c)
+    }
+}
+
 /// Paragraph attributes (the Paragraph panel).
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct ParaStyle {
@@ -281,6 +340,9 @@ pub struct ParaStyle {
     pub space_after: f64,
     #[serde(default)]
     pub hyphenate: bool,
+    /// Japanese line-break rules.
+    #[serde(default, skip_serializing_if = "Kinsoku::is_default")]
+    pub kinsoku: Kinsoku,
     /// Tab stops (Tabs panel), sorted by position.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tabs: Vec<TabStop>,

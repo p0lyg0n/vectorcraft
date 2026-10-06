@@ -452,3 +452,29 @@ fn vertical_area_type_wraps_into_columns_inside_the_frame() {
     assert!(l.glyphs.iter().all(|g| g.origin.x >= 0.0 && g.origin.x <= 100.0 && g.origin.y >= 0.0 && g.origin.y <= 65.0));
     assert!(l.glyphs[l.lines[1].glyph_start].origin.x < l.glyphs[0].origin.x);
 }
+
+/// Kinsoku: a line doesn't start with closing punctuation or (strong rules) a small kana, and
+/// doesn't end with an opening bracket; without the rules any CJK character may end a line.
+#[test]
+fn kinsoku_keeps_punctuation_off_line_starts_and_brackets_off_line_ends() {
+    // Area type just wide enough for four glyphs: "あいう。" would break before "。".
+    let lines = |text: &str, k: vectorcraft_doc::Kinsoku| -> Vec<String> {
+        let mut t = area(text, style(20.0), Rect::new(0.0, 0.0, 61.0, 400.0), Justify::Left);
+        t.para.kinsoku = k;
+        let l = layout(db(), &t);
+        l.lines.iter().map(|ln| text.get(ln.start..ln.end).unwrap_or("").to_string()).collect()
+    };
+    let none = lines("あいう。えお", vectorcraft_doc::Kinsoku::None);
+    assert!(none.iter().any(|l| l.starts_with('。')), "no rules: {none:?}");
+    for k in [vectorcraft_doc::Kinsoku::Weak, vectorcraft_doc::Kinsoku::Strong] {
+        let l = lines("あいう。えお", k);
+        assert!(l.iter().all(|l| !l.starts_with('。')), "{k:?}: {l:?}");
+        let l = lines("あい「うえお」", k);
+        assert!(l.iter().all(|l| !l.trim_end().ends_with('「')), "{k:?}: {l:?}");
+    }
+    // Small kana: only the strong rules keep them off a line start.
+    let weak = lines("あいうっえお", vectorcraft_doc::Kinsoku::Weak);
+    let strong = lines("あいうっえお", vectorcraft_doc::Kinsoku::Strong);
+    assert!(weak.iter().any(|l| l.starts_with('っ')), "{weak:?}");
+    assert!(strong.iter().all(|l| !l.starts_with('っ')), "{strong:?}");
+}

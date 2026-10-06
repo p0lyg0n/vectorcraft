@@ -3,7 +3,7 @@
 use std::ops::Range;
 
 use kurbo::{Affine, BezPath, ParamCurve, ParamCurveArclen, PathEl, PathSeg, Point, Rect, Shape, Vec2};
-use vectorcraft_doc::{CharStyle, Justify, ParaStyle, PathEffect, TextKind, TextObject};
+use vectorcraft_doc::{CharStyle, Justify, Kinsoku, ParaStyle, PathEffect, TextKind, TextObject};
 
 use crate::composer::{Breakpoint, compose};
 use crate::fontdb::FontDb;
@@ -489,7 +489,13 @@ fn tab_advance(tabs: &[vectorcraft_doc::TabStop], origin: f64, x: f64, rest: &[S
 }
 
 /// Greedy break: returns (end glyph index, hyphenated) for a line starting at `i` of `width`.
-fn break_line(text: &str, g: &[SGlyph], i: usize, width: f64, hyphenate: bool) -> (usize, bool) {
+/// May a line end after glyph `j` (its own rule, and the paragraph's kinsoku on both sides)?
+fn may_break_after(g: &[SGlyph], j: usize, kinsoku: Kinsoku) -> bool {
+    let Some(gl) = g.get(j) else { return false };
+    gl.break_after() && !kinsoku.no_line_end(gl.ch) && !g.get(j + 1).is_some_and(|n| kinsoku.no_line_start(n.ch))
+}
+
+fn break_line(text: &str, g: &[SGlyph], i: usize, width: f64, hyphenate: bool, kinsoku: Kinsoku) -> (usize, bool) {
     if !width.is_finite() {
         return (g.len(), false);
     }
@@ -502,7 +508,7 @@ fn break_line(text: &str, g: &[SGlyph], i: usize, width: f64, hyphenate: bool) -
             break;
         }
         x += gl.adv;
-        if gl.break_after() {
+        if may_break_after(g, j, kinsoku) {
             if gl.is_soft_hyphen() {
                 if x + hyphen_glyph(gl).adv <= width + EPS {
                     last_break = Some((j + 1, true));
@@ -572,7 +578,7 @@ fn hyphen_breaks(text: &str, g: &[SGlyph], ws: usize, we: usize) -> Vec<usize> {
 }
 
 /// Break candidates for the every-line composer.
-fn candidates(text: &str, g: &[SGlyph], hyphenate: bool) -> Vec<Breakpoint> {
+fn candidates(text: &str, g: &[SGlyph], hyphenate: bool, kinsoku: Kinsoku) -> Vec<Breakpoint> {
     let mut v = vec![];
     let mut ws = 0;
     for (j, gl) in g.iter().enumerate() {
@@ -584,7 +590,7 @@ fn candidates(text: &str, g: &[SGlyph], hyphenate: bool) -> Vec<Breakpoint> {
                 }
             }
             let hy = if gl.is_soft_hyphen() { hyphen_glyph(gl).adv } else { 0.0 };
-            if j + 1 < g.len() && g[j + 1].byte != gl.byte {
+            if j + 1 < g.len() && g[j + 1].byte != gl.byte && may_break_after(g, j, kinsoku) {
                 v.push(Breakpoint { end: j + 1, hyphen: hy });
             }
             ws = j + 1;
@@ -631,7 +637,7 @@ fn compose_para(cx: &Ctx<'_>, sg: &[SGlyph], para: &ParaStyle, pen: &Pen<'_>) ->
     }
     let last = *widths.last()?;
     let width = |k: usize| widths.get(k).copied().unwrap_or(last);
-    let cands = candidates(cx.text, sg, para.hyphenate);
+    let cands = candidates(cx.text, sg, para.hyphenate, para.kinsoku);
     let justify_last = para.justify == Justify::JustifyAll;
     compose(sg, &width, &cands, justify_last, 1.0).or_else(|| compose(sg, &width, &cands, justify_last, 4.0))
 }
@@ -667,7 +673,7 @@ fn flow(cx: &mut Ctx<'_>, paras: &[Range<usize>], para: &ParaStyle, regions: Opt
                 let width = x1 - x0 - ind_l - para.right_indent;
                 let (end, hyph) = match composed.as_ref().and_then(|c| c.get(li_para)) {
                     Some(&(e, h)) if e > i => (e, h),
-                    _ if i < n => break_line(cx.text, &sg, i, width, para.hyphenate),
+                    _ if i < n => break_line(cx.text, &sg, i, width, para.hyphenate, para.kinsoku),
                     _ => (n, false),
                 };
                 let m = Metrics::max(&sg[i..end]).unwrap_or(pm);
