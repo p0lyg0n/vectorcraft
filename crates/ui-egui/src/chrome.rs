@@ -348,10 +348,10 @@ pub fn status_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                             }
                         }
                         ui.separator();
-                        if ui.selectable_label(false, "Fit on Screen").clicked() {
+                        if ui.selectable_label(false, crate::i18n::t("Fit on Screen")).clicked() {
                             app.run("view.fitArtboard", json!({})).ok();
                         }
-                        if ui.selectable_label(false, "Fit All").clicked() {
+                        if ui.selectable_label(false, crate::i18n::t("Fit All")).clicked() {
                             app.run("view.fitAll", json!({})).ok();
                         }
                     },

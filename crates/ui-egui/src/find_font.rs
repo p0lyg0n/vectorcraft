@@ -49,7 +49,7 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         .frame(egui::Frame::window(&ctx.global_style()).fill(t.panel).inner_margin(egui::Margin::same(22)))
         .show(ctx, |ui: &mut Ui| {
             ui.set_width(380.0);
-            ui.label(egui::RichText::new("Find Font").font(theme::semibold(16.0)).color(t.text));
+            ui.label(egui::RichText::new(crate::i18n::t("Find Font")).font(theme::semibold(16.0)).color(t.text));
             ui.add_space(10.0);
             widgets::subheader(ui, &format!("Fonts in Document: {}", list.len()));
             let sel = d.fields.get("selected").and_then(Value::as_u64).unwrap_or(0) as usize;
@@ -92,13 +92,14 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
             ui.add_space(14.0);
             ui.horizontal(|ui| {
                 let has = sel < list.len();
-                if ui.add_enabled(has, egui::Button::new("Find")).clicked() {
+                if ui.add_enabled(has, egui::Button::new(crate::i18n::t("Find"))).clicked() {
                     act = Some("find");
                 }
-                if ui.add_enabled(has, egui::Button::new("Change")).on_hover_text("In the selected objects").clicked() {
+                if ui.add_enabled(has, egui::Button::new(crate::i18n::t("Change"))).on_hover_text(crate::i18n::t("In the selected objects")).clicked()
+                {
                     act = Some("change");
                 }
-                if ui.add_enabled(has, egui::Button::new("Change All")).clicked() {
+                if ui.add_enabled(has, egui::Button::new(crate::i18n::t("Change All"))).clicked() {
                     act = Some("changeAll");
                 }
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {

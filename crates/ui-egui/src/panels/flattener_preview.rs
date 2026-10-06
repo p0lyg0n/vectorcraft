@@ -200,7 +200,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     let mut set = app.ui.flattener_preview.clone();
     let mut refresh_now = false;
     ui.horizontal(|ui| {
-        if widgets::flat_button(ui, "Refresh", 64.0).on_hover_text("Preview the document as it is now").clicked() {
+        if widgets::flat_button(ui, "Refresh", 64.0).on_hover_text(crate::i18n::t("Preview the document as it is now")).clicked() {
             refresh_now = true;
         }
         let labels = Highlight::ALL.map(Highlight::label);
@@ -242,7 +242,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
         widgets::dim_label(ui, &format!("{count} {what}{} highlighted", if count == 1 { "" } else { "s" }));
     }
     if stale {
-        ui.label(egui::RichText::new("Changed since the last Refresh.").color(t.text_dim).size(11.5));
+        ui.label(egui::RichText::new(crate::i18n::t("Changed since the last Refresh.")).color(t.text_dim).size(11.5));
     }
     if set != app.ui.flattener_preview {
         app.ui.flattener_preview = set;
@@ -257,7 +257,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
 fn preview_area(ui: &mut Ui, t: &Tokens, h: Highlight, overprints: Overprints) {
     let w = ui.available_width();
     let (rect, resp) = ui.allocate_exact_size(vec2(w, (w * 0.8).clamp(140.0, 320.0)), Sense::click_and_drag());
-    let resp = resp.on_hover_text("Click to zoom in, Alt-click to zoom out, drag to pan, double-click to fit");
+    let resp = resp.on_hover_text(crate::i18n::t("Click to zoom in, Alt-click to zoom out, drag to pan, double-click to fit"));
     ui.painter().rect_filled(rect, 0.0, t.pasteboard);
     let ppp = ui.ctx().pixels_per_point();
     CACHE.with(|c| {

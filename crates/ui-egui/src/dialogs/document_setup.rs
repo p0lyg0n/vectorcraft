@@ -189,7 +189,7 @@ fn typography(ui: &mut egui::Ui, d: &mut Dialog) {
             }
             ui.end_row();
         }
-        ui.label(egui::RichText::new("Small Caps:").color(t.text));
+        ui.label(egui::RichText::new(crate::i18n::t("Small Caps:")).color(t.text));
         if let Some(n) = widgets::plain_field(ui, "smallCaps", d.f64("smallCapsSize", 70.0), "%", 1, 70.0) {
             d.fields.insert("smallCapsSize".into(), json!(n));
         }

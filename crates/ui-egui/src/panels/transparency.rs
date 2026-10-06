@@ -74,7 +74,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             // The thumbnail being edited is outlined (object normally, the mask while editing it).
             let (obj_w, mask_w) = if editing.is_some() { (0.5, 1.5) } else { (1.5, 1.0) };
             ui.painter().rect_stroke(r, 0.0, Stroke::new(obj_w, t.border), StrokeKind::Outside);
-            if editing.is_some() && oresp.on_hover_text("Stop editing the opacity mask").clicked() {
+            if editing.is_some() && oresp.on_hover_text(crate::i18n::t("Stop editing the opacity mask")).clicked() {
                 app.run("transparency.stopEditingOpacityMask", json!({})).ok();
             }
             if let Some(n) = &n {
@@ -145,7 +145,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             let label = if mask.is_some() { "Release" } else { "Make Mask" };
             let enabled = mask.is_some() || (has && editing.is_none());
             let r = ui.add_enabled_ui(enabled, |ui| widgets::flat_button(ui, label, 96.0)).inner;
-            if r.on_disabled_hover_text("Select the art (and, on top of it, the mask object)").clicked() {
+            if r.on_disabled_hover_text(crate::i18n::t("Select the art (and, on top of it, the mask object)")).clicked() {
                 let id = if mask.is_some() { "transparency.releaseOpacityMask" } else { "transparency.makeOpacityMask" };
                 app.run(id, json!({})).ok();
             }

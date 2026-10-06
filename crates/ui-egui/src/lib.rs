@@ -59,6 +59,8 @@ mod tests_fonts;
 #[cfg(test)]
 mod tests_home;
 #[cfg(test)]
+mod tests_ja_coverage;
+#[cfg(test)]
 mod tests_labels;
 #[cfg(test)]
 mod tests_nativeoptions;

@@ -147,7 +147,7 @@ fn create(app: &mut VectorcraftApp, ui: &mut Ui) {
     let mut d = draft(app, &ctx);
     let before = d.clone();
     ui.horizontal(|ui| {
-        ui.label(egui::RichText::new("Rule:").color(t.text_dim));
+        ui.label(egui::RichText::new(crate::i18n::t("Rule:")).color(t.text_dim));
         let labels: Vec<&str> = std::iter::once("Custom").chain(Harmony::ALL.iter().map(|h| h.label())).collect();
         let cur = d.rule.map_or("Custom", Harmony::label);
         // A rule makes the theme from the selected colour; Custom frees the colours.
@@ -198,7 +198,7 @@ fn create(app: &mut VectorcraftApp, ui: &mut Ui) {
     });
     ui.add_space(4.0);
     ui.horizontal(|ui| {
-        ui.label(egui::RichText::new("Name:").color(t.text_dim));
+        ui.label(egui::RichText::new(crate::i18n::t("Name:")).color(t.text_dim));
         if let Some(n) = widgets::text_field(ui, "ct-name", Some(&d.name), ui.available_width() - 4.0, 1) {
             d.name = n;
         }
@@ -261,7 +261,7 @@ fn my_themes(app: &mut VectorcraftApp, ui: &mut Ui) {
                     ui.painter().rect_stroke(strip, 0.0, egui::Stroke::new(1.0, t.border), egui::StrokeKind::Outside);
                     if resp.double_clicked() {
                         action = Some(Action::Edit(th.name.clone()));
-                    } else if resp.on_hover_text("Click to select, double-click to edit").clicked() {
+                    } else if resp.on_hover_text(crate::i18n::t("Click to select, double-click to edit")).clicked() {
                         action = Some(Action::Pick(th.name.clone()));
                     }
                 }

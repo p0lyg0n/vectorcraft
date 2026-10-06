@@ -281,7 +281,8 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             ui.add_enabled_ui(!all.is_empty(), |ui| {
                 let label = if sel.is_empty() || sel.len() == all.len() { "Export".to_string() } else { format!("Export {} Selected", sel.len()) };
-                export_clicked = widgets::primary_button(ui, &label).on_hover_text("Export the selected assets (else all of them)").clicked();
+                export_clicked =
+                    widgets::primary_button(ui, &label).on_hover_text(crate::i18n::t("Export the selected assets (else all of them)")).clicked();
             });
         });
     });

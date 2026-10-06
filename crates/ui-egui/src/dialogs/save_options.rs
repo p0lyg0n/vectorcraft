@@ -123,7 +123,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
         if d.bool("__pick") {
             form::field_w(ui, d, "path", "File Name:", 240.0);
             if SaveMode::of(&d.str("__action")) != Some(SaveMode::Template) {
-                ui.label(egui::RichText::new("Format:").color(t.text_dim));
+                ui.label(egui::RichText::new(crate::i18n::t("Format:")).color(t.text_dim));
                 switch = widgets::dropdown(ui, "save-format", f.label, save_labels(), 254.0).and_then(|i| SAVE_FORMATS.get(i).copied());
                 ui.end_row();
             }

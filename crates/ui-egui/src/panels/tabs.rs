@@ -83,7 +83,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     });
     ui.add_space(4.0);
     egui::Grid::new("tabs-grid").num_columns(2).spacing([6.0, 4.0]).show(ui, |ui| {
-        ui.label(egui::RichText::new("X:").color(t.text));
+        ui.label(egui::RichText::new(crate::i18n::t("X:")).color(t.text));
         let x = stops.get(sel).map(|s| s.position);
         if let Some(v) = widgets::spin_field(ui, "tabs-x", x, app.session.general_unit(), 90.0, 1.0, 0.0, &[])
             && let Some(s) = stops.get_mut(sel)
@@ -93,7 +93,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             apply(app, &stops);
         }
         ui.end_row();
-        ui.label(egui::RichText::new("Leader:").color(t.text));
+        ui.label(egui::RichText::new(crate::i18n::t("Leader:")).color(t.text));
         let mut leader = stops.get(sel).map(|s| s.leader.clone()).unwrap_or_default();
         if ui.add_enabled(stops.get(sel).is_some(), egui::TextEdit::singleline(&mut leader).desired_width(90.0)).lost_focus()
             && let Some(s) = stops.get_mut(sel)
@@ -103,7 +103,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             apply(app, &stops);
         }
         ui.end_row();
-        ui.label(egui::RichText::new("Align On:").color(t.text));
+        ui.label(egui::RichText::new(crate::i18n::t("Align On:")).color(t.text));
         let decimal = stops.get(sel).is_some_and(|s| s.align == TabAlign::Decimal);
         let mut on = stops.get(sel).map(|s| s.align_on.to_string()).unwrap_or_else(|| ".".into());
         if ui.add_enabled(decimal, egui::TextEdit::singleline(&mut on).desired_width(30.0)).lost_focus()
@@ -196,12 +196,12 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             }
         }
     }
-    resp.on_hover_text("Click to add a tab stop, drag to move it, drag it off the ruler to delete it");
+    resp.on_hover_text(crate::i18n::t("Click to add a tab stop, drag to move it, drag it off the ruler to delete it"));
 }
 
 pub fn menu(app: &mut VectorcraftApp, ui: &mut Ui) {
     let Some((mut stops, _)) = current(app) else {
-        ui.add_enabled(false, egui::Button::new("Select text").frame(false));
+        ui.add_enabled(false, egui::Button::new(crate::i18n::t("Select text")).frame(false));
         return;
     };
     let sel: usize = pstate(ui.ctx(), "tabs-sel");

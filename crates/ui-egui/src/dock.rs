@@ -28,7 +28,11 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             let mut x = strip.left();
             for (tab, label) in [(DockTab::Properties, "Properties"), (DockTab::Layers, "Layers"), (DockTab::Libraries, "Libraries")] {
                 let active = app.ui.dock_tab == tab;
-                let galley = ui.painter().layout_no_wrap(label.to_string(), theme::semibold(12.5), if active { t.text_strong } else { t.text_dim });
+                let galley = ui.painter().layout_no_wrap(
+                    crate::i18n::t(label).to_string(),
+                    theme::semibold(12.5),
+                    if active { t.text_strong } else { t.text_dim },
+                );
                 let r = egui::Rect::from_min_size(egui::pos2(x, strip.top()), vec2(galley.size().x + 24.0, strip.height() - 1.0));
                 let resp = ui.interact(r, ui.id().with(("docktab", label)), Sense::click());
                 if active {

@@ -46,7 +46,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             ui.painter().text(r.center(), egui::Align2::CENTER_CENTER, "Expand", egui::FontId::proportional(12.5), t.text_disabled);
         })
         .response
-        .on_disabled_hover_text("Expand applies to compound shapes (Alt-click a shape mode) — on the roadmap");
+        .on_disabled_hover_text(crate::i18n::t("Expand applies to compound shapes (Alt-click a shape mode) — on the roadmap"));
     });
     widgets::subheader(ui, "Pathfinders:");
     ui.horizontal(|ui| {

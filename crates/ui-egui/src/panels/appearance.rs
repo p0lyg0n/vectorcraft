@@ -188,7 +188,7 @@ fn eye(ui: &mut Ui, r: Rect, id: impl std::hash::Hash + std::fmt::Debug, on: boo
         t.icon
     };
     icons::paint(ui, if on { "eye" } else { "eye-off" }, er, col);
-    enabled && resp.on_hover_text("Click to toggle visibility").clicked()
+    enabled && resp.on_hover_text(crate::i18n::t("Click to toggle visibility")).clicked()
 }
 
 fn chevron(ui: &mut Ui, r: Rect, id: impl std::hash::Hash + std::fmt::Debug, open: bool) -> bool {
@@ -277,7 +277,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
 /// The object row's thumbnail drags this object's appearance onto art ([`PanelDrag::Appearance`];
 /// a chip of its fill follows the pointer).
 fn thumbnail_drag(ui: &mut Ui, th: Rect, id: NodeId) {
-    let resp = ui.interact(th, ui.id().with("ap-thumb"), Sense::drag()).on_hover_text("Drag onto art to apply this appearance");
+    let resp = ui.interact(th, ui.id().with("ap-thumb"), Sense::drag()).on_hover_text(crate::i18n::t("Drag onto art to apply this appearance"));
     widgets::drag_source(ui, &resp, || PanelDrag::Appearance(id));
     if resp.dragged() {
         ui.ctx().set_cursor_icon(egui::CursorIcon::Grabbing);
@@ -422,7 +422,7 @@ fn stack(app: &mut VectorcraftApp, ui: &mut Ui, n: &Node, sel: Sel, object_row: 
         chip(ui, cr, paint);
         let cresp = ui
             .interact(cr.expand(2.0), ui.id().with(("ap-chip", i)), Sense::click())
-            .on_hover_text("Click to choose a swatch, Shift-click to mix a colour");
+            .on_hover_text(crate::i18n::t("Click to choose a swatch, Shift-click to mix a colour"));
         let mixer = cresp.clicked() && ui.input(|inp| inp.modifiers.shift);
         if mixer {
             select_row(app, ui.ctx(), Sel::Item(i));

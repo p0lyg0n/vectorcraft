@@ -82,11 +82,11 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
     let unit = app.session.general_unit();
     let t = crate::theme::Tokens::get(ui.ctx());
     ui.horizontal(|ui| {
-        ui.label(egui::RichText::new("Add").color(t.text));
+        ui.label(egui::RichText::new(crate::i18n::t("Add")).color(t.text));
         if let Some(v) = widgets::num_field(ui, "raster-add-around", Some(d.f64("addAround", 0.0)), unit, 80.0) {
             d.fields.insert("addAround".into(), json!(v));
         }
-        ui.label(egui::RichText::new("Around Object").color(t.text));
+        ui.label(egui::RichText::new(crate::i18n::t("Around Object")).color(t.text));
     });
     check(ui, d, "preserveSpotColors", "Preserve Spot Colors");
     ui.add_space(8.0);

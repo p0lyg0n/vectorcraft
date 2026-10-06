@@ -267,7 +267,7 @@ fn preset_rows(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) {
         picked =
             widgets::dropdown(ui, "print-preset", if same { &name } else { CUSTOM }, &names, 300.0).and_then(|i| names.get(i)).map(|n| n.to_string());
         let save = ui.add_enabled_ui(!asking, |ui| widgets::flat_button(ui, "Save Preset…", 96.0)).inner;
-        ask = save.on_hover_text("Save these settings as a print preset").clicked();
+        ask = save.on_hover_text(crate::i18n::t("Save these settings as a print preset")).clicked();
     });
     if let Some(n) = picked {
         // Picking the preset shown again brings its settings back.
@@ -597,12 +597,12 @@ fn general(app: &VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) {
     row(ui, "Width:", |ui| match media.size() {
         Some((w, h)) => {
             ui.add_enabled_ui(false, |ui| widgets::num_field(ui, "print-media-w", Some(w), unit, 80.0));
-            ui.label("Height:");
+            ui.label(crate::i18n::t("Height:"));
             ui.add_enabled_ui(false, |ui| widgets::num_field(ui, "print-media-h", Some(h), unit, 80.0));
         }
         None => {
             length(ui, d, "width", unit, true);
-            ui.label("Height:");
+            ui.label(crate::i18n::t("Height:"));
             length(ui, d, "height", unit, true);
         }
     });
@@ -627,16 +627,16 @@ fn general(app: &VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) {
             if let Some(o) = widgets::reference_point(ui, current).and_then(|i| Origin::ALL.get(i)) {
                 set(d, "placement.origin", json!(o.id()));
             }
-            ui.label("X:");
+            ui.label(crate::i18n::t("X:"));
             length(ui, d, "placement.x", unit, true);
-            ui.label("Y:");
+            ui.label(crate::i18n::t("Y:"));
             length(ui, d, "placement.y", unit, true);
         });
     });
     if placed {
         row(ui, "", |ui| {
             note(ui, "The Print Tiling tool placed the pages.");
-            if widgets::flat_button(ui, "Reset", 56.0).on_hover_text("Place the pages with the placement again").clicked() {
+            if widgets::flat_button(ui, "Reset", 56.0).on_hover_text(crate::i18n::t("Place the pages with the placement again")).clicked() {
                 set(d, PLACED, json!(false));
             }
         });
@@ -646,9 +646,9 @@ fn general(app: &VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) {
     });
     row(ui, "Scale:", |ui| {
         let on = scaling == PrintScaling::Custom || tiles;
-        ui.label("W:");
+        ui.label(crate::i18n::t("W:"));
         number(ui, d, "scale.width", "%", on);
-        ui.label("H:");
+        ui.label(crate::i18n::t("H:"));
         number(ui, d, "scale.height", "%", on);
     });
     row(ui, "Overlap:", |ui| length(ui, d, "overlap", unit, tiles));
@@ -722,7 +722,7 @@ fn graphics(ui: &mut egui::Ui, d: &mut Dialog) {
     let auto = get(d, "graphics.autoFlatness").as_bool() == Some(true);
     row(ui, "Flatness:", |ui| {
         number(ui, d, "graphics.flatness", "", !auto);
-        ui.label(egui::RichText::new("0.2 (quality) to 100 (speed)").size(11.5).color(Tokens::get(ui.ctx()).text_dim));
+        ui.label(egui::RichText::new(crate::i18n::t("0.2 (quality) to 100 (speed)")).size(11.5).color(Tokens::get(ui.ctx()).text_dim));
     });
     heading(ui, "Fonts");
     row(ui, "Download:", |ui| {

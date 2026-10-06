@@ -427,7 +427,7 @@ fn tint_rows(ui: &mut Ui, tint: &Tint, slider_w: f32, field_w: f32) -> Option<(f
         ui.label(egui::RichText::new(&tint.swatch).size(12.5).color(t.text));
     });
     ui.horizontal(|ui| {
-        ui.add_sized(vec2(12.0, 22.0), egui::Label::new(egui::RichText::new("T").size(12.5).color(t.text)));
+        ui.add_sized(vec2(12.0, 22.0), egui::Label::new(egui::RichText::new(crate::i18n::t("T")).size(12.5).color(t.text)));
         let track = |x: f32| to32(&tint.base.tinted(x));
         let (nv, phase) = widgets::color_slider(ui, ("color-slider", "tint"), tint.tint, slider_w, &track);
         let field = widgets::plain_field(ui, ("color-field", "tint"), (tint.tint * 100.0).round() as f64, "%", 0, field_w);

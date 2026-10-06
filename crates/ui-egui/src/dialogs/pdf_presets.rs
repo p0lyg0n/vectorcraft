@@ -73,7 +73,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
             ui.add_space(6.0);
             ui.horizontal(|ui| {
                 ui.spacing_mut().item_spacing.x = 4.0;
-                if widgets::flat_button(ui, "New…", 48.0).on_hover_text("A new preset starting from the selected one").clicked() {
+                if widgets::flat_button(ui, "New…", 48.0).on_hover_text(crate::i18n::t("A new preset starting from the selected one")).clicked() {
                     act = Some(Action::New);
                 }
                 if ui.add_enabled_ui(!builtin, |ui| widgets::flat_button(ui, "Edit…", 48.0)).inner.clicked() {
@@ -85,7 +85,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
                 if widgets::flat_button(ui, "Import…", 64.0).clicked() {
                     act = Some(Action::Import);
                 }
-                if widgets::flat_button(ui, "Export…", 64.0).on_hover_text("Save the selected preset to a file").clicked() {
+                if widgets::flat_button(ui, "Export…", 64.0).on_hover_text(crate::i18n::t("Save the selected preset to a file")).clicked() {
                     act = Some(Action::Export);
                 }
             });

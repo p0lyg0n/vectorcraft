@@ -267,7 +267,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
             });
             if d.str("mode") != "place" {
                 ui.add_space(10.0);
-                ui.label(egui::RichText::new("Pages").color(t.text));
+                ui.label(egui::RichText::new(crate::i18n::t("Pages")).color(t.text));
                 let all = d.bool("allPages");
                 if widgets::radio(ui, "All", all, true) {
                     d.fields.insert("allPages".into(), json!(true));

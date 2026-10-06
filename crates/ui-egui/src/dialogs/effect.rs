@@ -28,7 +28,7 @@ pub const EXISTS: &str = "effectExists";
 pub(super) const EXISTS_SPEC: DialogSpec = DialogSpec {
     heading: |d| format!("{} is already applied", d.str("__label")),
     body: |_, ui, _| {
-        ui.label(egui::RichText::new("Edit the applied effect, or add another one?").color(Tokens::get(ui.ctx()).text_dim));
+        ui.label(egui::RichText::new(crate::i18n::t("Edit the applied effect, or add another one?")).color(Tokens::get(ui.ctx()).text_dim));
         false
     },
     confirm: confirm_exists,
@@ -123,7 +123,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
     };
     ui.add_space(6.0);
     let mut pv = d.bool("preview");
-    let pv_changed = ui.checkbox(&mut pv, "Preview").changed();
+    let pv_changed = ui.checkbox(&mut pv, crate::i18n::t("Preview")).changed();
     d.fields.insert("preview".into(), json!(pv));
     if pv && (changed || pv_changed || !app.session.in_interaction()) {
         let label = d.str("__label");

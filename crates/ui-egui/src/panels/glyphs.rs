@@ -142,7 +142,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     let picked: Option<(String, String)> = pstate(ui.ctx(), "gl-font");
     let (family, style) = picked.or(current).unwrap_or_else(|| (vectorcraft_text::FALLBACK_FAMILY.to_string(), "Regular".to_string()));
     let Some(face) = db.face(&family, &style) else {
-        ui.label(egui::RichText::new("No fonts are available.").color(t.text_dim));
+        ui.label(egui::RichText::new(crate::i18n::t("No fonts are available.")).color(t.text_dim));
         return;
     };
     let subset: usize = pstate(ui.ctx(), "gl-subset");
@@ -150,7 +150,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     let w = ui.available_width();
     let names: Vec<&str> = SUBSETS.iter().map(|s| s.0).collect();
     ui.horizontal(|ui| {
-        ui.label(egui::RichText::new("Show:").color(t.text_dim));
+        ui.label(egui::RichText::new(crate::i18n::t("Show:")).color(t.text_dim));
         if let Some(i) = widgets::dropdown(ui, "gl-subset", names[subset.min(names.len() - 1)], &names, (w - 50.0).max(80.0)) {
             set_pstate(ui.ctx(), "gl-subset", i);
         }

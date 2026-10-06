@@ -50,7 +50,7 @@ fn plates_section(app: &mut VectorcraftApp, ui: &mut Ui) {
                     run(app, "view.separationsPreview", json!({"plates": plates.iter().map(|p| p.name.clone()).collect::<Vec<_>>()}));
                 }
             });
-            ui.label(egui::RichText::new("CMYK").size(12.0).color(if on { t.text } else { t.text_dim }));
+            ui.label(egui::RichText::new(crate::i18n::t("CMYK")).size(12.0).color(if on { t.text } else { t.text_dim }));
         });
         for p in &plates {
             ui.horizontal(|ui| {
@@ -84,19 +84,19 @@ fn settings_section(app: &mut VectorcraftApp, ui: &mut Ui) {
     let st = cms::active_settings();
     widgets::section_header(ui, "Color Settings");
     ui.horizontal(|ui| {
-        ui.label("RGB:");
+        ui.label(crate::i18n::t("RGB:"));
         if let Some(n) = profile_dropdown(ui, "cms-rgb", &st.rgb, ProfileKind::Rgb, None) {
             run(app, "edit.colorSettings", json!({"rgb": n}));
         }
     });
     ui.horizontal(|ui| {
-        ui.label("CMYK:");
+        ui.label(crate::i18n::t("CMYK:"));
         if let Some(n) = profile_dropdown(ui, "cms-cmyk", &st.cmyk, ProfileKind::Cmyk, None) {
             run(app, "edit.colorSettings", json!({"cmyk": n}));
         }
     });
     ui.horizontal(|ui| {
-        ui.label("Intent:");
+        ui.label(crate::i18n::t("Intent:"));
         let labels: Vec<&str> = Intent::ALL.iter().map(|i| i.label()).collect();
         if let Some(i) = widgets::dropdown(ui, "cms-intent", st.intent.label(), &labels, 170.0) {
             run(app, "edit.colorSettings", json!({"intent": Intent::ALL[i].id()}));
@@ -130,7 +130,7 @@ fn settings_section(app: &mut VectorcraftApp, ui: &mut Ui) {
         let (_, cmyk) = vectorcraft_engine::cmd::colormgmt::doc_profiles(&d.doc);
         const WORKING: &str = "Working CMYK (don't tag)";
         ui.horizontal(|ui| {
-            ui.label("Assign:");
+            ui.label(crate::i18n::t("Assign:"));
             if let Some(n) = profile_dropdown(ui, "cms-assign", cmyk.as_deref().unwrap_or(WORKING), ProfileKind::Cmyk, Some(WORKING)) {
                 let v = if n == WORKING { Value::Null } else { Value::String(n) };
                 run(app, "edit.assignProfile", json!({ "cmyk": v }));

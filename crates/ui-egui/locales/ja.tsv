@@ -943,6 +943,74 @@ Other	その他
 Unlock	ロック解除
 Restore	元に戻す
 
+# Dock tabs, panels and the window (coverage report)
+Snap Options	スナップオプション
+Millimeters	ミリメートル
+Points	ポイント
+Picas	パイカ
+Inches	インチ
+Centimeters	センチメートル
+Pixels	ピクセル
+Search commands and tools	コマンドとツールを検索
+Search All	すべてを検索
+Essentials	初期設定
+Make Mask	マスク作成
+Normal	通常
+Default	初期設定
+Fill:	塗り：
+Limit:	比率：
+dash	線分
+gap	間隔
+Edit Toolbar…	ツールバーを編集…
+Quickly start a new file	新規ファイルをすばやく作成
+Name	名前
+Color Mode	カラーモード
+Pattern Swatches	パターンスウォッチ
+No text selected	テキストが選択されていません
+Select a text object to edit its character attributes.	文字属性を編集するには、テキストオブジェクトを選択してください。
+Select a text object to edit its paragraph attributes.	段落属性を編集するには、テキストオブジェクトを選択してください。
+Select a text object to set its tab stops.	タブを設定するには、テキストオブジェクトを選択してください。
+Select text to set its OpenType features.	OpenType 機能を設定するには、テキストを選択してください。
+Select an image to see its Link Info.	リンク情報を見るには、画像を選択してください。
+Select art and choose Object › Pattern › Make.	アートを選択して、オブジェクト › パターン › 作成 を選んでください。
+Select art and click New Symbol to make one.	アートを選択して「新規シンボル」をクリックすると作成できます。
+No symbols in this document	このドキュメントにシンボルはありません
+No images	画像はありません
+No assets	アセットはありません
+Opacity & Mask Define Knockout Shape	不透明度とマスクで抜きの形状を定義
+Overprint Fill	塗りにオーバープリント
+Overprint Stroke	線にオーバープリント
+Note:	メモ：
+URL:	URL：
+Browser	ブラウザー
+Cyan	シアン
+Magenta	マゼンタ
+Yellow	イエロー
+Tints	濃淡
+Shades	明清色
+Complementary	補色
+Threshold	しきい値
+Paths	パス
+Corners	コーナー
+Noise	ノイズ
+Black and White	白黒
+Ignore White	ホワイトを無視
+Snap Curves To Lines	曲線を直線にスナップ
+Abutting	隣接
+Overlapping	重なり
+Entire Font	フォント全体
+Regular	標準
+Duplicate	複製
+Recolor	再配色
+Simplify	単純化
+My Themes	マイテーマ
+Rule:	ルール：
+Custom	カスタム
+Format	形式
+Suffix	サフィックス
+Scale	拡大・縮小
+Export Settings	書き出し設定
+
 # Words that read differently in one place
 @Document Setup
 Type	テキスト
@@ -1155,3 +1223,93 @@ Arrange	アレンジ
 # Control bar: the kind of the selection
 @Control
 Type	文字
+
+# Effect menu (labels are drawn in the Effect menu's context)
+@Effect
+Apply Last Effect	前回の効果を適用
+Last Effect…	前回の効果…
+Last Effect: {}	前回の効果：{}
+Document Raster Effects Settings…	ドキュメントのラスタライズ効果設定…
+Vector Effects	Illustrator 効果
+Raster Effects	ラスター効果
+3D and Materials	3D とマテリアル
+Extrude & Bevel…	押し出しとベベル…
+Revolve…	回転体…
+Inflate…	膨張…
+Rotate…	回転…
+Materials…	マテリアル…
+SVG Filters	SVG フィルター
+Apply SVG Filter…	SVG フィルターを適用…
+Stylize	スタイライズ
+Feather…	ぼかし…
+Drop Shadow…	ドロップシャドウ…
+Inner Glow…	光彩 (内側)…
+Outer Glow…	光彩 (外側)…
+Scribble…	落書き…
+Round Corners…	角を丸くする…
+Crop Marks	トリムマーク
+Path	パス
+Outline Object	オブジェクトのアウトライン
+Outline Stroke	パスのアウトライン
+Offset Path…	パスのオフセット…
+Distort & Transform	パスの変形
+Zig Zag…	ジグザグ…
+Free Distort…	パスの自由変形…
+Pucker & Bloat…	パンク・膨張…
+Roughen…	ラフ…
+Tweak…	ランダム・ひねり…
+Transform…	変形…
+Twist…	旋回…
+Pathfinder	パスファインダー
+Add	追加
+Intersect	交差
+Exclude	中マド
+Subtract	前面オブジェクトで型抜き
+Minus Back	背面オブジェクトで型抜き
+Divide	分割
+Trim	刈り込み
+Merge	合流
+Crop	切り抜き
+Outline	アウトライン
+Hard Mix	濃い混色
+Soft Mix	ソフト混色
+Trap…	トラップ…
+Warp	ワープ
+Arc…	円弧…
+Arc Lower…	円弧 (下弦)…
+Arc Upper…	円弧 (上弦)…
+Arch…	アーチ…
+Bulge…	でこぼこ…
+Shell Lower…	貝殻 (下向き)…
+Shell Upper…	貝殻 (上向き)…
+Flag…	旗…
+Wave…	波形…
+Fish…	魚形…
+Rise…	上昇…
+Fisheye…	魚眼レンズ…
+Squeeze…	絞り込み…
+Convert to Shape	形状に変換
+Rectangle…	長方形…
+Rounded Rectangle…	角丸長方形…
+Ellipse…	楕円形…
+Blur	ぼかし
+Gaussian Blur…	ぼかし (ガウス)…
+Color Adjustments	色調補正
+Brightness/Contrast…	明るさ・コントラスト…
+Curves…	トーンカーブ…
+Hue/Saturation…	色相・彩度…
+Levels…	レベル補正…
+Temperature/Tint…	色温度・色かぶり…
+Shift to Color…	カラーに変更…
+Plug-ins	プラグイン
+
+# Toolbar categories
+@Toolbar
+Select	選択
+Shapes	シェイプ
+Draw	描画
+Modify	変更
+Type	文字
+Navigate	移動
+Color	ペイント
+Paint	ペイント

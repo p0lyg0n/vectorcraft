@@ -73,7 +73,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
             ui.add_space(6.0);
             ui.horizontal(|ui| {
                 ui.spacing_mut().item_spacing.x = 4.0;
-                if widgets::flat_button(ui, "New…", 48.0).on_hover_text("A new preset starting from the selected one").clicked() {
+                if widgets::flat_button(ui, "New…", 48.0).on_hover_text(crate::i18n::t("A new preset starting from the selected one")).clicked() {
                     act = Some(Action::New);
                 }
                 if ui.add_enabled_ui(!builtin, |ui| widgets::flat_button(ui, "Edit…", 48.0)).inner.clicked() {
@@ -85,7 +85,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
                 if widgets::flat_button(ui, "Import…", 60.0).clicked() {
                     act = Some(Action::Import);
                 }
-                if widgets::flat_button(ui, "Export…", 60.0).on_hover_text("Save the selected preset to a file").clicked() {
+                if widgets::flat_button(ui, "Export…", 60.0).on_hover_text(crate::i18n::t("Save the selected preset to a file")).clicked() {
                     act = Some(Action::Export);
                 }
             });
@@ -101,13 +101,13 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
             changed.sort_by_key(|c| section_of(c["option"].as_str().unwrap_or_default()).0);
             egui::ScrollArea::vertical().id_salt("print-preset-details").max_height(200.0).show(ui, |ui| {
                 if changed.is_empty() {
-                    ui.label(egui::RichText::new("None.").color(t.text_dim).size(11.5));
+                    ui.label(egui::RichText::new(crate::i18n::t("None.")).color(t.text_dim).size(11.5));
                 }
                 option_rows(ui, &changed, option_label);
             });
             if builtin {
                 ui.add_space(6.0);
-                ui.label(egui::RichText::new("[Default] is protected: New… starts an editable copy.").color(t.text_dim).size(11.5));
+                ui.label(egui::RichText::new(crate::i18n::t("[Default] is protected: New… starts an editable copy.")).color(t.text_dim).size(11.5));
             }
         });
     });

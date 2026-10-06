@@ -124,7 +124,7 @@ pub(super) fn scale_row(ui: &mut egui::Ui, d: &mut Dialog) {
             let (lo, hi) = (*vectorcraft_cad::SCALE_RANGE.start(), *vectorcraft_cad::SCALE_RANGE.end());
             d.fields.insert("scale".into(), json!(v.clamp(lo, hi)));
         }
-        ui.label(egui::RichText::new("Units").color(t.text));
+        ui.label(egui::RichText::new(crate::i18n::t("Units")).color(t.text));
     });
 }
 

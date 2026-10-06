@@ -288,7 +288,7 @@ fn details(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog, b: &mut 
     let t = Tokens::get(ui.ctx());
     ui.spacing_mut().item_spacing = egui::vec2(6.0, 4.0);
     let top = ui.cursor().top();
-    ui.label(egui::RichText::new("PRESET DETAILS").font(theme::semibold(11.0)).color(t.text_dim));
+    ui.label(egui::RichText::new(crate::i18n::t("PRESET DETAILS")).font(theme::semibold(11.0)).color(t.text_dim));
     ui.add_space(8.0);
     ui.horizontal(|ui| {
         form::text(ui, d, "name", DETAILS - 50.0);
@@ -444,7 +444,7 @@ fn advanced(ui: &mut egui::Ui, d: &mut Dialog, label: f32, field: f32) {
         .horizontal(|ui| {
             let (r, _) = ui.allocate_exact_size(egui::vec2(14.0, 18.0), egui::Sense::hover());
             crate::icons::paint(ui, if open { "chevron-down" } else { "chevron-right" }, r, t.icon);
-            ui.label(egui::RichText::new("Advanced Options").color(t.text));
+            ui.label(egui::RichText::new(crate::i18n::t("Advanced Options")).color(t.text));
         })
         .response
         .interact(egui::Sense::click());
@@ -475,7 +475,7 @@ fn show_more(app: &mut VectorcraftApp, ctx: &egui::Context) {
     const L: f32 = 150.0;
     window(ctx, MORE, 22, |ui| {
         ui.set_width(560.0);
-        ui.label(egui::RichText::new("More Settings").font(theme::semibold(16.0)).color(t.text));
+        ui.label(egui::RichText::new(crate::i18n::t("More Settings")).font(theme::semibold(16.0)).color(t.text));
         ui.add_space(12.0);
         widgets::label_row(ui, "Name:", L, |ui| {
             form::text(ui, &mut d, "name", 300.0);
@@ -519,7 +519,7 @@ fn show_more(app: &mut VectorcraftApp, ctx: &egui::Context) {
                     set_layout(&mut d, "spacing", json!(v.max(0.0)));
                 }
                 ui.add_space(20.0);
-                ui.label(egui::RichText::new("Columns:").color(t.text));
+                ui.label(egui::RichText::new(crate::i18n::t("Columns:")).color(t.text));
                 let grid = matches!(lay, ArtboardLayout::GridByRow | ArtboardLayout::GridByColumn);
                 ui.add_enabled_ui(grid, |ui| {
                     if let Some(v) = widgets::spin_plain(ui, "newdoc-columns", cols as f64, "", 0, 76.0, 1.0, 1.0, &[]) {
@@ -542,13 +542,13 @@ fn show_more(app: &mut VectorcraftApp, ctx: &egui::Context) {
         widgets::label_row(ui, "Width:", L, |ui| {
             form::length(ui, &mut d, "width", unit, 120.0);
             ui.add_space(20.0);
-            ui.label(egui::RichText::new("Units:").color(t.text));
+            ui.label(egui::RichText::new(crate::i18n::t("Units:")).color(t.text));
             units_dropdown(ui, &mut d, 120.0);
         });
         widgets::label_row(ui, "Height:", L, |ui| {
             form::length(ui, &mut d, "height", unit, 120.0);
             ui.add_space(20.0);
-            ui.label(egui::RichText::new("Orientation:").color(t.text));
+            ui.label(egui::RichText::new(crate::i18n::t("Orientation:")).color(t.text));
             orientation(ui, &mut d);
         });
         ui.add_space(4.0);
@@ -559,7 +559,7 @@ fn show_more(app: &mut VectorcraftApp, ctx: &egui::Context) {
         advanced(ui, &mut d, L, 220.0);
         ui.add_space(16.0);
         ui.horizontal(|ui| {
-            templates = widgets::secondary_button(ui, "Templates…").on_hover_text("New from Template").clicked();
+            templates = widgets::secondary_button(ui, "Templates…").on_hover_text(crate::i18n::t("New from Template")).clicked();
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 b.create = widgets::primary_button(ui, "Create Document").clicked();
                 ui.add_space(8.0);

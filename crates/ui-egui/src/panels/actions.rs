@@ -104,7 +104,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
         }
         let (r, resp) = ui.allocate_exact_size(egui::vec2(24.0, 24.0), egui::Sense::click());
         ui.painter().circle_filled(r.center(), 6.0, if recording { egui::Color32::from_rgb(0xe0, 0x30, 0x30) } else { t.icon });
-        if resp.on_hover_text("Begin Recording").clicked() && !recording {
+        if resp.on_hover_text(crate::i18n::t("Begin Recording")).clicked() && !recording {
             let n = app.ui.action_sets.first().map(|s| s.actions.len()).unwrap_or(0) + 1;
             if app.ui.action_sets.is_empty() {
                 app.ui.action_sets.push(ActionSet { name: "Set 1".into(), actions: vec![] });
@@ -126,7 +126,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
             ui.data_mut(|d| d.insert_temp::<Option<(usize, usize)>>(selected_id, None));
         }
         if recording {
-            ui.label(egui::RichText::new("● Recording").color(egui::Color32::from_rgb(0xe0, 0x30, 0x30)));
+            ui.label(egui::RichText::new(crate::i18n::t("● Recording")).color(egui::Color32::from_rgb(0xe0, 0x30, 0x30)));
         }
     });
     if let Some((si, ai)) = play_req

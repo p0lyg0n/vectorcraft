@@ -83,7 +83,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
             ui.add_space(6.0);
             ui.horizontal(|ui| {
                 ui.spacing_mut().item_spacing.x = 4.0;
-                if widgets::flat_button(ui, "New", 44.0).on_hover_text("A saved copy of the selected preset").clicked() {
+                if widgets::flat_button(ui, "New", 44.0).on_hover_text(crate::i18n::t("A saved copy of the selected preset")).clicked() {
                     act = Some(Action::New);
                 }
                 if ui.add_enabled_ui(!builtin, |ui| widgets::flat_button(ui, "Delete", 52.0)).inner.clicked() {
@@ -92,7 +92,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
                 if widgets::flat_button(ui, "Import…", 62.0).clicked() {
                     act = Some(Action::Import);
                 }
-                if widgets::flat_button(ui, "Export…", 62.0).on_hover_text("Save the selected preset to a file").clicked() {
+                if widgets::flat_button(ui, "Export…", 62.0).on_hover_text(crate::i18n::t("Save the selected preset to a file")).clicked() {
                     act = Some(Action::Export);
                 }
             });
@@ -114,7 +114,9 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
             }
             if builtin {
                 ui.add_space(6.0);
-                ui.label(egui::RichText::new("Built-in presets don't change: New makes a copy you can edit.").color(t.text_dim).size(11.5));
+                ui.label(
+                    egui::RichText::new(crate::i18n::t("Built-in presets don't change: New makes a copy you can edit.")).color(t.text_dim).size(11.5),
+                );
             }
         });
     });

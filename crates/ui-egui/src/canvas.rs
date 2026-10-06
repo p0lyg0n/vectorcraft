@@ -1219,9 +1219,9 @@ fn home(app: &mut VectorcraftApp, ui: &mut Ui, rect: egui::Rect) {
     let inner = rect.shrink2(vec2((rect.width() - 820.0).max(40.0) / 2.0, 60.0));
     let mut child = ui.new_child(egui::UiBuilder::new().max_rect(inner).layout(egui::Layout::top_down(egui::Align::Min)));
     let ui = &mut child;
-    ui.label(egui::RichText::new("Welcome to VectorCraft").font(theme::semibold(26.0)).color(t.text));
+    ui.label(egui::RichText::new(crate::i18n::t("Welcome to VectorCraft")).font(theme::semibold(26.0)).color(t.text));
     ui.add_space(4.0);
-    ui.label(egui::RichText::new("Vector illustration — fast, open, scriptable.").size(14.0).color(t.text_dim));
+    ui.label(egui::RichText::new(crate::i18n::t("Vector illustration — fast, open, scriptable.")).size(14.0).color(t.text_dim));
     ui.add_space(22.0);
     ui.horizontal(|ui| {
         if widgets::primary_button(ui, "New file").clicked() {
@@ -1233,7 +1233,7 @@ fn home(app: &mut VectorcraftApp, ui: &mut Ui, rect: egui::Rect) {
         }
     });
     ui.add_space(28.0);
-    ui.label(egui::RichText::new("Quickly start a new file").font(theme::semibold(14.0)).color(t.text));
+    ui.label(egui::RichText::new(crate::i18n::t("Quickly start a new file")).font(theme::semibold(14.0)).color(t.text));
     ui.add_space(10.0);
     // A few of New Document's presets (`file.newPresets`), as its cards.
     let presets = ["Letter", "A4", "Web 1920×1080", "Phone 390×844", "Postcard", "Social Square Post 1080×1080"];
@@ -1247,7 +1247,7 @@ fn home(app: &mut VectorcraftApp, ui: &mut Ui, rect: egui::Rect) {
         }
     });
     ui.add_space(28.0);
-    ui.label(egui::RichText::new("Community").font(theme::semibold(14.0)).color(t.text));
+    ui.label(egui::RichText::new(crate::i18n::t("Community")).font(theme::semibold(14.0)).color(t.text));
     ui.add_space(10.0);
     crate::community::links(app, ui);
 }
@@ -1329,7 +1329,7 @@ fn task_bar(app: &mut VectorcraftApp, ui: &mut Ui, xf: &Xf) {
                         Stroke::new(1.0, t.button_border),
                         StrokeKind::Outside,
                     );
-                    if resp.on_hover_text("Fill").clicked() {
+                    if resp.on_hover_text(crate::i18n::t("Fill")).clicked() {
                         app.session.fill_active = true;
                         app.ui.open_panel = Some("swatches".into());
                     }

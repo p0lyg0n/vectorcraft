@@ -217,11 +217,11 @@ fn document_sections(app: &mut VectorcraftApp, ui: &mut Ui) {
     divider(ui);
     section_header(ui, "Snap Options");
     let mut sp = app.ui.view.snap_to_point;
-    if ui.checkbox(&mut sp, "Snap to Point").changed() {
+    if ui.checkbox(&mut sp, crate::i18n::t("Snap to Point")).changed() {
         app.ui.view.snap_to_point = sp;
     }
     let mut sg = app.ui.view.snap_to_grid;
-    if ui.checkbox(&mut sg, "Snap to Grid").changed() {
+    if ui.checkbox(&mut sg, crate::i18n::t("Snap to Grid")).changed() {
         app.ui.view.snap_to_grid = sg;
     }
     divider(ui);
@@ -233,7 +233,7 @@ fn document_sections(app: &mut VectorcraftApp, ui: &mut Ui) {
         }
     });
     let mut ss = app.session.prefs.scale_strokes;
-    if ui.checkbox(&mut ss, "Scale Strokes & Effects").changed() {
+    if ui.checkbox(&mut ss, crate::i18n::t("Scale Strokes & Effects")).changed() {
         super::transform::set_pref(app, "scaleStrokes", ss);
     }
     divider(ui);
@@ -352,7 +352,7 @@ fn appearance_section(app: &mut VectorcraftApp, ui: &mut Ui) {
         });
     }
     ui.horizontal(|ui| {
-        ui.label(egui::RichText::new("Opacity").size(12.0));
+        ui.label(egui::RichText::new(crate::i18n::t("Opacity")).size(12.0));
         ui.add_space(8.0);
         if let Some(o) = widgets::plain_field(ui, "ap-op", n.opacity as f64 * 100.0, "%", 0, 64.0) {
             app.run("object.setProps", json!({"opacity": o.clamp(0.0, 100.0)})).ok();
@@ -363,7 +363,7 @@ fn appearance_section(app: &mut VectorcraftApp, ui: &mut Ui) {
     });
     ui.horizontal(|ui| {
         // The fx button opens the effect menu, as the Appearance panel's does.
-        let r = widgets::flat_button(ui, "fx", 34.0).on_hover_text("Add New Effect");
+        let r = widgets::flat_button(ui, "fx", 34.0).on_hover_text(crate::i18n::t("Add New Effect"));
         egui::Popup::menu(&r).show(|ui| super::appearance::fx_menu(app, ui));
         if widgets::icon_button(ui, "ellipsis", "Appearance panel", false, 22.0).clicked() {
             app.ui.open_panel = Some("appearance".into());

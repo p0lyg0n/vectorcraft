@@ -139,7 +139,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     ui.horizontal(|ui| {
         let (r, resp) = ui.allocate_exact_size(vec2(26.0, 26.0), Sense::click());
         widgets::swatch_tile(ui, r, &Paint::solid(base), false, resp.hovered());
-        if resp.on_hover_text("Set base color to the current color").clicked()
+        if resp.on_hover_text(crate::i18n::t("Set base color to the current color")).clicked()
             && let Some(c) = active_paint(app).color()
         {
             set_pstate(&ctx, "cg-base", Some(c));

@@ -11,7 +11,9 @@ pub(super) const SPEC: DialogSpec = DialogSpec {
     heading: |_| "Recover Documents".into(),
     body: |_, ui, d| {
         let t = Tokens::get(ui.ctx());
-        ui.label(egui::RichText::new("VectorCraft didn't quit normally last time. These documents had unsaved changes:").color(t.text_dim));
+        ui.label(
+            egui::RichText::new(crate::i18n::t("VectorCraft didn't quit normally last time. These documents had unsaved changes:")).color(t.text_dim),
+        );
         ui.add_space(8.0);
         let copies = d.fields.get("copies").and_then(Value::as_array);
         egui::ScrollArea::vertical().max_height(220.0).show(ui, |ui| {
@@ -25,7 +27,7 @@ pub(super) const SPEC: DialogSpec = DialogSpec {
             }
         });
         ui.add_space(8.0);
-        ui.label(egui::RichText::new("Restored documents open unsaved: save them to keep them.").color(t.text_dim));
+        ui.label(egui::RichText::new(crate::i18n::t("Restored documents open unsaved: save them to keep them.")).color(t.text_dim));
         false
     },
     confirm: crate::recovery::confirm,

@@ -180,11 +180,11 @@ fn window<K: LibraryKind>(app: &mut VectorcraftApp, ctx: &egui::Context, id: &st
             ui.painter().rect_filled(tab, CornerRadius { nw: 4, ne: 0, sw: 0, se: 0 }, t.panel);
             ui.put(tab.shrink2(vec2(12.0, 0.0)), egui::Label::new(label.color(t.text)).truncate().selectable(false));
             let close = Rect::from_center_size(strip.right_center() - vec2(13.0, 0.0), vec2(14.0, 14.0));
-            let cr = ui.interact(close, ui.id().with("close-library"), Sense::click()).on_hover_text("Close");
+            let cr = ui.interact(close, ui.id().with("close-library"), Sense::click()).on_hover_text(crate::i18n::t("Close"));
             icons::paint(ui, "x", close, if cr.hovered() { t.text } else { t.text_dim });
             open = !cr.clicked();
             let menu = Rect::from_center_size(strip.right_center() - vec2(34.0, 0.0), vec2(16.0, 16.0));
-            let mr = ui.interact(menu, ui.id().with("library-menu"), Sense::click()).on_hover_text("Panel menu");
+            let mr = ui.interact(menu, ui.id().with("library-menu"), Sense::click()).on_hover_text(crate::i18n::t("Panel menu"));
             icons::paint(ui, "menu", menu.shrink(1.0), if mr.hovered() { t.text_strong } else { t.text_dim });
             egui::Popup::menu(&mr).show(|ui| {
                 ui.set_min_width(200.0);

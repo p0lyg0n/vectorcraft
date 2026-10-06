@@ -58,7 +58,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
         widgets::label_row(ui, "Location:", LABEL, |ui| {
             form::text(ui, d, "folder", 230.0);
             if let Some(pick) = app.services.pick_folder.as_mut()
-                && ui.button("Choose…").clicked()
+                && ui.button(crate::i18n::t("Choose…")).clicked()
                 && let Some(f) = pick()
             {
                 d.fields.insert("folder".into(), json!(f));
@@ -80,7 +80,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
         }
     }
     ui.add_space(6.0);
-    ui.label(egui::RichText::new("Fonts whose licence doesn't allow embedding are not copied.").size(11.5).color(t.text_dim));
+    ui.label(egui::RichText::new(crate::i18n::t("Fonts whose licence doesn't allow embedding are not copied.")).size(11.5).color(t.text_dim));
     false
 }
 

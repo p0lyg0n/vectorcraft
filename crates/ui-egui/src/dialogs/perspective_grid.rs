@@ -227,7 +227,7 @@ fn name_row(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) {
                 d.fields.extend(o.clone());
             }
         }
-        if widgets::flat_button(ui, "Save Preset…", 96.0).on_hover_text("Save these settings as a preset").clicked() {
+        if widgets::flat_button(ui, "Save Preset…", 96.0).on_hover_text(crate::i18n::t("Save these settings as a preset")).clicked() {
             d.fields.insert(MODE.into(), json!("save"));
             d.fields.insert(FROM.into(), json!("define"));
             d.fields.insert("name".into(), json!(app.session.new_perspective_preset_name()));

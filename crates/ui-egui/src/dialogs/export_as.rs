@@ -63,7 +63,7 @@ fn body(_: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
     let Some(f) = chosen(d) else { return false };
     let missing = unavailable(d);
     egui::Grid::new("export-as").num_columns(2).spacing([10.0, 8.0]).show(ui, |ui| {
-        ui.label(egui::RichText::new("Format:").color(t.text_dim));
+        ui.label(egui::RichText::new(crate::i18n::t("Format:")).color(t.text_dim));
         let shown = missing.map_or(f.label, |(label, _)| label);
         if let Some(g) = widgets::dropdown_with(ui, "export-as-format", shown, &LABELS, 160.0, |i| i < FORMATS.len()).and_then(|i| FORMATS.get(i)) {
             d.fields.insert("format".into(), json!(g.id));

@@ -120,7 +120,13 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
                 while i < all.len() {
                     if let Some(cat) = all[i].0 {
                         let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), 18.0), Sense::hover());
-                        let label = if cols == 1 && cat.len() > 6 { format!("{}...", &cat[..4]) } else { cat.to_string() };
+                        let cat = crate::i18n::t_in("Toolbar", cat);
+                        // Shortened to fit one column: four characters (whole characters, not bytes).
+                        let label = if cols == 1 && cat.chars().count() > 6 {
+                            format!("{}...", cat.chars().take(4).collect::<String>())
+                        } else {
+                            cat.to_string()
+                        };
                         ui.painter().text(r.center() + vec2(0.0, 2.0), egui::Align2::CENTER_CENTER, label, egui::FontId::proportional(11.0), t.text);
                     }
                     // One row = `cols` slots (a category label always starts a new row).
@@ -376,7 +382,7 @@ fn flyout(app: &mut VectorcraftApp, ctx: &egui::Context) {
 fn puppet_warp_options(app: &mut VectorcraftApp, ui: &mut Ui) {
     let t = Tokens::get(ui.ctx());
     let opts = app.session.tool_options();
-    ui.label(egui::RichText::new("Expand:").size(12.0).color(t.text));
+    ui.label(egui::RichText::new(crate::i18n::t("Expand:")).size(12.0).color(t.text));
     let unit = app.session.general_unit();
     if let Some(v) = widgets::num_field(ui, ("cb-tool", "expand"), opts["expand"].as_f64(), unit, 64.0) {
         app.run("tool.setOption", json!({ "key": "expand", "value": v })).ok();

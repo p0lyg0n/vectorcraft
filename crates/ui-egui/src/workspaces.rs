@@ -349,28 +349,28 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
                     if ui.add(egui::TextEdit::singleline(&mut name).desired_width(180.0)).changed() {
                         d.fields.insert("name".into(), json!(name));
                     }
-                    if ui.button("New").on_hover_text("Save the current layout under this name").clicked() {
+                    if ui.button(crate::i18n::t("New")).on_hover_text(crate::i18n::t("Save the current layout under this name")).clicked() {
                         action = Some(("window.workspace.new", json!({"name": d.str("name")})));
                     }
                     ui.add_enabled_ui(!sel.is_empty(), |ui| {
-                        if ui.button("Rename").clicked() {
+                        if ui.button(crate::i18n::t("Rename")).clicked() {
                             action = Some(("window.workspace.rename", json!({"name": sel, "to": d.str("name")})));
                         }
-                        if ui.button("Delete").clicked() {
+                        if ui.button(crate::i18n::t("Delete")).clicked() {
                             action = Some(("window.workspace.delete", json!({"name": sel})));
                         }
                     });
                 });
             } else {
                 ui.horizontal(|ui| {
-                    ui.label(egui::RichText::new("Name:").color(t.text_dim));
+                    ui.label(egui::RichText::new(crate::i18n::t("Name:")).color(t.text_dim));
                     let mut name = d.str("name");
                     let r = ui.add(egui::TextEdit::singleline(&mut name).desired_width(240.0));
                     if r.changed() {
                         d.fields.insert("name".into(), json!(name));
                     }
                 });
-                ui.label(egui::RichText::new("Saves the current bars, toolbar and panel layout.").color(t.text_dim).size(11.0));
+                ui.label(egui::RichText::new(crate::i18n::t("Saves the current bars, toolbar and panel layout.")).color(t.text_dim).size(11.0));
             }
             ui.add_space(16.0);
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {

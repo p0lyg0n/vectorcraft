@@ -237,7 +237,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
         ui.add_space(4.0);
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
-                icons::icon(ui, "rotate-ccw", 15.0, if placed { t.icon } else { t.text_disabled }).on_hover_text("Angle");
+                icons::icon(ui, "rotate-ccw", 15.0, if placed { t.icon } else { t.text_disabled }).on_hover_text(crate::i18n::t("Angle"));
                 let angle = g.geom.map_or(g.angle, |x| x.angle_deg());
                 let set = ui
                     .add_enabled_ui(placed, |ui| {
@@ -253,7 +253,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             });
             let radial = kind == GradientKind::Radial && placed;
             ui.horizontal(|ui| {
-                icons::icon(ui, "scaling", 15.0, if radial { t.icon } else { t.text_disabled }).on_hover_text("Aspect Ratio");
+                icons::icon(ui, "scaling", 15.0, if radial { t.icon } else { t.text_disabled }).on_hover_text(crate::i18n::t("Aspect Ratio"));
                 let asp = g.geom.map_or(100.0, |x| (x.aspect * 1000.0).round() / 10.0);
                 let set = ui.add_enabled_ui(radial, |ui| widgets::spin_plain(ui, "grad-aspect", asp, "%", 1, 104.0, 1.0, 0.5, &ASPECT_PRESETS)).inner;
                 if let Some(a) = set {
@@ -309,7 +309,7 @@ fn freeform_section(app: &mut VectorcraftApp, ui: &mut Ui, g: &GradientPaint) {
         let (r, resp) = ui.allocate_exact_size(vec2(18.0, 18.0), Sense::hover());
         let paint = point.map_or(Paint::None, |p| Paint::solid(p.color));
         widgets::swatch_tile(ui, r, &paint, false, resp.hovered());
-        resp.on_hover_text("Edit the selected point's colour in the Color panel");
+        resp.on_hover_text(crate::i18n::t("Edit the selected point's colour in the Color panel"));
         if let Some(p) = point {
             widgets::dim_label(ui, &p.color.to_hex().to_uppercase());
         }
@@ -346,7 +346,7 @@ fn thumbnail(app: &mut VectorcraftApp, ui: &mut Ui, g: &GradientPaint, is_grad: 
     let (r, resp) = ui.allocate_exact_size(vec2(40.0, 40.0), Sense::click_and_drag());
     widgets::gradient_chip(ui, r, &g.gradient);
     ui.painter().rect_stroke(r, 0.0, Stroke::new(1.0, t.border), StrokeKind::Inside);
-    let resp = resp.on_hover_text("Gradient Fill: click to apply, drag onto art");
+    let resp = resp.on_hover_text(crate::i18n::t("Gradient Fill: click to apply, drag onto art"));
     if resp.clicked() && !is_grad {
         edit(app, json!({}), Live::Released);
     }
@@ -356,7 +356,7 @@ fn thumbnail(app: &mut VectorcraftApp, ui: &mut Ui, g: &GradientPaint, is_grad: 
     ui.advance_cursor_after_rect(dr);
     let dresp = ui.interact(dr, ui.id().with("grad-swatches"), Sense::click());
     icons::paint(ui, "chevron-down", Rect::from_center_size(dr.center(), vec2(12.0, 12.0)), if dresp.hovered() { t.text_strong } else { t.icon });
-    let dresp = dresp.on_hover_text("Gradient swatches");
+    let dresp = dresp.on_hover_text(crate::i18n::t("Gradient swatches"));
     egui::Popup::menu(&dresp).show(|ui| {
         ui.set_min_width(200.0);
         let mut chosen = None;
@@ -409,7 +409,7 @@ fn stop_fields(app: &mut VectorcraftApp, ui: &mut Ui, g: &Gradient, is_grad: boo
                 None => s.color.to_hex().to_uppercase(),
             };
             widgets::dim_label(ui, &label);
-            if resp.on_hover_text("Edit the stop").clicked() {
+            if resp.on_hover_text(crate::i18n::t("Edit the stop")).clicked() {
                 open_popover(app, i, r.left_bottom() + vec2(0.0, 4.0));
             }
             ui.add_space(ui.available_width() - 22.0);

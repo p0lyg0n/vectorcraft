@@ -150,7 +150,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     }
     ui.horizontal(|ui| {
         let r = ui.add_enabled_ui(is_trace || is_image, |ui| widgets::flat_button(ui, "Trace", 80.0)).inner;
-        if r.on_disabled_hover_text("Select an image to trace").clicked() {
+        if r.on_disabled_hover_text(crate::i18n::t("Select an image to trace")).clicked() {
             trace(app, &mut st);
         }
         if ui.add_enabled_ui(is_trace, |ui| widgets::flat_button(ui, "Expand", 80.0)).inner.clicked() {

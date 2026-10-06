@@ -385,7 +385,7 @@ pub(crate) fn profile_dropdown(app: &VectorcraftApp, ui: &mut Ui, cur: Option<&W
     let body = Rect::from_min_max(r.min + vec2(6.0, 5.0), pos2(r.right() - 20.0, r.bottom() - 5.0));
     paint_profile(ui, body, cur.and_then(|p| silhouette(&p.points)), t.text_strong);
     icons::paint(ui, "chevron-down", Rect::from_center_size(pos2(r.right() - 9.0, r.center().y), vec2(10.0, 10.0)), t.icon);
-    let resp = resp.on_hover_text("Variable Width Profile");
+    let resp = resp.on_hover_text(crate::i18n::t("Variable Width Profile"));
     let mut out = None;
     egui::Popup::menu(&resp).show(|ui| {
         egui::ScrollArea::vertical().max_height(360.0).show(ui, |ui| {

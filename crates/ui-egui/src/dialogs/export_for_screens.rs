@@ -330,10 +330,10 @@ fn artboards(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) {
     let checked = boards.clone();
     ui.add_enabled_ui(d.str("select") != "full", |ui| {
         ui.horizontal(|ui| {
-            if ui.small_button("Select All").clicked() {
+            if ui.small_button(crate::i18n::t("Select All")).clicked() {
                 boards.iter_mut().for_each(|b| *b = true);
             }
-            if ui.small_button("Clear").clicked() {
+            if ui.small_button(crate::i18n::t("Clear")).clicked() {
                 boards.iter_mut().for_each(|b| *b = false);
             }
         });
@@ -387,10 +387,10 @@ fn assets(app: &VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) {
     let mut on = checked_assets(app, d);
     let before = on.clone();
     ui.horizontal(|ui| {
-        if ui.small_button("Select All").clicked() {
+        if ui.small_button(crate::i18n::t("Select All")).clicked() {
             on = st.doc.assets.iter().map(|a| a.id).collect();
         }
-        if ui.small_button("Clear").clicked() {
+        if ui.small_button(crate::i18n::t("Clear")).clicked() {
             on.clear();
         }
     });
@@ -557,7 +557,7 @@ fn format_settings(ui: &mut egui::Ui, d: &mut Dialog, id: &str) {
             let labels: Vec<&str> =
                 d.fields.get("__presets").and_then(Value::as_array).map(|a| a.iter().filter_map(Value::as_str).collect()).unwrap_or_default();
             ui.horizontal(|ui| {
-                ui.label(egui::RichText::new("PDF Preset:").color(t.text_dim));
+                ui.label(egui::RichText::new(crate::i18n::t("PDF Preset:")).color(t.text_dim));
                 if let Some(p) = widgets::dropdown(ui, "efs-pdf-preset", &s.str("preset"), &labels, 220.0).and_then(|i| labels.get(i)) {
                     s.fields.insert("preset".into(), json!(p));
                 }

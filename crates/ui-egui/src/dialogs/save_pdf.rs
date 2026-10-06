@@ -317,7 +317,7 @@ fn body(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) -> bool {
             standard_chosen(d, standard);
         }
         ui.add_space(16.0);
-        ui.label(egui::RichText::new("Compatibility:").color(t.text));
+        ui.label(egui::RichText::new(crate::i18n::t("Compatibility:")).color(t.text));
         pick::<Compatibility>(ui, d, "compatibility", 110.0, |c| standard.allows(c));
     });
     ui.add_space(10.0);
@@ -402,7 +402,7 @@ fn preset_rows(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) {
         if ui
             .add_enabled_ui(!asking, |ui| widgets::flat_button(ui, "Save Preset…", 96.0))
             .inner
-            .on_hover_text("Save these settings as a preset")
+            .on_hover_text(crate::i18n::t("Save these settings as a preset"))
             .clicked()
         {
             d.fields.insert(SAVE_AS.into(), json!(app.session.new_pdf_preset_name()));
@@ -473,19 +473,19 @@ fn image_rows(ui: &mut egui::Ui, d: &mut Dialog, key: &str, title: &str) {
     let on = get(d, &format!("{base}.downsample")) != Downsample::None.id();
     ui.horizontal(|ui| {
         pick::<Downsample>(ui, d, &format!("{base}.downsample"), 150.0, |_| true);
-        ui.label("to");
+        ui.label(crate::i18n::t("to"));
         number(ui, d, &format!("{base}.ppi"), " ppi", on);
-        ui.label("above");
+        ui.label(crate::i18n::t("above"));
         number(ui, d, &format!("{base}.abovePpi"), " ppi", on);
     });
     ui.horizontal(|ui| {
-        ui.label("Compression:");
+        ui.label(crate::i18n::t("Compression:"));
         if key == "mono" {
             pick::<MonoCodec>(ui, d, &format!("{base}.compression"), 150.0, |_| true);
         } else {
             pick::<ImageCodec>(ui, d, &format!("{base}.compression"), 120.0, |_| true);
             let lossy = get(d, &format!("{base}.compression")).as_str().is_some_and(|c| c != ImageCodec::None.id() && c != ImageCodec::Zip.id());
-            ui.label("Quality:");
+            ui.label(crate::i18n::t("Quality:"));
             ui.add_enabled_ui(lossy, |ui| {
                 pick::<JpegQuality>(ui, d, &format!("{base}.quality"), 110.0, |_| true);
             });
@@ -611,7 +611,7 @@ fn advanced(app: &VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) {
     let outline = get(d, "advanced.outlineText").as_bool() == Some(true);
     row(ui, "Subset fonts below:", |ui| {
         number(ui, d, "advanced.fontSubsetPercent", "%", !outline);
-        ui.label("of characters used");
+        ui.label(crate::i18n::t("of characters used"));
     });
     flag(ui, d, "advanced.outlineText", "Convert text to outlines", true);
     heading(ui, "Overprint and Transparency Flattener");

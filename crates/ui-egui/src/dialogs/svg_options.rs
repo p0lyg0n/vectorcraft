@@ -195,7 +195,7 @@ pub(super) fn option_fields(ui: &mut egui::Ui, d: &mut Dialog, screens: bool) {
             choice(ui, d, "images", "Images:", &IMAGES, None);
         }
         choice(ui, d, "objectIds", "Object IDs:", &OBJECT_IDS, None);
-        ui.label(egui::RichText::new("Decimal:").color(t.text_dim));
+        ui.label(egui::RichText::new(crate::i18n::t("Decimal:")).color(t.text_dim));
         let decimals = d.f64("decimals", 3.0);
         if let Some(v) = widgets::spin_plain(ui, "svg-decimals", decimals, "", 0, 70.0, 1.0, 1.0, &[]) {
             let (lo, hi) = (*vectorcraft_svg::DECIMALS.start() as f64, *vectorcraft_svg::DECIMALS.end() as f64);
@@ -225,10 +225,10 @@ fn artboards(app: &VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog) {
         ui.horizontal(|ui| {
             ui.add_space(22.0);
             let all = d.bool("allArtboards");
-            if ui.radio(all, "All").clicked() {
+            if ui.radio(all, crate::i18n::t("All")).clicked() {
                 d.fields.insert("allArtboards".into(), json!(true));
             }
-            if ui.radio(!all, "Range:").clicked() {
+            if ui.radio(!all, crate::i18n::t("Range:")).clicked() {
                 d.fields.insert("allArtboards".into(), json!(false));
             }
             let mut range = d.str("range");

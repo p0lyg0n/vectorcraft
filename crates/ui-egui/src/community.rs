@@ -33,7 +33,7 @@ pub fn discord_button(app: &mut VectorcraftApp, ui: &mut Ui, large: bool) -> egu
     let ir = egui::Rect::from_center_size(r.left_center() + vec2(h * 0.35 + icon / 2.0, 0.0), vec2(icon, icon));
     icons::paint(ui, "message-circle", ir, Color32::WHITE);
     ui.painter().galley(egui::pos2(ir.right() + h * 0.2, r.center().y - galley.size().y / 2.0), galley, Color32::WHITE);
-    let resp = resp.on_hover_text("Join the ArtCraft community on Discord (discord.gg/artcraft)");
+    let resp = resp.on_hover_text(crate::i18n::t("Join the ArtCraft community on Discord (discord.gg/artcraft)"));
     if resp.clicked() {
         app.open_link("help.discord");
     }

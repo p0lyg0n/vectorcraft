@@ -254,8 +254,8 @@ fn new_original_chips(ui: &mut Ui, new: &Color, original: &Color) -> bool {
     widgets::paint_chip(ui, top, &Paint::solid(*new));
     widgets::paint_chip(ui, bottom, &Paint::solid(*original));
     ui.painter().rect_stroke(r, 0.0, egui::Stroke::new(1.0, t.border), egui::StrokeKind::Outside);
-    ui.interact(top, ui.id().with("cp-new"), Sense::hover()).on_hover_text("New");
-    ui.interact(bottom, ui.id().with("cp-original"), Sense::click()).on_hover_text("Original: click to restore").clicked()
+    ui.interact(top, ui.id().with("cp-new"), Sense::hover()).on_hover_text(crate::i18n::t("New"));
+    ui.interact(bottom, ui.id().with("cp-original"), Sense::click()).on_hover_text(crate::i18n::t("Original: click to restore")).clicked()
 }
 
 /// The HSB and RGB fields with the channel radios, hex, Lab and CMYK. Returns the edited colour

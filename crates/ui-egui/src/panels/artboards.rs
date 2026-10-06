@@ -61,7 +61,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
                 let opt = egui::Rect::from_center_size(r.right_center() - vec2(14.0, 0.0), vec2(14.0, 14.0));
                 let oresp = ui.interact(opt, ui.id().with(("ab-opt", i)), Sense::click());
                 icons::paint(ui, "dc-artboard-options", opt, if oresp.hovered() { t.text_strong } else { t.icon });
-                if oresp.on_hover_text("Artboard Options: edit with the Artboard tool").clicked() {
+                if oresp.on_hover_text(crate::i18n::t("Artboard Options: edit with the Artboard tool")).clicked() {
                     set_pstate(ui.ctx(), "ab-sel", i);
                     app.select_tool("artboard");
                 }

@@ -105,7 +105,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             });
             ui.add_space(6.0);
             let r = ui.add_enabled_ui(url.is_some(), |ui| widgets::flat_button(ui, "Browser", 64.0)).inner;
-            if r.on_hover_text("Open the URL in the web browser").clicked() {
+            if r.on_hover_text(crate::i18n::t("Open the URL in the web browser")).clicked() {
                 app.run("attributes.openUrl", json!({})).ok();
             }
         });

@@ -410,7 +410,7 @@ fn preview_area(app: &mut VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog, set
         }
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             let b = ui.add_enabled(!io::is_web(app), |ui: &mut egui::Ui| widgets::secondary_button(ui, "Preview in Browser"));
-            browser = b.on_disabled_hover_text("Needs the desktop app").clicked();
+            browser = b.on_disabled_hover_text(crate::i18n::t("Needs the desktop app")).clicked();
         });
     });
     browser
@@ -806,7 +806,7 @@ fn image_size(app: &VectorcraftApp, ui: &mut egui::Ui, d: &mut Dialog, s: Option
         if let Some(v) = widgets::plain_field(ui, "sfw-w", f64::from(w), " px", 0, 80.0) {
             set(d, "width", json!(v.round().max(1.0)));
         }
-        ui.label("H:");
+        ui.label(crate::i18n::t("H:"));
         if let Some(v) = widgets::plain_field(ui, "sfw-h", f64::from(h), " px", 0, 80.0) {
             set(d, "height", json!(v.round().max(1.0)));
         }

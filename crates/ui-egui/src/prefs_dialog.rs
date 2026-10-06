@@ -166,7 +166,7 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
             ui.add_space(14.0);
             ui.horizontal(|ui| {
                 if widgets::secondary_button(ui, "Reset Preferences")
-                    .on_hover_text("Restore every preference to its default (applied on OK)")
+                    .on_hover_text(crate::i18n::t("Restore every preference to its default (applied on OK)"))
                     .clicked()
                 {
                     reset = true;
@@ -181,10 +181,10 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
                     }
                     ui.add_space(16.0);
                     let i = PREF_CATEGORIES.iter().position(|c| *c == cat).unwrap_or(0);
-                    if ui.add_enabled(i + 1 < PREF_CATEGORIES.len(), egui::Button::new("Next")).clicked() {
+                    if ui.add_enabled(i + 1 < PREF_CATEGORIES.len(), egui::Button::new(crate::i18n::t("Next"))).clicked() {
                         d.fields.insert("__category".into(), json!(PREF_CATEGORIES[i + 1]));
                     }
-                    if ui.add_enabled(i > 0, egui::Button::new("Previous")).clicked() {
+                    if ui.add_enabled(i > 0, egui::Button::new(crate::i18n::t("Previous"))).clicked() {
                         d.fields.insert("__category".into(), json!(PREF_CATEGORIES[i - 1]));
                     }
                 });

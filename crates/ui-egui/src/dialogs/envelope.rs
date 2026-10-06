@@ -301,7 +301,7 @@ pub fn control_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
         Bar::TopObject => None,
     };
     if let Some(r) = reset
-        && widgets::flat_button(ui, "Reset", 50.0).on_hover_text("Reset Envelope Shape").clicked()
+        && widgets::flat_button(ui, "Reset", 50.0).on_hover_text(crate::i18n::t("Reset Envelope Shape")).clicked()
     {
         run = Some(r);
     }

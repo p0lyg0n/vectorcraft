@@ -69,7 +69,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     let origin = rp.map(|p| json!([p.x, p.y]));
     ui.horizontal(|ui| {
         ui.add_enabled_ui(has, |ui| {
-            icons::icon(ui, "rotate-ccw", 16.0, t.icon).on_hover_text("Rotate");
+            icons::icon(ui, "rotate-ccw", 16.0, t.icon).on_hover_text(crate::i18n::t("Rotate"));
             // The bounding box's angle: a new value turns the selection to it.
             let angle = bx.map_or(0.0, |b| b.angle);
             if let Some(a) = widgets::spin_plain(ui, "xfp-rot", angle, "°", 2, 96.0, 15.0, -360.0, &ANGLE_PRESETS)
@@ -78,7 +78,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
                 app.run("object.rotate", json!({"angle": a, "absolute": true, "origin": origin})).ok();
             }
             ui.add_space(4.0);
-            icons::icon(ui, "dc-shear", 16.0, t.icon).on_hover_text("Shear");
+            icons::icon(ui, "dc-shear", 16.0, t.icon).on_hover_text(crate::i18n::t("Shear"));
             if let Some(a) = widgets::plain_field(ui, "xfp-shear", 0.0, "°", 1, 56.0)
                 && a != 0.0
             {
