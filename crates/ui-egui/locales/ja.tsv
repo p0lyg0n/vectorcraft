@@ -1069,6 +1069,10 @@ Kinsoku:	禁則処理：
 Soft	弱い禁則
 Hard	強い禁則
 
+Mojikumi:	文字組み：
+Solid Setting	ベタ組み
+Tight Setting	ツメ組み
+
 # Words that read differently in one place
 @Document Setup
 Type	テキスト

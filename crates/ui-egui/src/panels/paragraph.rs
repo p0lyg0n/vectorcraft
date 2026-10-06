@@ -84,6 +84,15 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     ui.add_space(4.0);
     // Kinsoku, with Preferences ▸ Type ▸ Show East Asian Options.
     if app.session.prefs.show_east_asian_options {
+        // Solid or tight setting, with the settings each needs (kerning, proportional metrics, kinsoku).
+        widgets::label_row(ui, "Mojikumi:", 80.0, |ui| {
+            let labels: Vec<&str> = vectorcraft_doc::Mojikumi::ALL.iter().map(|m| m.label()).collect();
+            if let Some(m) =
+                widgets::dropdown(ui, "pa-mojikumi", para.mojikumi.label(), &labels, 120.0).and_then(|i| vectorcraft_doc::Mojikumi::ALL.get(i))
+            {
+                format(app, if *m == vectorcraft_doc::Mojikumi::None { json!({"mojikumi": "none"}) } else { json!({"composition": m.key()}) });
+            }
+        });
         widgets::label_row(ui, "Kinsoku:", 80.0, |ui| {
             let labels: Vec<&str> = vectorcraft_doc::Kinsoku::ALL.iter().map(|k| k.label()).collect();
             if let Some(k) =
@@ -137,5 +146,8 @@ mod tests {
         assert!(shown.contains("Kinsoku:") && shown.contains("Hard"), "{shown}");
         format(&mut app, json!({"kinsoku": "weak"}));
         assert_eq!(text_style(&app).unwrap().1.kinsoku, vectorcraft_doc::Kinsoku::Weak);
+        assert!(shown.contains("Mojikumi:"), "{shown}");
+        format(&mut app, json!({"composition": "tight"}));
+        assert_eq!(text_style(&app).unwrap().1.mojikumi, vectorcraft_doc::Mojikumi::Tight);
     }
 }
