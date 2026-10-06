@@ -442,8 +442,8 @@ pub(crate) fn empty_state(ui: &mut Ui, icon: &str, title: &str, body: &str) {
     ui.vertical_centered(|ui| {
         icons::icon(ui, icon, 28.0, t.text_disabled);
         ui.add_space(4.0);
-        ui.label(egui::RichText::new(title).size(12.5).color(t.text));
-        ui.label(egui::RichText::new(body).size(11.5).color(t.text_dim));
+        ui.label(egui::RichText::new(crate::i18n::t(title)).size(12.5).color(t.text));
+        ui.label(egui::RichText::new(crate::i18n::t(body)).size(11.5).color(t.text_dim));
     });
     ui.add_space(12.0);
 }

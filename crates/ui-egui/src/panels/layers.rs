@@ -66,7 +66,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     ui.painter().text(
         bar.left_center() + vec2(4.0, 0.0),
         egui::Align2::LEFT_CENTER,
-        format!("{n} Layer{}", if n == 1 { "" } else { "s" }),
+        crate::i18n::t_owned(&format!("{n} Layer{}", if n == 1 { "" } else { "s" })),
         egui::FontId::proportional(11.5),
         t.text_dim,
     );

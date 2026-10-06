@@ -131,6 +131,11 @@ pub fn t_owned(text: &str) -> String {
     current().tr_owned("", text)
 }
 
+/// [`t_owned`] in `context`.
+pub fn t_owned_in(context: &str, text: &str) -> String {
+    current().tr_owned(context, text)
+}
+
 /// A parsed catalogue.
 #[derive(Default)]
 pub(crate) struct Catalog {

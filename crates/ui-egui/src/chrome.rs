@@ -48,7 +48,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             let right_edge = if custom { full.right() - titlebar::WIDTH - 10.0 } else { full.right() };
             let right = egui::Rect::from_min_max(egui::pos2(menus_end + 8.0, full.top()), egui::pos2(right_edge, full.bottom()));
             let room = right.width();
-            let ws = ui.painter().layout_no_wrap(app.ui.workspace.clone(), egui::FontId::proportional(12.0), t.text);
+            let ws = ui.painter().layout_no_wrap(crate::i18n::t(&app.ui.workspace).to_string(), egui::FontId::proportional(12.0), t.text);
             let ws_w = (ws.size().x + 36.0).clamp(112.0, 190.0);
             let gap = ui.spacing().item_spacing.x;
             let with_search = ws_w + 8.0 + gap + 200.0;
@@ -79,7 +79,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                 ui.painter().text(
                     r.left_center() + vec2(26.0, 0.0),
                     egui::Align2::LEFT_CENTER,
-                    "Search commands and tools",
+                    crate::i18n::t("Search commands and tools"),
                     egui::FontId::proportional(11.5),
                     t.text_dim,
                 );
@@ -379,7 +379,10 @@ pub fn status_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                     widgets::icon_button(ui, icon, "", false, 18.0);
                 }
                 ui.separator();
-                let tool = vectorcraft_tools::tool_info(app.session.tool_id()).map(|t| t.label.trim_end_matches(" Tool")).unwrap_or("");
+                // The tool's name without "Tool" (ツール in Japanese).
+                let full = vectorcraft_tools::tool_info(app.session.tool_id()).map(|t| t.label).unwrap_or("");
+                let shown = crate::i18n::t(full);
+                let tool = if shown == full { full.trim_end_matches(" Tool") } else { shown.trim_end_matches("ツール") };
                 ui.label(egui::RichText::new(tool).size(11.5).color(t.text_dim));
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     ui.label(
@@ -577,6 +580,21 @@ fn hint_segments(tool: &str) -> Vec<(Cow<'static, str>, bool)> {
             &search
         }
     };
+    // Translated as a whole (word order differs between languages): the catalogue's Hint entry
+    // is the hint with its bold segments in asterisks.
+    let marked: String = segments.iter().map(|&(text, bold)| if bold { format!("*{text}*") } else { text.to_string() }).collect();
+    let translated = crate::i18n::t_owned_in("Hint", &marked);
+    if translated != marked {
+        return translated
+            .split('*')
+            .enumerate()
+            .filter(|(_, s)| !s.is_empty())
+            .map(|(i, s)| {
+                let bold = i % 2 == 1;
+                (if bold { Cow::Owned(menus::pretty_shortcut(s)) } else { Cow::Owned(s.to_string()) }, bold)
+            })
+            .collect();
+    }
     segments.iter().map(|&(text, bold)| (if bold { Cow::Owned(menus::pretty_shortcut(text)) } else { Cow::Borrowed(text) }, bold)).collect()
 }
 
@@ -621,6 +639,24 @@ mod tests {
         assert!(text("rotate").contains(&pretty("Alt+Click")));
         assert!(text("eyedropper").contains(&pretty("Alt+Click")));
         assert!(text("perspectiveSelection").contains(&pretty("Alt+Drag")) && text("perspectiveSelection").contains("perpendicular"));
+        // In Japanese, a hint reads as a whole sentence, its keys still in bold and named as the
+        // menus name them.
+        crate::i18n::set_current(crate::i18n::Language::Ja);
+        let ja = super::hint_segments("selection");
+        crate::i18n::set_current(crate::i18n::Language::En);
+        let all: String = ja.iter().map(|(s, _)| s.as_ref()).collect();
+        assert!(all.contains("選択"), "{all}");
+        assert!(ja.iter().any(|(s, b)| *b && s.contains(&pretty("Alt+"))), "{ja:?}");
+        // Every tool's hint has its Japanese.
+        for tool in vectorcraft_tools::catalog::all_tools().map(|t| t.id) {
+            if super::hint_for(tool).is_none() {
+                continue;
+            }
+            crate::i18n::set_current(crate::i18n::Language::Ja);
+            let hint: String = super::hint_segments(tool).into_iter().map(|(s, _)| s).collect();
+            crate::i18n::set_current(crate::i18n::Language::En);
+            assert!(!hint.is_ascii(), "{tool}: {hint}");
+        }
         assert!(text("paintbrush").contains(&pretty("Cmd+Shift+/")), "the Search Commands shortcut");
         if !cfg!(target_os = "macos") {
             assert!(text("zoom").contains("Alt+Click") && text("paintbrush").contains("Ctrl+Shift+/"));

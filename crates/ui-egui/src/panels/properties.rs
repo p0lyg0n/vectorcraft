@@ -22,7 +22,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
         (_, n) if n > 1 => format!("{n} Objects"),
         (Some(n), _) => n.kind_label().to_string(),
     };
-    ui.label(egui::RichText::new(label).size(11.5).color(t.text_dim));
+    ui.label(egui::RichText::new(crate::i18n::t_owned_in("Control", &label)).size(11.5).color(t.text_dim));
     ui.add_space(4.0);
     if first.is_none() {
         document_sections(app, ui);

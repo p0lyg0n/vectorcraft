@@ -239,7 +239,7 @@ pub fn popup(app: &mut VectorcraftApp, ui: &mut egui::Ui) {
                 ui.separator();
             }
             crate::menus::Item::Cmd(label, id, p) => {
-                let label = crate::menus::dynamic_label(app, id, label);
+                let label = crate::i18n::t_owned(&crate::menus::dynamic_label(app, id, label));
                 let text = match crate::menus::checked(app, id, &p) {
                     Some(true) => format!("✓  {label}"),
                     Some(false) => format!("     {label}"),

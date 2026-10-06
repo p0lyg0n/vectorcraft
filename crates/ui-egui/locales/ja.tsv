@@ -47,7 +47,7 @@ Place…	配置…
 Export	書き出し
 Export for Screens…	スクリーン用に書き出し…
 Export As…	書き出し形式…
-Save for Web (Legacy)…	Web 用に保存 (従来)…
+Save for Web (Legacy)…	Web 用に保存…
 Export Selection…	選択範囲を書き出し…
 Export As PNG…	PNG として書き出し…
 Export As SVG…	SVG として書き出し…
@@ -1019,6 +1019,27 @@ Make Compound Path	複合パスを作成
 Release Compound Path	複合パスを解除
 Select All	すべてを選択
 
+# Workspaces, layer counts and empty panels
+Essentials Classic	初期設定 (クラシック)
+Painting	ペイント
+Typography	テキスト
+Layout	レイアウト
+Tracing	トレース
+Web	Web
+Automation	自動化
+{} Layer	{} レイヤー
+{} Layers	{} レイヤー
+
+# Properties panel title and the home screen
+{} Objects	{} 個のオブジェクト
+Community	コミュニティ
+Join our Discord	Discord に参加
+ArtCraft website	ArtCraft の Web サイト
+Source code on GitHub	GitHub のソースコード
+Vector illustration — fast, open, scriptable.	ベクターイラストレーション — 高速、オープン、スクリプト対応。
+Letter	レター
+Postcard	はがき
+
 # Words that read differently in one place
 @Document Setup
 Type	テキスト
@@ -1321,3 +1342,27 @@ Type	文字
 Navigate	移動
 Color	ペイント
 Paint	ペイント
+
+# Hint bar: whole hints, bold keys between asterisks (VectorCraft's own wording)
+@Hint
+*Click* the object to select  |  *Shift+Click* to select multiple objects  |  *Alt+Drag* the object to duplicate	オブジェクトを*クリック*で選択  |  *Shift+クリック*で複数選択  |  *Alt+ドラッグ*で複製
+*Click* an anchor or path segment to select it  |  *Drag* to move  |  *Shift+Click* to add	アンカーやセグメントを*クリック*で選択  |  *ドラッグ*で移動  |  *Shift+クリック*で追加
+*Click* to add a corner point  |  *Drag* to add a smooth point  |  *Click the first point* to close  |  *Enter* to finish	*クリック*でコーナーポイントを追加  |  *ドラッグ*でスムーズポイントを追加  |  *始点をクリック*で閉じる  |  *Enter*で終了
+*Click* to add smooth points  |  *Double-click* to toggle corner  |  *Esc* to finish	*クリック*でスムーズポイントを追加  |  *ダブルクリック*でコーナーと切り替え  |  *Esc*で終了
+*Click* to create point type  |  *Drag* to create area type  |  *Esc* to exit editing	*クリック*でポイント文字を作成  |  *ドラッグ*でエリア内文字を作成  |  *Esc*で編集を終了
+*Drag* to draw  |  *Shift+Drag* to constrain proportions  |  *Alt+Drag* from center  |  *Click* for exact size	*ドラッグ*で描画  |  *Shift+ドラッグ*で縦横比を固定  |  *Alt+ドラッグ*で中心から描画  |  *クリック*で数値指定
+*Click* to set the reference point  |  *Drag* to transform  |  *Alt+Click* for exact values	*クリック*で基準点を設定  |  *ドラッグ*で変形  |  *Alt+クリック*で数値指定
+*Drag* to pan the view	*ドラッグ*で表示をスクロール
+*Click* to zoom in  |  *Alt+Click* to zoom out  |  *Drag* to zoom into an area	*クリック*でズームイン  |  *Alt+クリック*でズームアウト  |  *ドラッグ*で範囲をズーム
+*Click* an object to copy its attributes  |  *Alt+Click* to apply the selection's to it  |  *Shift+Click* to sample a color	オブジェクトを*クリック*で属性を取得  |  *Alt+クリック*で選択中の属性を適用  |  *Shift+クリック*でカラーを取得
+*Drag* across a selected object to set the gradient direction	選択中のオブジェクト上を*ドラッグ*でグラデーションの方向を設定
+*Click* to select an artboard  |  *Drag* on the canvas to create one	*クリック*でアートボードを選択  |  カンバス上を*ドラッグ*で作成
+*Drag* a stroke to add a width point  |  *Alt+Drag* to change one side  |  *Shift+Click* to select more points  |  *Double-click* a point to edit it  |  *Delete* to remove points	線を*ドラッグ*で線幅ポイントを追加  |  *Alt+ドラッグ*で片側だけ変更  |  *Shift+クリック*でポイントを追加選択  |  ポイントを*ダブルクリック*で編集  |  *Delete*でポイントを削除
+*Click* the art to add a pin  |  *Shift+Click* to select more pins  |  *Drag* a pin to warp  |  *Alt+Drag* near a selected pin to rotate  |  *Delete* to remove pins	アートを*クリック*でピンを追加  |  *Shift+クリック*でピンを追加選択  |  ピンを*ドラッグ*でワープ  |  選択したピンの近くを*Alt+ドラッグ*で回転  |  *Delete*でピンを削除
+*Drag* across paths to push them along  |  *Alt+Drag* to size the brush (*Shift* keeps its proportions)	パスの上を*ドラッグ*で押し出す  |  *Alt+ドラッグ*でブラシのサイズを変更（*Shift*で縦横比を固定）
+*Click or drag* over paths, and hold still to keep going  |  *Alt+Drag* to size the brush (*Shift* keeps its proportions)	パスの上で*クリックまたはドラッグ*（押したままで効果が続く）  |  *Alt+ドラッグ*でブラシのサイズを変更（*Shift*で縦横比を固定）
+*Click or drag* over paths to roughen their outlines  |  *Alt+Drag* to size the brush (*Shift* keeps its proportions)	パスの上で*クリックまたはドラッグ*で輪郭を変形  |  *Alt+ドラッグ*でブラシのサイズを変更（*Shift*で縦横比を固定）
+*Drag* to move in perspective  |  *Alt+Drag* to copy  |  *5* while dragging to move perpendicular to the plane  |  *Drag a handle* to scale in perspective	*ドラッグ*で遠近に沿って移動  |  *Alt+ドラッグ*でコピー  |  ドラッグ中に*5*で面に垂直に移動  |  *ハンドルをドラッグ*で遠近に沿って拡大・縮小
+*Click* an object, then another to blend them  |  *Click an anchor point* to blend from it  |  *Alt+Click* to set spacing and orientation	オブジェクトを順に*クリック*でブレンド  |  *アンカーポイントをクリック*でそこからブレンド  |  *Alt+クリック*で間隔と方向を設定
+Press *{}* to search every command	*{}*ですべてのコマンドを検索
+Use *Help › Search Commands…* to search every command	*ヘルプ › コマンドを検索…*ですべてのコマンドを検索
