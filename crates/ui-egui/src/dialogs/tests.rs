@@ -246,3 +246,39 @@ fn dialogs_do_not_stretch_to_the_screen() {
     }
     assert!(checked >= 10, "only {checked} dialogs drew in the shared frame");
 }
+
+#[test]
+fn effect_dialogs_are_narrow_and_can_be_dragged_aside() {
+    // A warp's dialog on a wide window: not window-wide, and a drag on its background moves it
+    // off the art it previews.
+    let mut app = app();
+    app.run("shape.rectangle", json!({"x": 10, "y": 10, "width": 50, "height": 50})).unwrap();
+    app.run("select.all", json!({})).unwrap();
+    app.run("effect.dialog", json!({"effect": "warp.arc"})).unwrap();
+    let kind = app.ui.dialog.as_ref().unwrap().kind.clone();
+    let ctx = egui::Context::default();
+    theme::install_fonts(&ctx);
+    theme::apply(&ctx, Default::default());
+    let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1600.0, 900.0));
+    let mut frame = |events: Vec<egui::Event>| {
+        let input = egui::RawInput { screen_rect: Some(screen), events, ..Default::default() };
+        ctx.run_ui(input, |ui| show(&mut app, ui.ctx())).textures_delta.clear();
+        ctx.memory(|m| m.area_rect(egui::Id::new(("dialog", kind.as_str())))).unwrap()
+    };
+    for _ in 0..4 {
+        frame(vec![]);
+    }
+    let before = frame(vec![]);
+    assert!(before.width() <= DEFAULT_MAX_WIDTH + 2.0 * f32::from(MARGIN) + 2.0, "{} pt wide", before.width());
+    // Drag from the frame's margin (no widget there) 300 pt to the right.
+    let from = before.left_top() + egui::vec2(6.0, 6.0);
+    let to = from + egui::vec2(300.0, 0.0);
+    let button = |pos, pressed| egui::Event::PointerButton { pos, button: egui::PointerButton::Primary, pressed, modifiers: Default::default() };
+    frame(vec![egui::Event::PointerMoved(from), button(from, true)]);
+    for i in 1..=5 {
+        frame(vec![egui::Event::PointerMoved(from + (to - from) * (i as f32 / 5.0))]);
+    }
+    frame(vec![button(to, false)]);
+    let after = frame(vec![]);
+    assert!(after.left() > before.left() + 200.0, "moved from {} to {}", before.left(), after.left());
+}
