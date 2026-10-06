@@ -495,9 +495,15 @@ pub(crate) fn outlined_stroke(
         let art = d.reid(&art);
         return Some(with_transparency(d, art, st.opacity, st.blend));
     }
-    let outline = vectorcraft_render::effects::stroke::outline_region(path, rule, st);
+    let mut outline = vectorcraft_render::effects::stroke::outline_region(path, rule, st);
     if outline.is_empty() {
         return None;
+    }
+    // A width profile is outlined from flattened samples: refit them as Béziers (to a hundredth
+    // of the stroke weight, keeping corners), so the outline has a few anchors, not hundreds.
+    if st.profile.is_some() {
+        let opts = vectorcraft_pathops::SimplifyOptions { tolerance: (st.width * 0.01).clamp(0.005, 0.25), ..Default::default() };
+        outline = vectorcraft_pathops::simplify_with(&outline, &opts);
     }
     if let Some(g) = st.path_gradient() {
         // A gradient along or across the stroke: gradient meshes clipped to its outline.
