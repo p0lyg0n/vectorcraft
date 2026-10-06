@@ -1064,6 +1064,11 @@ Luminosity	輝度
 Opacity: {}	不透明度：{}
 Click to choose a swatch	クリックでスウォッチを選択
 
+# Kinsoku (Paragraph panel, East Asian options)
+Kinsoku:	禁則処理：
+Soft	弱い禁則
+Hard	強い禁則
+
 # Words that read differently in one place
 @Document Setup
 Type	テキスト

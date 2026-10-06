@@ -48,7 +48,6 @@ const NOT_APPLIED_YET: &[&str] = &[
     "typeSizeIncrement",
     "trackingIncrement",
     "baselineShiftIncrement",
-    "showEastAsianOptions",
     "showIndicOptions",
     "typeSelectionByPathOnly",
     "autoSizeAreaType",

@@ -82,6 +82,17 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
         ui.end_row();
     });
     ui.add_space(4.0);
+    // Kinsoku, with Preferences ▸ Type ▸ Show East Asian Options.
+    if app.session.prefs.show_east_asian_options {
+        widgets::label_row(ui, "Kinsoku:", 80.0, |ui| {
+            let labels: Vec<&str> = vectorcraft_doc::Kinsoku::ALL.iter().map(|k| k.label()).collect();
+            if let Some(k) =
+                widgets::dropdown(ui, "pa-kinsoku", para.kinsoku.label(), &labels, 120.0).and_then(|i| vectorcraft_doc::Kinsoku::ALL.get(i))
+            {
+                format(app, json!({"kinsoku": k.key()}));
+            }
+        });
+    }
     if !pstate::<bool>(ui.ctx(), "pa-hide-options") && widgets::check(ui, "Hyphenate", para.hyphenate, true) {
         format(app, json!({"hyphenate": !para.hyphenate}));
     }
@@ -104,5 +115,27 @@ pub fn menu(app: &mut VectorcraftApp, ui: &mut Ui) {
     if menu_item(ui, "Reset Panel", has, false) {
         para_cmd(app, "text.setStyle", json!({"justify": "left"}));
         format(app, json!({"leftIndent": 0, "rightIndent": 0, "firstLineIndent": 0, "spaceBefore": 0, "spaceAfter": 0, "hyphenate": false}));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::*;
+
+    /// With East Asian options shown, the panel sets the paragraph's kinsoku.
+    #[test]
+    fn kinsoku_is_set_from_the_panel_with_east_asian_options() {
+        let mut app = VectorcraftApp::new(vectorcraft_engine::Session::new(), Default::default());
+        app.run("file.new", json!({"width": 200, "height": 200})).unwrap();
+        app.run("text.create", json!({"x": 10, "y": 10, "text": "あいう。"})).unwrap();
+        let hidden = crate::tests_labels::painted_text(&mut app, show);
+        assert!(!hidden.contains("Kinsoku:"), "off by default: {hidden}");
+        app.session.prefs.show_east_asian_options = true;
+        let shown = crate::tests_labels::painted_text(&mut app, show);
+        assert!(shown.contains("Kinsoku:") && shown.contains("Hard"), "{shown}");
+        format(&mut app, json!({"kinsoku": "weak"}));
+        assert_eq!(text_style(&app).unwrap().1.kinsoku, vectorcraft_doc::Kinsoku::Weak);
     }
 }
