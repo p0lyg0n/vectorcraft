@@ -210,6 +210,11 @@ impl Session {
         self.apply_actions(acts)
     }
 
+    /// The Type tool's caret, in document coordinates.
+    pub fn tool_caret(&mut self, view: ViewInfo) -> Option<(Point, Point)> {
+        self.with_tool_cx(view, |t, cx| t.caret(cx))
+    }
+
     pub fn tool_wants_text(&self) -> bool {
         self.tool.wants_text()
     }

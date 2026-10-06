@@ -143,11 +143,14 @@ pub fn handle(app: &mut VectorcraftApp, ctx: &egui::Context) {
         return;
     }
     let typing = ctx.egui_wants_keyboard_input();
+    // While an input method composes on the canvas, its keys (Enter, Escape, Backspace, arrows)
+    // are its own.
+    let composing = app.ime.composing();
     let view = app.view_info();
     // Tool keys first (Enter/Escape end paths; arrows change polygon sides while dragging).
     let busy = app.session.tool_busy();
     for (k, tk) in [(Key::Enter, ToolKey::Enter), (Key::Escape, ToolKey::Escape)] {
-        if !typing && ctx.input(|i| i.key_pressed(k)) {
+        if !typing && !composing && ctx.input(|i| i.key_pressed(k)) {
             // A key the tool claims (Esc with a loaded place cursor) is only the tool's.
             let claimed = app.session.tool_claims_key(tk, view);
             let r = app.session.tool_key(tk, Mods::default(), view);
@@ -170,6 +173,10 @@ pub fn handle(app: &mut VectorcraftApp, ctx: &egui::Context) {
     }
     // Type tool editing: text and editing keys go to the tool.
     if app.session.tool_wants_text() {
+        crate::ime::route(app, ctx);
+        if app.ime.composing() || composing {
+            return;
+        }
         let texts: Vec<String> =
             ctx.input(|i| i.events.iter().filter_map(|e| if let egui::Event::Text(t) = e { Some(t.clone()) } else { None }).collect());
         for t in texts {

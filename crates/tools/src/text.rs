@@ -589,6 +589,12 @@ impl Tool for TypeTool {
         Self::overflow_marker(&t, &lay, cx, &mut o);
         o
     }
+    fn caret(&self, cx: &ToolContext) -> Option<(Point, Point)> {
+        let t = self.current(cx)?;
+        let lay = self.layout(&t);
+        let (p, q) = vectorcraft_text::caret_position(&lay, self.caret.min(t.plain_text().len()));
+        Some((t.xf * p, t.xf * q))
+    }
     fn cursor(&self, cx: &ToolContext, p: Point, _m: Mods) -> Cursor {
         if self.mode != Mode::Type && Self::path_at(cx, p, self.mode == Mode::Area).is_some() {
             return Cursor::Crosshair;

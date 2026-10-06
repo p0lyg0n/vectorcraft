@@ -18,6 +18,7 @@ pub mod find_font;
 pub mod i18n;
 pub mod icon_data;
 pub mod icons;
+pub mod ime;
 pub mod io;
 pub mod menus;
 pub mod palette;
@@ -267,6 +268,8 @@ pub struct VectorcraftApp {
     fonts_ready: bool,
     /// Installed fonts added to the UI's for characters its own fonts lack (CJK names…).
     ui_fonts: ui_fonts::UiFonts,
+    /// The input method's composition while the Type tool edits text.
+    pub ime: ime::Ime,
     frame: u64,
     last_time: f64,
     /// Canvas rect of the last frame (screen points), for control-channel coordinate mapping.
@@ -347,6 +350,7 @@ impl VectorcraftApp {
             styled: false,
             fonts_ready: false,
             ui_fonts: Default::default(),
+            ime: Default::default(),
             frame: 0,
             last_time: 0.0,
             canvas_rect: None,

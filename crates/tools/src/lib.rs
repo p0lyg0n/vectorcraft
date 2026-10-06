@@ -385,6 +385,11 @@ pub trait Tool: Send {
     fn text_input(&mut self, _cx: &ToolContext, _s: &str) -> Vec<Action> {
         vec![]
     }
+    /// The text caret being typed at, as a line in document coordinates (where an input method
+    /// shows its composition and candidates).
+    fn caret(&self, _cx: &ToolContext) -> Option<(Point, Point)> {
+        None
+    }
     fn notify(&mut self, _cx: &ToolContext, _what: &str) {}
     /// Called when the user switches away (finish pending work).
     fn deactivate(&mut self, _cx: &ToolContext) -> Vec<Action> {
