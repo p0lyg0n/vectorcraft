@@ -21,6 +21,90 @@ fn tr(text: &str) -> &str {
     crate::i18n::t_in(TR, text)
 }
 
+/// Preferences that are stored and shown but not applied yet: the dialog marks them so nobody
+/// expects them to work. Take a key off the list when the preference takes effect.
+const NOT_APPLIED_YET: &[&str] = &[
+    "disableAutoAddDelete",
+    "usePreciseCursors",
+    "showToolTips",
+    "antiAliasedArtwork",
+    "selectSameTintPercent",
+    "showHomeScreen",
+    "displayPrintSize",
+    "doubleClickToIsolate",
+    "transformPatternTiles",
+    "selectionTolerance",
+    "objectSelectionByPathOnly",
+    "snapToPointTolerance",
+    "ctrlClickSelectsBehind",
+    "zoomToSelection",
+    "moveLockedWithArtboard",
+    "handleStyle",
+    "highlightAnchorsOnHover",
+    "showHandlesMultipleAnchors",
+    "hideCornerWidgetAbove",
+    "penRubberBand",
+    "curvatureRubberBand",
+    "typeSizeIncrement",
+    "trackingIncrement",
+    "baselineShiftIncrement",
+    "showEastAsianOptions",
+    "showIndicOptions",
+    "typeSelectionByPathOnly",
+    "autoSizeAreaType",
+    "fontPreviewSize",
+    "recentFontsCount",
+    "missingGlyphProtection",
+    "highlightAlternateGlyphs",
+    "placeholderText",
+    "unitsAsianType",
+    "numbersWithoutUnitsArePoints",
+    "identifyObjectsBy",
+    "guideColor",
+    "guideStyle",
+    "gridColor",
+    "gridStyle",
+    "gridlineEvery",
+    "gridSubdivisions",
+    "gridsInBack",
+    "showPixelGrid",
+    "smartGuideColor",
+    "alignmentGuides",
+    "objectHighlighting",
+    "transformToolsGuides",
+    "constructionGuides",
+    "constructionAngles",
+    "anchorPathLabels",
+    "measurementLabels",
+    "spacingGuides",
+    "snappingTolerance",
+    "hyphenationLanguage",
+    "hyphenationExceptions",
+    "scratchPrimary",
+    "scratchSecondary",
+    "autoCollapseIconPanels",
+    "openDocumentsAsTabs",
+    "largeTabs",
+    "scaleCursorWithUi",
+    "gpuPerformance",
+    "animatedZoom",
+    "realTimeDrawing",
+    "lowResProxyEps",
+    "antiAliasedBitmaps",
+    "copyAicb",
+    "aicbMode",
+    "blackOnScreen",
+    "blackOutput",
+    "touchWorkspace",
+    "touchGestures",
+];
+
+/// `text`, struck through while preference `key` isn't applied yet.
+fn pref_text(key: &str, text: String) -> egui::RichText {
+    let text = egui::RichText::new(text);
+    if NOT_APPLIED_YET.contains(&key) { text.strikethrough() } else { text }
+}
+
 const UI_FIELDS: &[(&str, &str, &str)] = &[
     ("__smartGuides", "Smart Guides", "Smart Guides (View → Smart Guides)"),
     ("__snapToGrid", "Guides & Grid", "Snap to Grid"),
@@ -233,7 +317,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
         match sp.kind {
             PrefKind::Bool => bool_row(ui, d, sp.key, sp.label),
             PrefKind::Num { min, max, unit } => {
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let mut x = v.as_f64().unwrap_or(min);
                     let r = if sp.key == "uiScaling" {
                         ui.add(egui::Slider::new(&mut x, min..=max).step_by(0.05).text(tr("Smaller ↔ Larger")))
@@ -250,14 +334,14 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
                 // In the dialog's own Units choice, so a change there shows right away.
                 let unit = vectorcraft_doc::Unit::named(&d.str(measure.pref_key())).unwrap_or_default();
                 let x = d.f64(sp.key, min);
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     if let Some(x) = widgets::num_field(ui, sp.key, Some(x), unit, 110.0) {
                         d.fields.insert(sp.key.into(), json!(x.clamp(min, max)));
                     }
                 });
             }
             PrefKind::Int { min, max } => {
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let mut x = v.as_i64().unwrap_or(min);
                     let r = if sp.key == "anchorSize" {
                         ui.add(egui::Slider::new(&mut x, min..=max).show_value(false).text(tr("Size")))
@@ -270,7 +354,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
                 });
             }
             PrefKind::Choice(opts) => {
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let cur = v.as_str().unwrap_or("");
                     let cur_label = tr(opts.iter().find(|o| o.0 == cur).map(|o| o.1).unwrap_or(cur));
                     let labels: Vec<&str> = opts.iter().map(|o| tr(o.1)).collect();
@@ -280,7 +364,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
                 });
             }
             PrefKind::Color => {
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let hex = v.as_str().unwrap_or("#000000");
                     let c = vectorcraft_color::Color::from_hex(hex).map(|c| c.to_rgba8(1.0)).unwrap_or([0, 0, 0, 255]);
                     let mut rgb = [c[0], c[1], c[2]];
@@ -291,7 +375,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
                 });
             }
             PrefKind::Text => {
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let mut s = v.as_str().unwrap_or("").to_string();
                     if ui.add(egui::TextEdit::singleline(&mut s).desired_width(260.0)).changed() {
                         d.fields.insert(sp.key.into(), json!(s));
@@ -304,19 +388,19 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
 
 fn bool_row(ui: &mut egui::Ui, d: &mut Dialog, key: &str, label: &str) {
     let mut b = d.bool(key);
-    if ui.checkbox(&mut b, tr(label)).changed() {
+    if ui.checkbox(&mut b, pref_text(key, tr(label).to_string())).changed() {
         d.fields.insert(key.into(), json!(b));
     }
 }
 
-fn labeled(ui: &mut egui::Ui, label: &str, add: impl FnOnce(&mut egui::Ui)) {
+fn labeled(ui: &mut egui::Ui, key: &str, label: &str, add: impl FnOnce(&mut egui::Ui)) {
     let t = Tokens::get(ui.ctx());
     ui.horizontal(|ui| {
         ui.allocate_ui_with_layout(egui::vec2(210.0, 22.0), egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.set_min_width(210.0);
             // Japanese labels end in a full-width colon.
             let colon = if crate::i18n::current() == crate::i18n::Language::Ja { "：" } else { ":" };
-            ui.add(egui::Label::new(egui::RichText::new(format!("{}{colon}", tr(label))).color(t.text)).truncate());
+            ui.add(egui::Label::new(pref_text(key, format!("{}{colon}", tr(label))).color(t.text)).truncate());
         });
         add(ui);
     });
@@ -365,6 +449,21 @@ mod tests {
         missing.sort_unstable();
         missing.dedup();
         assert!(missing.is_empty(), "no Japanese for: {missing:?}");
+    }
+
+    /// Preferences that don't take effect yet are struck through.
+    #[test]
+    fn preferences_not_applied_yet_are_marked() {
+        assert!(NOT_APPLIED_YET.iter().all(|k| vectorcraft_engine::cmd::prefscmds::spec(k).is_some()), "every listed key is a preference");
+        assert!(!NOT_APPLIED_YET.contains(&"zoomWithMouseWheel"), "the wheel zooms now");
+        let ctx = egui::Context::default();
+        let mut out = ctx.run_ui(egui::RawInput::default(), |ui| {
+            ui.label(pref_text("guideColor", "Color".into()));
+            ui.label(pref_text("keyboardIncrement", "Keyboard Increment".into()));
+        });
+        out.textures_delta.clear();
+        let runs = crate::tests_labels::struck_text(&out);
+        assert!(runs.contains(&("Color".to_string(), true)) && runs.contains(&("Keyboard Increment".to_string(), false)), "{runs:?}");
     }
 
     #[test]

@@ -358,6 +358,24 @@ mod tests {
         assert!(!japanese.contains("Cancel"), "{japanese}");
     }
 
+    /// Menu items not built yet are struck through, not just greyed.
+    #[test]
+    fn menu_items_not_built_yet_are_struck_through() {
+        let mut app = crate::VectorcraftApp::new(vectorcraft_engine::Session::new(), crate::Services::default());
+        let items = vec![crate::menus::Item::Todo("Design…", ""), crate::menus::Item::Cmd("Undo", "edit.undo", serde_json::Value::Null)];
+        let ctx = egui::Context::default();
+        crate::theme::install_fonts(&ctx);
+        let mut struck = vec![];
+        for _ in 0..2 {
+            let mut out = ctx.run_ui(egui::RawInput::default(), |ui| crate::menus::menu_body(&app, ui, "Object", &items, &mut None));
+            out.textures_delta.clear();
+            struck = crate::tests_labels::struck_text(&out);
+        }
+        let _ = &mut app;
+        assert!(struck.iter().any(|(t, s)| t == "Design…" && *s), "{struck:?}");
+        assert!(struck.iter().any(|(t, s)| t == "Undo" && !*s), "{struck:?}");
+    }
+
     #[test]
     fn current_language_is_per_thread() {
         set_current(Language::Ja);

@@ -24,6 +24,22 @@ pub(crate) fn painted_text(app: &mut VectorcraftApp, mut f: impl FnMut(&mut Vect
     shapes_text(&out)
 }
 
+/// Every string a frame painted, with whether it is struck through.
+pub(crate) fn struck_text(out: &egui::FullOutput) -> Vec<(String, bool)> {
+    fn collect(s: &Shape, out: &mut Vec<(String, bool)>) {
+        match s {
+            Shape::Text(t) => out.push((t.galley.text().to_string(), t.galley.job.sections.iter().any(|s| s.format.strikethrough.width > 0.0))),
+            Shape::Vec(v) => v.iter().for_each(|s| collect(s, out)),
+            _ => {}
+        }
+    }
+    let mut v = vec![];
+    for c in &out.shapes {
+        collect(&c.shape, &mut v);
+    }
+    v
+}
+
 /// Every string a frame painted, one per line.
 pub(crate) fn shapes_text(out: &egui::FullOutput) -> String {
     fn collect(s: &Shape, out: &mut String) {

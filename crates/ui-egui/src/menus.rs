@@ -2164,7 +2164,9 @@ fn render_items(app: &VectorcraftApp, ui: &mut egui::Ui, menu: &str, items: &[It
             }
             Item::Todo(label, sc) => {
                 ui.add_enabled_ui(false, |ui| {
-                    ui.add(egui::Button::new(tr(label)).shortcut_text(pretty_shortcut(sc)));
+                    // Struck through, so an item that isn't built yet isn't taken for one that just
+                    // doesn't apply now.
+                    ui.add(egui::Button::new(egui::RichText::new(tr(label)).strikethrough()).shortcut_text(pretty_shortcut(sc)));
                 })
                 .response
                 .on_disabled_hover_text(crate::i18n::t("Coming soon — tracked in the parity plan"));
