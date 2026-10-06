@@ -9,6 +9,7 @@ use crate::theme::{self, Tokens};
 
 /// Square icon button; `selected` draws the pressed well.
 pub fn icon_button(ui: &mut Ui, icon: &str, tip: &str, selected: bool, size: f32) -> Response {
+    let tip = crate::i18n::t(tip);
     let t = Tokens::get(ui.ctx());
     let (rect, resp) = ui.allocate_exact_size(Vec2::splat(size), Sense::click());
     let bg = if selected {
@@ -26,6 +27,7 @@ pub fn icon_button(ui: &mut Ui, icon: &str, tip: &str, selected: bool, size: f32
 
 /// Small flat text button (Quick Actions style).
 pub fn flat_button(ui: &mut Ui, text: &str, width: f32) -> Response {
+    let text = crate::i18n::t(text);
     let t = Tokens::get(ui.ctx());
     let (rect, resp) = ui.allocate_exact_size(vec2(width, 24.0), Sense::click());
     let rect = rect.shrink2(vec2(0.0, 0.5));
@@ -46,6 +48,7 @@ pub fn flat_button(ui: &mut Ui, text: &str, width: f32) -> Response {
 
 /// Blue call-to-action pill (dialog OK/Create).
 pub fn primary_button(ui: &mut Ui, text: &str) -> Response {
+    let text = crate::i18n::t(text);
     let t = Tokens::get(ui.ctx());
     let galley = ui.painter().layout_no_wrap(text.to_string(), theme::semibold(12.5), Color32::WHITE);
     let w = galley.size().x + 32.0;
@@ -58,6 +61,7 @@ pub fn primary_button(ui: &mut Ui, text: &str) -> Response {
 
 /// Outlined secondary pill (dialog Cancel).
 pub fn secondary_button(ui: &mut Ui, text: &str) -> Response {
+    let text = crate::i18n::t(text);
     let t = Tokens::get(ui.ctx());
     let galley = ui.painter().layout_no_wrap(text.to_string(), theme::semibold(12.5), t.text);
     let w = galley.size().x + 32.0;
@@ -72,6 +76,7 @@ pub fn secondary_button(ui: &mut Ui, text: &str) -> Response {
 
 /// Bold section header (Properties panel).
 pub fn section_header(ui: &mut Ui, text: &str) {
+    let text = crate::i18n::t(text);
     let t = Tokens::get(ui.ctx());
     ui.add_space(2.0);
     ui.label(egui::RichText::new(text).size(13.0).color(t.text));
@@ -88,6 +93,7 @@ pub fn divider(ui: &mut Ui) {
 }
 
 pub fn dim_label(ui: &mut Ui, text: &str) -> Response {
+    let text = crate::i18n::t(text);
     let t = Tokens::get(ui.ctx());
     ui.label(egui::RichText::new(text).color(t.text).size(12.5))
 }
@@ -190,6 +196,7 @@ pub fn text_field(ui: &mut Ui, id: impl std::hash::Hash + std::fmt::Debug, value
 
 /// A form row: `label` in a column `label_width` wide, then what `add` draws.
 pub fn label_row(ui: &mut Ui, label: &str, label_width: f32, add: impl FnOnce(&mut Ui)) {
+    let label = crate::i18n::t(label);
     ui.horizontal(|ui| {
         let (r, _) = ui.allocate_exact_size(vec2(label_width, 24.0), Sense::hover());
         let t = Tokens::get(ui.ctx());
@@ -637,6 +644,7 @@ pub fn reference_point(ui: &mut Ui, current: usize) -> Option<usize> {
 
 /// A toggle icon (e.g. eye / lock columns) — returns clicked.
 pub fn toggle_icon(ui: &mut Ui, on_icon: &str, on: bool, size: f32, tip: &str) -> bool {
+    let tip = crate::i18n::t(tip);
     let t = Tokens::get(ui.ctx());
     let (rect, resp) = ui.allocate_exact_size(Vec2::splat(size), Sense::click());
     if on {
@@ -663,12 +671,14 @@ pub fn icon_button_enabled(ui: &mut Ui, icon: &str, tip: &str, selected: bool, e
 
 /// Regular-weight panel sub-header ("Shape Modes:", "Align Objects:").
 pub fn subheader(ui: &mut Ui, text: &str) {
+    let text = crate::i18n::t(text);
     let t = Tokens::get(ui.ctx());
     ui.label(egui::RichText::new(text).size(12.5).color(t.text));
 }
 
 /// A label drawn with a dotted underline (Illustrator's link labels: "Stroke:", "Opacity:").
 pub fn link_label(ui: &mut Ui, text: &str) -> Response {
+    let text = crate::i18n::t(text);
     let t = Tokens::get(ui.ctx());
     let galley = ui.painter().layout_no_wrap(text.to_string(), egui::FontId::proportional(12.5), t.text_strong);
     let (rect, resp) = ui.allocate_exact_size(galley.size() + vec2(0.0, 3.0), Sense::click());
@@ -685,6 +695,7 @@ pub fn link_label(ui: &mut Ui, text: &str) -> Response {
 /// The row of a checkbox or radio button: allocates a 13 pt box plus `label`, draws the label and
 /// returns the box, the response and the box's border colour.
 fn choice_row(ui: &mut Ui, label: &str, enabled: bool) -> (Rect, Response, Color32) {
+    let label = crate::i18n::t(label);
     let t = Tokens::get(ui.ctx());
     let galley = ui.painter().layout_no_wrap(label.to_string(), egui::FontId::proportional(12.5), if enabled { t.text } else { t.text_disabled });
     let (rect, resp) =
@@ -1015,6 +1026,7 @@ pub fn swatch_tile(ui: &Ui, rect: Rect, paint: &Paint, selected: bool, hovered: 
 /// A recessed search field with an italic `hint` (Layers' Search All, Swatches' Find), keeping its
 /// text in egui memory under `id`. Returns the text.
 pub fn search_field(ui: &mut Ui, id: egui::Id, hint: &str) -> String {
+    let hint = crate::i18n::t(hint);
     let t = Tokens::get(ui.ctx());
     let mut query: String = ui.data(|d| d.get_temp(id)).unwrap_or_default();
     egui::Frame::NONE
@@ -1056,6 +1068,7 @@ pub fn bottom_bar(ui: &mut Ui, add: impl FnOnce(&mut Ui)) {
 
 /// A menu row for panel (≡) menus: label, optional check mark, disabled when not implemented.
 pub fn menu_item(ui: &mut Ui, label: &str, enabled: bool, checked: bool) -> bool {
+    let label = crate::i18n::t(label);
     let text = if checked { format!("✓ {label}") } else { format!("   {label}") };
     ui.add_enabled(enabled, egui::Button::new(egui::RichText::new(text).size(12.5)).frame(false)).clicked()
 }
@@ -1297,7 +1310,7 @@ pub fn tab_bar(ui: &mut Ui, tabs: &[&str], current: usize) -> Option<usize> {
         for (i, tab) in tabs.iter().enumerate() {
             let sel = i == current;
             let font = if sel { theme::semibold(13.0) } else { egui::FontId::proportional(13.0) };
-            let galley = ui.painter().layout_no_wrap(tab.to_string(), font, t.text);
+            let galley = ui.painter().layout_no_wrap(crate::i18n::t(tab).to_string(), font, t.text);
             let (rect, resp) = ui.allocate_exact_size(vec2(galley.size().x, 30.0), Sense::click());
             let color = if sel || resp.hovered() { t.text_strong } else { t.text_dim };
             ui.painter().galley(pos2(rect.left(), rect.center().y - galley.size().y / 2.0 - 2.0), galley, color);
@@ -1319,6 +1332,7 @@ pub fn tab_bar(ui: &mut Ui, tabs: &[&str], current: usize) -> Option<usize> {
 /// A page-orientation toggle drawn in code: a portrait or landscape sheet with a folded corner,
 /// accent-filled when `selected`. Returns clicked.
 pub fn orientation_button(ui: &mut Ui, landscape: bool, selected: bool, tip: &str) -> bool {
+    let tip = crate::i18n::t(tip);
     let t = Tokens::get(ui.ctx());
     let (rect, resp) = ui.allocate_exact_size(Vec2::splat(26.0), Sense::click());
     if resp.hovered() && !selected {

@@ -309,7 +309,7 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         // Modal, but the canvas isn't dimmed so previews stay readable (as in the reference app).
         ui.allocate_rect(ctx.content_rect(), egui::Sense::click());
     });
-    let heading = (spec.heading)(&d);
+    let heading = crate::i18n::t_owned(&(spec.heading)(&d));
     egui::Window::new(heading.as_str())
         // One window per kind, so a dialog never inherits another dialog's size.
         .id(egui::Id::new(("dialog", d.kind.as_str())))

@@ -239,7 +239,7 @@ pub(super) fn row_with(ui: &mut egui::Ui, label: &str, width: f32, add: impl FnO
     ui.horizontal(|ui| {
         ui.allocate_ui_with_layout(egui::vec2(width, 24.0), egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.set_min_width(width);
-            ui.label(egui::RichText::new(label).color(t.text));
+            ui.label(egui::RichText::new(crate::i18n::t(label)).color(t.text));
         });
         add(ui);
     });

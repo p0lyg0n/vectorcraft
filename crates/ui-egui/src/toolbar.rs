@@ -50,8 +50,8 @@ pub const BASIC: &[(&str, &[&[&str]])] = &[
 
 fn tip(t: &ToolInfo) -> String {
     match crate::shortcut_editor::tool_shortcut(t.id) {
-        Some(s) => format!("{} ({})", t.label, s),
-        None => t.label.to_string(),
+        Some(s) => format!("{} ({})", crate::i18n::t(t.label), s),
+        None => crate::i18n::t(t.label).to_string(),
     }
 }
 
@@ -96,7 +96,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
                 egui::Rect::from_min_size(hdr.left_top() + vec2(3.0, 2.0), vec2(10.0, 10.0)),
                 if hresp.hovered() { t.text_strong } else { t.text },
             );
-            if hresp.on_hover_text("Toggle single/double column").clicked() {
+            if hresp.on_hover_text(crate::i18n::t("Toggle single/double column")).clicked() {
                 app.ui.toolbar_double = !app.ui.toolbar_double;
             }
             let (grip, _) = ui.allocate_exact_size(vec2(ui.available_width(), 6.0), Sense::hover());
@@ -341,7 +341,7 @@ fn flyout(app: &mut VectorcraftApp, ctx: &egui::Context) {
                         ui.painter().text(
                             r.left_center() + vec2(52.0, 0.0),
                             egui::Align2::LEFT_CENTER,
-                            tool.label,
+                            crate::i18n::t(tool.label),
                             egui::FontId::proportional(13.0),
                             color,
                         );

@@ -476,6 +476,421 @@ Nonbreaking Space	改行なしスペース
 Forced Line Break	強制改行
 Tab	タブ
 
+
+# Tools (toolbar tooltips, flyouts)
+Selection Tool	選択ツール
+Direct Selection Tool	ダイレクト選択ツール
+Group Selection Tool	グループ選択ツール
+Magic Wand Tool	自動選択ツール
+Lasso Tool	なげなわツール
+Pen Tool	ペンツール
+Add Anchor Point Tool	アンカーポイントの追加ツール
+Delete Anchor Point Tool	アンカーポイントの削除ツール
+Anchor Point Tool	アンカーポイントツール
+Curvature Tool	曲線ツール
+Type Tool	文字ツール
+Area Type Tool	エリア内文字ツール
+Type on a Path Tool	パス上文字ツール
+Vertical Type Tool	文字（縦）ツール
+Vertical Area Type Tool	エリア内文字（縦）ツール
+Vertical Type on a Path Tool	パス上文字（縦）ツール
+Touch Type Tool	文字タッチツール
+Line Segment Tool	直線ツール
+Arc Tool	円弧ツール
+Spiral Tool	スパイラルツール
+Rectangular Grid Tool	長方形グリッドツール
+Polar Grid Tool	同心円グリッドツール
+Rectangle Tool	長方形ツール
+Rounded Rectangle Tool	角丸長方形ツール
+Ellipse Tool	楕円形ツール
+Polygon Tool	多角形ツール
+Star Tool	スターツール
+Flare Tool	フレアツール
+Paintbrush Tool	ブラシツール
+Blob Brush Tool	塗りブラシツール
+Shaper Tool	Shaper ツール
+Pencil Tool	鉛筆ツール
+Smooth Tool	スムーズツール
+Path Eraser Tool	パス消しゴムツール
+Join Tool	連結ツール
+Eraser Tool	消しゴムツール
+Scissors Tool	はさみツール
+Knife	ナイフ
+Mirror & Cut Tool	ミラーカットツール
+Line Cut Tool	ラインカットツール
+Rectangle Cut Tool	長方形カットツール
+Rotate Tool	回転ツール
+Reflect Tool	リフレクトツール
+Scale Tool	拡大・縮小ツール
+Shear Tool	シアーツール
+Reshape Tool	リシェイプツール
+Width Tool	線幅ツール
+Warp Tool	ワープツール
+Twirl Tool	うねりツール
+Pucker Tool	収縮ツール
+Bloat Tool	膨張ツール
+Scallop Tool	ひだツール
+Crystallize Tool	クラウンツール
+Wrinkle Tool	リンクルツール
+Free Transform Tool	自由変形ツール
+Puppet Warp Tool	パペットワープツール
+Shape Builder Tool	シェイプ形成ツール
+Live Paint Bucket	ライブペイントツール
+Live Paint Selection Tool	ライブペイント選択ツール
+Perspective Grid Tool	遠近グリッドツール
+Perspective Selection Tool	遠近図形選択ツール
+Mesh Tool	メッシュツール
+Gradient Tool	グラデーションツール
+Eyedropper Tool	スポイトツール
+Measure Tool	計測ツール
+Blend Tool	ブレンドツール
+Symbol Sprayer Tool	シンボルスプレーツール
+Symbol Shifter Tool	シンボルシフトツール
+Symbol Scruncher Tool	シンボルスクランチツール
+Symbol Sizer Tool	シンボルサイズ調整ツール
+Symbol Spinner Tool	シンボルスピンツール
+Symbol Stainer Tool	シンボルステインツール
+Symbol Screener Tool	シンボルスクリーンツール
+Symbol Styler Tool	シンボルスタイルツール
+Column Graph Tool	棒グラフツール
+Stacked Column Graph Tool	積み上げ棒グラフツール
+Bar Graph Tool	横向き棒グラフツール
+Stacked Bar Graph Tool	横向き積み上げ棒グラフツール
+Line Graph Tool	折れ線グラフツール
+Area Graph Tool	階層グラフツール
+Scatter Graph Tool	散布図ツール
+Pie Graph Tool	円グラフツール
+Radar Graph Tool	レーダーチャートツール
+Artboard Tool	アートボードツール
+Slice Tool	スライスツール
+Slice Selection Tool	スライス選択ツール
+Hand Tool	手のひらツール
+Rotate View Tool	回転ビューツール
+Print Tiling Tool	プリント分割ツール
+Zoom Tool	ズームツール
+
+# Panels, dialogs and their controls
+OK	OK
+Cancel	キャンセル
+Options	オプション
+Name:	名前：
+Preset:	プリセット：
+Presets:	プリセット：
+Delete	削除
+Opacity:	不透明度：
+Color Model:	カラーモデル：
+Done	完了
+Export…	書き出し…
+Import…	読み込み…
+New	新規
+Preferences	環境設定
+Preview	プレビュー
+Save Preset…	プリセットを保存…
+Add to Swatches	スウォッチに追加
+Color:	カラー：
+Colors:	カラー：
+Document Setup	ドキュメント設定
+Edit…	編集…
+Fonts	フォント
+Format:	形式：
+Height:	高さ：
+Width:	幅：
+W:	W：
+H:	H：
+X:	X：
+Y:	Y：
+Location:	場所：
+Method:	方法：
+Quality:	画質：
+Range:	範囲：
+Reset	リセット
+Resolution:	解像度：
+Scale Strokes & Effects	線幅と効果を拡大・縮小
+Scale:	拡大・縮小：
+Size:	サイズ：
+Add	追加
+Artboard:	アートボード：
+Background:	背景：
+Bleed:	裁ち落とし：
+Color Mode:	カラーモード：
+Color Reduction:	カラー数の削減：
+Corner Radius:	角丸の半径：
+Depth:	奥行き：
+Dither:	ディザ：
+Edit Artboards	アートボードを編集
+Error	エラー
+Image Map:	イメージマップ：
+List View	リスト表示
+Thumbnail View	サムネール表示
+Matte:	マット：
+More Settings	詳細設定
+Orientation:	方向：
+Orientation	方向
+Pages	ページ
+Panel menu	パネルメニュー
+Preset name:	プリセット名：
+Profile:	プロファイル：
+Quick Actions	クイック操作
+Refresh	更新
+Relink…	再リンク…
+Rename	名前を変更
+Reset Panel	パネルをリセット
+Save a Copy	複製を保存
+Save as preset:	プリセットとして保存：
+Select All Unused	未使用項目をすべて選択
+Select a text object	テキストオブジェクトを選択してください
+Show Find Field	検索フィールドを表示
+Sides:	辺の数：
+Sort by Name	名前で並べ替え
+Sort by Kind	種類で並べ替え
+Spacing:	間隔：
+Stroke:	線：
+Style:	スタイル：
+Type:	種類：
+Unembed…	埋め込みを解除…
+Units	単位
+Units:	単位：
+Warnings	警告
+Advanced Options	詳細オプション
+Align Objects:	オブジェクトの整列：
+Align On:	整列の基準：
+Align Stroke:	線の位置：
+Align To:	整列：
+Align to Glyph Bounds	字形の境界に整列
+Align:	整列：
+Alignment:	揃え：
+All Categories	すべてのカテゴリ
+Angle	角度
+Angle:	角度：
+Anti-aliasing:	アンチエイリアス：
+Apply to All	すべてに適用
+Around Object	オブジェクトのシェイプ
+Arrowheads:	矢印：
+Artboard Options…	アートボードオプション…
+Aspect Ratio	縦横比
+Background Color:	背景色：
+Begin Recording	記録開始
+Bleeds	裁ち落とし
+Break Link to Graphic Style	グラフィックスタイルへのリンクを解除
+Brightness	明るさ
+Brush Affects:	ブラシの適用：
+Byte Order:	バイト順序：
+Cap:	線端：
+Corner:	角の形状：
+Choose…	選択…
+Clear All Tabs	すべてのタブを消去
+Clear Appearance	アピアランスを消去
+Clear Overrides	オーバーライドを消去
+Clip	クリップ
+Clip to Bounding Box	バウンディングボックスでクリップ
+Close Library	ライブラリを閉じる
+Color Group:	カラーグループ：
+Color Guide Options…	カラーガイドオプション…
+Color Settings	カラー設定
+Color Table	カラーテーブル
+Color Type:	カラータイプ：
+Columns:	列数：
+Compatibility:	互換性：
+Compression:	圧縮：
+Convert	変換
+Copy Color Value (Hex)	カラー値をコピー（16 進数）
+Create Document	ドキュメントを作成
+Create New Swatch…	新規スウォッチを作成…
+Crop To	トリミング
+Dashed Line	破線
+Description	説明
+Distribute Objects:	オブジェクトの分布：
+Distribute Spacing:	等間隔に分布：
+Document	ドキュメント
+Draw:	描画：
+Delete Artboards	アートボードを削除
+Delete Brush	ブラシを削除
+Delete Graphic Style	グラフィックスタイルを削除
+Delete Swatch	スウォッチを削除
+Duplicate Artboards	アートボードを複製
+Duplicate Brush	ブラシを複製
+Duplicate Graphic Style	グラフィックスタイルを複製
+Duplicate Swatch	スウォッチを複製
+Edit Gradient	グラデーションを編集
+Embed	埋め込み
+Embed Image(s)	画像を埋め込み
+Encoding:	エンコーディング：
+Every-line Composer	段落コンポーザー
+Single-line Composer	単数行コンポーザー
+Expand:	分割：
+Export All…	すべてを書き出し…
+Export Selected Art Only	選択したアートのみ書き出し
+Export to:	書き出し先：
+Fill	塗り
+File Format:	ファイル形式：
+Find Font	フォント検索
+Fit in Window	ウィンドウに合わせる
+Flip Horizontal	水平方向に反転
+Flip Vertical	垂直方向に反転
+Format Settings	形式の設定
+Gamma	ガンマ
+Gamut Check	色域外警告
+Global	グローバル
+Go To Link	リンクへ移動
+Gradient Mesh	グラデーションメッシュ
+Graphic Style Options…	グラフィックスタイルオプション…
+Gridline every:	グリッド間隔：
+Harmony Rules:	ハーモニールール：
+History Options…	ヒストリーオプション…
+Hyphenate	ハイフネーション
+Image Size	画像サイズ
+Intent:	目的：
+Invert Mask	マスクを反転
+Isolate Blending	描画モードを分離
+Keyboard Increment	キー入力
+Knockout Group	グループの抜き
+Leading	行送り
+Tracking	トラッキング
+Limit to Library:	ライブラリに制限：
+Make Compound Shape	複合シェイプを作成
+Release Compound Shape	複合シェイプを解除
+Expand Compound Shape	複合シェイプを拡張
+Merge Graphic Styles	グラフィックスタイルを結合
+Merge Swatches	スウォッチを結合
+Mode:	モード：
+New Art Has Basic Appearance	新規オブジェクトにアピアランスを適用しない
+New Artboard	新規アートボード
+New Color Group…	新規カラーグループ…
+New Graphic Style…	新規グラフィックスタイル…
+New Opacity Masks Are Clipping	新規不透明マスクをクリッピングマスクとして作成
+New Opacity Masks Are Inverted	新規不透明マスクを反転マスクとして作成
+New Swatch…	新規スウォッチ…
+New file	新規ファイル
+No Document	ドキュメントがありません
+No document	ドキュメントがありません
+No document open	ドキュメントが開かれていません
+No document open.	ドキュメントが開かれていません。
+No Selection	選択されていません
+None	なし
+Objects	オブジェクト
+Only Web Colors	Web セーフカラーのみに制限
+Open	開く
+Options:	オプション：
+Outline Text	テキストのアウトライン
+Overprints:	オーバープリント：
+Panel Options…	パネルオプション…
+Password	パスワード
+Paste Remembers Layers	ペースト時にレイヤーを保持
+Pathfinder Options…	パスファインダーオプション…
+Pathfinders:	パスファインダー：
+Shape Modes:	形状モード：
+Placement Options…	配置オプション…
+Preview in Browser	ブラウザーでプレビュー
+Print Preset:	プリントプリセット：
+Printer:	プリンター：
+Recent Colors	最近使用したカラー
+Reduce to Basic Appearance	基本アピアランスに戻す
+Reference Point	基準点
+Refresh Font List	フォントリストを更新
+Relink to Folder…	フォルダーに再リンク…
+Remove Brush Stroke	ブラシストロークを削除
+Replace	置換
+Replace With Font	置換するフォント
+Reset Envelope Shape	エンベロープの形状をリセット
+Reset Preferences	環境設定をリセット
+Reset to Default	初期設定に戻す
+Reverse Gradient	グラデーションを反転
+Rotate	回転
+Shear	シアー
+Rulers & Grids	定規とグリッド
+Save Colors as Swatches	カラーをスウォッチとして保存
+Save To:	保存先：
+Save…	保存…
+Scale Corners	角を拡大・縮小
+Search	検索
+Select All Assets	すべてのアセットを選択
+Selected Artwork	選択したアートワーク
+Selection Only	選択範囲のみ
+Show All Hidden Attributes	隠された属性をすべて表示
+Show Link Info	リンク情報を表示
+Show Options	オプションを表示
+Show Swatch Bounds	スウォッチの境界を表示
+Show Tile Edge	タイルの境界線を表示
+Show:	表示：
+Simulate Paper	紙色をシミュレート
+Size Tile to Art	タイルをアートに合わせる
+Spot Colors…	特色…
+Swatch Name:	スウォッチ名：
+Swatch Options…	スウォッチオプション…
+Tolerance:	許容値：
+Trace	トレース
+Transform Both	両方を変形
+Transform Object Only	オブジェクトのみ変形
+Transform Pattern Only	パターンのみ変形
+Ungroup Color Group	カラーグループの解除
+Update Link	リンクを更新
+Use Black Point Compensation	黒点の補正を使用
+Use Preview Bounds	プレビュー境界を使用
+Weight:	線幅：
+Welcome to VectorCraft	VectorCraft へようこそ
+Your changes will be lost if you don't save them.	保存しないと変更内容は失われます。
+Default Fill and Stroke (D)	初期設定の塗りと線 (D)
+Swap Fill and Stroke (Shift+X)	塗りと線を入れ替え (Shift+X)
+Fill (X), double-click for the Color Picker	塗り (X)、ダブルクリックでカラーピッカー
+Stroke (X), double-click for the Color Picker	線 (X)、ダブルクリックでカラーピッカー
+Add New Effect	新規効果を追加
+Add New Fill	新規塗りを追加
+Add New Stroke	新規線を追加
+Coming soon — tracked in the parity plan	近日対応（開発計画で管理中）
+Click to toggle visibility	クリックで表示／非表示を切り替え
+Switch workspace	ワークスペースを切り替え
+
+
+# Dialog headings
+Adjust Colors	カラー調整
+All Tools	すべてのツール
+Artboard Options	アートボードオプション
+Blend Options	ブレンドオプション
+Color Guide Options	カラーガイドオプション
+Color Picker	カラーピッカー
+DXF Options	DXF オプション
+Divide Slices	スライスを分割
+Document Raster Effects Settings	ドキュメントのラスタライズ効果設定
+EPS Options	EPS オプション
+Export As	書き出し形式
+Export for Screens	スクリーン用に書き出し
+Eyedropper Options	スポイトツールオプション
+File Info	ファイル情報
+Flatten Transparency	透明部分を分割・統合
+Graphic Style Options	グラフィックスタイルオプション
+Linked File Not Found	リンクファイルが見つかりません
+New Color Group	新規カラーグループ
+New Swatch	新規スウォッチ
+PDF Presets	PDF プリセット
+Package	パッケージ
+Perspective Grid Options	遠近グリッドオプション
+Perspective Grid Presets	遠近グリッドプリセット
+Place	配置
+Placement Options	配置オプション
+Print	プリント
+Print Presets	プリントプリセット
+Recolor Artwork	オブジェクトを再配色
+Recover Documents	ドキュメントを復元
+SVG Options	SVG オプション
+Saturate	彩度調整
+Save Graphic Style Library	グラフィックスタイルライブラリを保存
+Save PDF	PDF を保存
+Save Swatch Library	スウォッチライブラリを保存
+Save for Office Documents	Office 用に保存
+Save for Web	Web 用に保存
+Slice Options	スライスオプション
+Spot Colors	特色
+Swatch Conflict	スウォッチの競合
+Swatch Options	スウォッチオプション
+Text Export Options	テキスト書き出しオプション
+Text Import Options	テキスト読み込みオプション
+Tile Edge Color	タイルの境界線のカラー
+Transform Each	個別に変形
+Transparency Flattener Presets	透明の分割・統合プリセット
+Vector Halftone	ベクターハーフトーン
+Width Point Edit	線幅ポイントを編集
+Toggle single/double column	1 列／2 列を切り替え
+
 # Words that read differently in one place
 @Document Setup
 Type	テキスト

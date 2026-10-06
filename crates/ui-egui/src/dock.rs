@@ -85,6 +85,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
 pub fn floating_panel(app: &mut VectorcraftApp, ctx: &egui::Context) {
     let Some(id) = app.ui.open_panel.clone() else { return };
     let Some((_, label, _)) = ICON_PANELS.iter().find(|p| p.0 == id) else { return };
+    let label = crate::i18n::t(label);
     let t = Tokens::get(ctx);
     let screen = ctx.content_rect();
     let x = screen.right() - ICON_COL - 300.0 - 262.0;
@@ -99,7 +100,7 @@ pub fn floating_panel(app: &mut VectorcraftApp, ctx: &egui::Context) {
                 vec2(ui.painter().layout_no_wrap(label.to_string(), theme::semibold(12.0), t.text).size().x + 24.0, 26.0),
             );
             ui.painter().rect_filled(tab, CornerRadius { nw: 4, ne: 0, sw: 0, se: 0 }, t.panel);
-            ui.painter().text(tab.left_center() + vec2(12.0, 0.0), egui::Align2::LEFT_CENTER, *label, theme::semibold(12.0), t.text);
+            ui.painter().text(tab.left_center() + vec2(12.0, 0.0), egui::Align2::LEFT_CENTER, label, theme::semibold(12.0), t.text);
             let close = egui::Rect::from_center_size(strip.right_center() - vec2(13.0, 0.0), vec2(14.0, 14.0));
             let cr = ui.interact(close, ui.id().with("close-panel"), Sense::click());
             icons::paint(ui, "chevrons-right", close, if cr.hovered() { t.text } else { t.text_dim });

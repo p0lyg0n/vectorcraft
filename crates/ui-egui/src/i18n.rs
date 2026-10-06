@@ -299,6 +299,26 @@ mod tests {
         assert!(missing.is_empty(), "{} menu labels have no Japanese:\n{}", missing.len(), missing.join("\n"));
     }
 
+    /// In Japanese, a dialog draws its heading, labels and buttons in Japanese.
+    #[test]
+    fn dialogs_draw_in_the_interface_language() {
+        let mut app = crate::VectorcraftApp::new(vectorcraft_engine::Session::new(), crate::Services::default());
+        app.run("file.new", serde_json::json!({"width": 100, "height": 100})).unwrap();
+        crate::menus::invoke(&mut app, "file.documentSetup", serde_json::json!({}));
+        assert!(app.ui.dialog.is_some());
+        let english = crate::tests_labels::painted_text(&mut app, |app, ui| crate::dialogs::show(app, ui.ctx()));
+        assert!(english.contains("Document Setup") && english.contains("Cancel"), "{english}");
+        let japanese = crate::tests_labels::painted_text(&mut app, |app, ui| {
+            set_current(Language::Ja);
+            crate::dialogs::show(app, ui.ctx());
+        });
+        set_current(Language::En);
+        for label in ["ドキュメント設定", "キャンセル", "OK"] {
+            assert!(japanese.contains(label), "{label} in {japanese}");
+        }
+        assert!(!japanese.contains("Cancel"), "{japanese}");
+    }
+
     #[test]
     fn current_language_is_per_thread() {
         set_current(Language::Ja);
