@@ -20,7 +20,7 @@ pub fn specs() -> Vec<CommandSpec> {
             "Transform",
             [],
             None,
-            "{matrix: [a,b,c,d,e,f], copy?: bool, ids?, strokes?: bool, corners?: bool} apply an affine to the selection (or ids); strokes/corners: Scale Strokes & Effects / Scale Corners (default: the preferences)",
+            "{matrix: [a,b,c,d,e,f], copy?: bool, ids?, strokes?: bool, corners?: bool, resizeAreaType?: bool} apply an affine to the selection (or ids); strokes/corners: Scale Strokes & Effects / Scale Corners (default: the preferences); resizeAreaType: area type's frame takes the transform and its text reflows (the Selection tool's bounding-box resize)",
             has_doc,
             transform
         ),
@@ -206,12 +206,24 @@ pub(crate) fn scaling(s: &mut Session, p: &Value) -> Scaling {
 /// Records Transform Again.
 pub(crate) fn apply_transform(s: &mut Session, label: &str, ids: Vec<NodeId>, xf: Affine, p: &Value) -> Result<Value> {
     let copy = bool_or(p, "copy", false);
+    // A bounding-box resize (the Selection tool's handles) resizes area type's frame: the text
+    // reflows in it at its size instead of scaling with it.
+    let resize_area = bool_or(p, "resizeAreaType", false);
     let sc = if Scaling::factor(xf).is_some() { scaling(s, p) } else { Scaling::default() };
     let ids = s.edit(label, |d, sel| {
         let targets = if copy { duplicate_in(d, sel, &ids, Affine::IDENTITY)? } else { ids.clone() };
         for id in &targets {
             if let Some(n) = d.node_mut(*id) {
-                n.transform(xf, sc);
+                match &mut n.kind {
+                    NodeKind::Text(t) if resize_area && matches!(t.kind, vectorcraft_doc::TextKind::Area { .. }) => {
+                        let local = t.xf.inverse() * xf * t.xf;
+                        if let vectorcraft_doc::TextKind::Area { frame } = &mut t.kind {
+                            frame.transform(local);
+                        }
+                        super::typecmd::refresh_bounds(t);
+                    }
+                    _ => n.transform(xf, sc),
+                }
             }
         }
         Ok(targets)

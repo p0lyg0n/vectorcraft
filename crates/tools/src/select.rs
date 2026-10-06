@@ -195,7 +195,7 @@ impl Tool for SelectionTool {
                 let a = scale_for_drag(bx.rect, handle, bx.to_local(p), m.shift, m.alt);
                 let nr = a.transform_rect_bbox(bx.rect);
                 self.measure = Some((p, cx.size_label(nr.width(), nr.height())));
-                vec![Action::Preview("object.transform".into(), json!({ "matrix": matrix_json(bx.conjugate(a)), "copy": false }))]
+                vec![Action::Preview("object.transform".into(), json!({ "matrix": matrix_json(bx.conjugate(a)), "copy": false, "resizeAreaType": true }))]
             }
             (PointerKind::Drag, State::Rotating { center, start, .. }) => {
                 let (a, deg) = rotate_for_drag(center, start, p, m.shift);

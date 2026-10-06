@@ -426,3 +426,32 @@ fn solid_and_tight_composition_set_their_settings_together() {
     assert!(t.runs[0].style.features.iter().any(|f| f == "palt") && t.para.mojikumi == vectorcraft_doc::Mojikumi::None);
     assert!(s.execute("text.setFormat", &json!({"ids": [id.0], "composition": "loose"})).is_err());
 }
+
+/// Resizing area type by its bounding box (the Selection tool's handles) resizes the frame: the
+/// type keeps its size and reflows; a plain transform still scales the type.
+#[test]
+fn a_bounding_box_resize_reflows_area_type_instead_of_scaling_it() {
+    let mut s = Session::new();
+    s.execute("file.new", &json!({"width": 400, "height": 300})).unwrap();
+    let r = s.execute("text.create", &json!({"x": 0, "y": 0, "text": "one two three four five six seven", "area": {"width": 60, "height": 200}})).unwrap();
+    let id = vectorcraft_doc::NodeId(r["id"].as_u64().unwrap());
+    let text = |s: &Session| match &s.doc().unwrap().doc.node(id).unwrap().kind {
+        vectorcraft_doc::NodeKind::Text(t) => (**t).clone(),
+        _ => panic!("text"),
+    };
+    let lines = |t: &vectorcraft_doc::TextObject| vectorcraft_text::layout(vectorcraft_text::FontDb::global(), t).lines.len();
+    let before = text(&s);
+    let size = before.runs[0].style.size;
+    // Twice as wide, from the left edge.
+    let wider = [2.0, 0.0, 0.0, 1.0, 0.0, 0.0];
+    s.execute("object.transform", &json!({"ids": [id.0], "matrix": wider, "resizeAreaType": true})).unwrap();
+    let after = text(&s);
+    assert_eq!(after.runs[0].style.size, size, "the type keeps its size");
+    assert_eq!(after.xf, before.xf, "nothing scales the glyphs");
+    let vectorcraft_doc::TextKind::Area { frame } = &after.kind else { panic!("area type") };
+    assert!((frame.bounds().unwrap().width() - 120.0).abs() < 1e-6);
+    assert!(lines(&after) < lines(&before), "the type reflows into fewer lines");
+    // Without the flag (the Scale tool, Transform Again), area type scales as before.
+    s.execute("object.transform", &json!({"ids": [id.0], "matrix": wider})).unwrap();
+    assert_ne!(text(&s).xf, after.xf);
+}
