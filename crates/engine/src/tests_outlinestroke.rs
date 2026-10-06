@@ -162,3 +162,26 @@ fn brushed_strokes_outline_to_their_brush_art() {
     assert!(near(n.opacity as f64, 0.5, 1e-6), "the stroke opacity stays on the art");
     assert!(!doc.layers[0].children().unwrap().iter().any(|c| vectorcraft_brush::has_brush(c)));
 }
+
+/// A width-profiled curve outlines to a few Bézier anchors, not one per flattening sample, with
+/// the same shape (the same area within half a percent).
+#[test]
+fn a_profiled_curve_outlines_to_few_anchors() {
+    let mut s = session();
+    s.execute("shape.ellipse", &json!({"x": 0, "y": 20, "width": 200, "height": 160})).unwrap();
+    s.execute("paint.setFill", &json!({"none": true})).unwrap();
+    s.execute("stroke.set", &json!({"weight": 24, "profile": "lens"})).unwrap();
+    let flat = {
+        let st = s.doc().unwrap();
+        let n = st.doc.node(st.selection.objects[0]).unwrap().clone();
+        let (path, rule) = (n.path_data().unwrap().clone(), FillRule::NonZero);
+        let AppearanceItem::Stroke(sl) = n.appearance.items.iter().find(|i| !i.is_fill()).unwrap() else { panic!("a stroke") };
+        vectorcraft_render::effects::stroke::outline_region(&path, rule, sl)
+    };
+    let n = outline(&mut s);
+    let anchors: usize = path_of(&n).subpaths.iter().map(|sp| sp.anchors.len()).sum();
+    let flat_anchors: usize = flat.subpaths.iter().map(|sp| sp.anchors.len()).sum();
+    assert!(anchors * 4 < flat_anchors, "{anchors} anchors (flattened: {flat_anchors})");
+    let (a, b) = (area(&n), vectorcraft_pathops::area(&flat, FillRule::NonZero));
+    assert!((a - b).abs() < b * 0.005, "area {a} vs {b}");
+}
