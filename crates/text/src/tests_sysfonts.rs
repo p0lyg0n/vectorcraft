@@ -164,3 +164,15 @@ fn japanese_first_without_system_fonts_uses_the_bundled_font() {
     db.set_japanese_first(true);
     assert_eq!(db.face_covering('漢').unwrap().family, "Shippori Mincho");
 }
+
+/// Documents name fonts by PostScript name, and families can hold hyphens: the installed face of
+/// that exact name gives the family and style, however the name splits.
+#[test]
+fn installed_faces_are_found_by_postscript_name() {
+    let dir = font_dir("postscript");
+    let db = FontDb::with_font_dirs(vec![dir]);
+    // The renamed Source Sans 3 files keep their PostScript names.
+    assert_eq!(db.by_postscript_name("SourceSans3-Bold"), Some((FAMILY.to_string(), "Bold".to_string())));
+    assert_eq!(db.by_postscript_name("sourcesans3-regular"), Some((FAMILY.to_string(), "Regular".to_string())), "any case");
+    assert_eq!(db.by_postscript_name("Rounded-X-Mplus-1c-black"), None);
+}
