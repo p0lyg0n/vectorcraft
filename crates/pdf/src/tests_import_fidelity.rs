@@ -388,3 +388,17 @@ fn glyphs_turned_along_a_curve_become_type_on_a_path() {
     assert_eq!(straight.len(), 1);
     assert!(matches!(straight[0].kind, vectorcraft_doc::TextKind::Point), "{:?}", straight[0].kind);
 }
+
+/// Type set tighter (or looser) than its font's advances keeps its length: the spacing between
+/// the glyphs comes back as tracking.
+#[test]
+fn glyph_spacing_comes_back_as_tracking() {
+    // "Tight" at 20 pt with every glyph 1 pt closer than its advance (TJ adjustments of 50/1000 em).
+    let t = texts(&open(&one_page("BT /F1 20 Tf 10 40 Td [(T) 50 (i) 50 (g) 50 (h) 50 (t)] TJ ET", HELVETICA, &[])));
+    assert_eq!(t.len(), 1);
+    let st = &t[0].runs[0].style;
+    assert!((st.tracking + 50.0).abs() < 1.0, "tracking {}", st.tracking);
+    // Type set at its advances has none.
+    let plain = texts(&open(&one_page("BT /F1 20 Tf 10 40 Td (Plain) Tj ET", HELVETICA, &[])));
+    assert_eq!(plain[0].runs[0].style.tracking, 0.0);
+}

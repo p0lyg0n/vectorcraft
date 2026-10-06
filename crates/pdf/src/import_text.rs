@@ -100,6 +100,9 @@ pub(crate) struct TextLine {
     last_dir: Vec2,
     /// Each glyph's baseline origin, then where the last one ends.
     baseline: Vec<Point>,
+    /// Space between glyphs beyond their advances (points), summed over the glyphs that follow
+    /// another without a word space, and how many: the tracking the type was set with.
+    spacing: (f64, usize),
     runs: Vec<(Look, String)>,
 }
 
@@ -108,7 +111,7 @@ const CURVE_TURN_COS: f64 = 0.94;
 
 impl TextLine {
     pub fn new(at: Placement, opacity: f32) -> Self {
-        Self { at, opacity, next: at.origin, last: at.origin, last_dir: at.dir, baseline: vec![], runs: vec![] }
+        Self { at, opacity, next: at.origin, last: at.origin, last_dir: at.dir, baseline: vec![], spacing: (0.0, 0), runs: vec![] }
     }
 
     /// Add glyph `text` drawn with `look` at `at` (advancing `advance` points) at `opacity` if
@@ -135,6 +138,9 @@ impl TextLine {
             // A gap wider than a fifth of an em reads as a space.
             if gap > size * 0.2 && !run.ends_with(' ') && !text.starts_with(' ') {
                 run.push(' ');
+            } else if !text.starts_with(' ') && !run.ends_with(' ') {
+                self.spacing.0 += gap;
+                self.spacing.1 += 1;
             }
             if last.takes(look) {
                 run.push_str(text);
@@ -197,7 +203,19 @@ impl TextLine {
         if self.runs.iter().all(|(_, t)| t.trim().is_empty()) {
             return None;
         }
-        let mut runs = self.runs.into_iter().map(|(look, text)| TextRun { text, style: look.style() });
+        // Glyphs set closer or further apart than their advances (tracking, proportional
+        // metrics): the average difference becomes the type's tracking, so it keeps its length.
+        let tracking = match self.spacing {
+            (sum, n) if n >= 2 && (sum / n as f64).abs() > self.at.size * 0.005 => Some(round(sum / n as f64 / self.at.size * 1000.0)),
+            _ => None,
+        };
+        let mut runs = self.runs.into_iter().map(|(look, text)| {
+            let mut style = look.style();
+            if let Some(t) = tracking {
+                style.tracking = t;
+            }
+            TextRun { text, style }
+        });
         let first = runs.next()?;
         let mut t = TextObject::point(Point::ORIGIN, &first.text, first.style);
         t.runs.extend(runs);
