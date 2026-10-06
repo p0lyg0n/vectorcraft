@@ -120,6 +120,8 @@ use crate::{VectorcraftApp, widgets};
 type DialogResult = Result<Value, String>;
 
 /// The shared dialog frame's inner margin, and the least room it leaves at the window's edges.
+/// The widest a dialog without a max width of its own grows (points).
+pub(crate) const DEFAULT_MAX_WIDTH: f32 = 520.0;
 const MARGIN: i8 = 22;
 const EDGE_GAP: f32 = 8.0;
 
@@ -413,7 +415,9 @@ pub fn show(app: &mut VectorcraftApp, ctx: &egui::Context) {
         // Never wider than the window (a large UI scale in a small window): the text wraps.
         let room = (ctx.content_rect().width() - 2.0 * (f32::from(MARGIN) + EDGE_GAP)).max(EDGE_GAP);
         ui.set_min_width(spec.min_width.min(room));
-        ui.set_max_width(spec.max_width.map_or(room, |w| w.min(room)));
+        // Dialogs without a width of their own stop at DEFAULT_MAX_WIDTH, so an effect's dialog
+        // doesn't stretch across the art it previews (fork only).
+        ui.set_max_width(spec.max_width.unwrap_or(DEFAULT_MAX_WIDTH).min(room));
         modal::heading(ui, &heading);
         ui.add_space(12.0);
         // Just opened: its first enabled field takes the keyboard focus, as in the reference app
