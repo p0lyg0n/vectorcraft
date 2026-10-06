@@ -121,7 +121,7 @@ impl NativeMenu {
                             "view.cornerWidget" | "view.textThreads" | "view.gradientAnnotator" | "effect.last" | "type.hiddenCharacters"
                         )
                     {
-                        i.set_text(app.ui.language.tr(&menus::dynamic_label(app, cmd, "")));
+                        i.set_text(app.ui.language.tr_owned("", &menus::dynamic_label(app, cmd, "")));
                     }
                 }
                 Handle::Check(c) => {

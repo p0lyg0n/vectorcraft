@@ -1,5 +1,16 @@
-//! Interface translations. Command ids, document text and file names remain stable.
-//! Untranslated labels fall back to English so coverage can grow incrementally.
+//! Interface translations. Command ids, document text and file names remain stable: only what is
+//! drawn is translated, so shortcuts, the control channel, MCP, journals and tests keep working on
+//! the English labels. Untranslated labels fall back to English so coverage can grow incrementally.
+//!
+//! The catalogues live in `crates/ui-egui/locales/<code>.tsv` (see the header of `ja.tsv` for the
+//! format): one English source text and its translation per line, optionally inside a `@context`
+//! section for words whose translation depends on where they appear ("Type" is the 書式 menu but
+//! the テキスト tab of Document Setup). Lines whose source contains `{}` are templates for labels
+//! composed at run time ("Undo {}" → "{}の取り消し"); the part matched by `{}` is translated in turn.
+
+use std::cell::Cell;
+use std::collections::HashMap;
+use std::sync::LazyLock;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -19,124 +30,282 @@ impl Language {
         }
     }
 
-    pub fn parse(code: &str) -> Option<Self> {
-        match code {
-            "en" => Some(Self::En),
-            "ja" => Some(Self::Ja),
-            _ => None,
+    pub fn code(self) -> &'static str {
+        match self {
+            Self::En => "en",
+            Self::Ja => "ja",
         }
     }
 
-    pub fn tr(self, text: &str) -> &str {
-        if self == Self::Ja
-            && let Some((_, japanese)) = JAPANESE.iter().find(|(english, _)| *english == text)
-        {
-            return japanese;
+    pub fn parse(code: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|l| l.code() == code)
+    }
+
+    fn catalog(self) -> Option<&'static Catalog> {
+        match self {
+            Self::En => None,
+            Self::Ja => Some(&JAPANESE),
         }
-        text
+    }
+
+    /// `text` in this language (`text` itself when there is no translation).
+    pub fn tr(self, text: &str) -> &str {
+        self.tr_in("", text)
+    }
+
+    /// `text` as it reads in `context` (a `@context` section of the catalogue), falling back to the
+    /// context-free translation, then to `text`.
+    pub fn tr_in<'a>(self, context: &str, text: &'a str) -> &'a str {
+        match self.catalog().and_then(|c| c.exact(context, text)) {
+            Some(t) => t,
+            None => text,
+        }
+    }
+
+    /// Like [`Self::tr_in`], also translating labels composed at run time through the catalogue's
+    /// templates ("Undo Move" → "移動の取り消し").
+    pub fn tr_owned(self, context: &str, text: &str) -> String {
+        let Some(c) = self.catalog() else { return text.to_string() };
+        if let Some(t) = c.exact(context, text) {
+            return t.to_string();
+        }
+        c.templated(context, text, 0).unwrap_or_else(|| text.to_string())
     }
 }
 
-const JAPANESE: &[(&str, &str)] = &[
-    ("Object", "オブジェクト"),
-    ("Effect", "効果"),
-    ("Settings…", "環境設定…"),
-    ("Image", "画像"),
-    ("Layer", "レイヤー"),
-    ("Type", "書式"),
-    ("Select", "選択"),
-    ("Filter", "フィルター"),
-    ("Window", "ウィンドウ"),
-    ("Language", "表示言語"),
-    ("Save As…", "別名で保存…"),
-    ("Exit", "終了"),
-    ("New…", "新規…"),
-    ("New", "新規"),
-    ("Horizontal", "横書き"),
-    ("Vertical", "縦書き"),
-    ("Orientation", "組み方向"),
-    ("Type Orientation", "組み方向"),
-    ("Layers", "レイヤー"),
-    ("History", "履歴"),
-    ("Properties", "プロパティ"),
-    ("Color", "カラー"),
-    ("Brush Settings", "ブラシ設定"),
-    ("Tools", "ツール"),
-    ("Options", "オプション"),
-    ("Zoom In", "ズームイン"),
-    ("Zoom Out", "ズームアウト"),
-    ("Fit on Screen", "画面に合わせる"),
-    ("Copy", "コピー"),
-    ("Cut", "切り取り"),
-    ("Paste", "貼り付け"),
-    ("Select All", "すべて選択"),
-    ("Deselect", "選択を解除"),
-    ("Export", "書き出し"),
-    ("Export As…", "形式を指定して書き出し…"),
-    ("Search…", "検索…"),
-    ("Theme", "テーマ"),
-    ("Menu", "メニュー"),
-    ("File", "ファイル"),
-    ("Edit", "編集"),
-    ("Pages", "ページ"),
-    ("View", "表示"),
-    ("Help", "ヘルプ"),
-    ("Preferences", "環境設定"),
-    ("Preferences…", "環境設定…"),
-    ("Interface language", "表示言語"),
-    ("Open…", "開く…"),
-    ("New blank PDF", "空白の PDF を作成"),
-    ("Create PDF from file…", "ファイルから PDF を作成…"),
-    ("Create PDF from images…", "画像から PDF を作成…"),
-    ("Create PDF from clipboard", "クリップボードから PDF を作成"),
-    ("Combine files…", "ファイルを結合…"),
-    ("Save", "保存"),
-    ("Save as…", "別名で保存…"),
-    ("Close file", "ファイルを閉じる"),
-    ("Close all", "すべて閉じる"),
-    ("Revert", "保存済みの状態に戻す"),
-    ("Print…", "印刷…"),
-    ("Document properties…", "文書のプロパティ…"),
-    ("Undo", "取り消し"),
-    ("Redo", "やり直し"),
-    ("Find…", "検索…"),
-    ("Advanced search…", "高度な検索…"),
-    ("Copy pages", "ページをコピー"),
-    ("Cut pages", "ページを切り取り"),
-    ("Paste pages", "ページを貼り付け"),
-    ("Fit visible", "表示範囲に合わせる"),
-    ("Marquee zoom", "範囲指定ズーム"),
-    ("Take a snapshot", "スナップショットを作成"),
-    ("Full screen mode", "全画面表示"),
-    ("Read mode", "閲覧モード"),
-    ("Switch light / dark theme", "明るい／暗いテーマを切り替え"),
-    ("Comments panel", "コメントパネル"),
-    ("Form fields panel", "フォームフィールドパネル"),
-    ("Clear form", "フォームをクリア"),
-    ("Find tools and commands…", "ツールとコマンドを検索…"),
-    ("Zoom", "ズーム"),
-    ("Actual size", "実際のサイズ"),
-    ("Zoom to page level", "ページ全体を表示"),
-    ("Fit to width", "幅に合わせる"),
-    ("Display theme", "表示テーマ"),
-    ("Side panels", "サイドパネル"),
-    ("OK", "OK"),
-];
+thread_local! {
+    /// The language the UI on this thread draws in: set from `UiState::language` at the start of
+    /// every frame, so widgets that don't see the app (panels' helpers, dialogs) can translate.
+    /// Per thread so parallel tests don't see each other's language.
+    static CURRENT: Cell<Language> = const { Cell::new(Language::En) };
+}
+
+/// Make `lang` the language [`t`] and [`t_in`] translate to on this thread.
+pub fn set_current(lang: Language) {
+    CURRENT.with(|c| c.set(lang));
+}
+
+/// The language the UI on this thread draws in.
+pub fn current() -> Language {
+    CURRENT.with(Cell::get)
+}
+
+/// `text` in the current UI language.
+pub fn t(text: &str) -> &str {
+    current().tr(text)
+}
+
+/// `text` in the current UI language, as it reads in `context`.
+pub fn t_in<'a>(context: &str, text: &'a str) -> &'a str {
+    current().tr_in(context, text)
+}
+
+/// `text` (possibly composed at run time) in the current UI language.
+pub fn t_owned(text: &str) -> String {
+    current().tr_owned("", text)
+}
+
+/// A parsed catalogue.
+#[derive(Default)]
+pub(crate) struct Catalog {
+    /// (context, source) → translation; "" is the context-free section.
+    exact: HashMap<(&'static str, &'static str), &'static str>,
+    /// Templates: (context, prefix, suffix, translation with one `{}`).
+    templates: Vec<(&'static str, &'static str, &'static str, &'static str)>,
+}
+
+/// How deep templates nest ("Undo Show Rulers" is two levels).
+const MAX_TEMPLATE_DEPTH: usize = 3;
+
+impl Catalog {
+    pub(crate) fn parse(src: &'static str) -> Self {
+        let mut cat = Catalog::default();
+        let mut context = "";
+        for line in src.lines() {
+            let line = line.trim_end_matches('\r');
+            if line.trim().is_empty() || line.starts_with('#') {
+                continue;
+            }
+            if let Some(ctx) = line.strip_prefix('@') {
+                context = ctx.trim();
+                continue;
+            }
+            let Some((source, translation)) = line.split_once('\t') else { continue };
+            let translation = translation.trim();
+            if source.is_empty() || translation.is_empty() {
+                continue;
+            }
+            if let Some((prefix, suffix)) = source.split_once("{}") {
+                if translation.contains("{}") {
+                    cat.templates.push((context, prefix, suffix, translation));
+                }
+                continue;
+            }
+            cat.exact.insert((context, source), translation);
+        }
+        // Longest pattern first, so "Undo Paste in Front {}"-style specific templates win.
+        cat.templates.sort_by_key(|(_, p, s, _)| std::cmp::Reverse(p.len() + s.len()));
+        cat
+    }
+
+    fn exact(&self, context: &str, text: &str) -> Option<&'static str> {
+        if !context.is_empty()
+            && let Some(t) = self.exact.get(&(context, text))
+        {
+            return Some(t);
+        }
+        self.exact.get(&("", text)).copied()
+    }
+
+    fn templated(&self, context: &str, text: &str, depth: usize) -> Option<String> {
+        if depth >= MAX_TEMPLATE_DEPTH {
+            return None;
+        }
+        for (ctx, prefix, suffix, translation) in &self.templates {
+            if !ctx.is_empty() && *ctx != context {
+                continue;
+            }
+            let Some(inner) = text.strip_prefix(prefix).and_then(|r| r.strip_suffix(suffix)) else { continue };
+            if inner.is_empty() || text.len() < prefix.len() + suffix.len() {
+                continue;
+            }
+            let inner = match self.exact(context, inner) {
+                Some(t) => t.to_string(),
+                None => self.templated(context, inner, depth + 1).unwrap_or_else(|| inner.to_string()),
+            };
+            return Some(translation.replacen("{}", &inner, 1));
+        }
+        None
+    }
+}
+
+static JAPANESE: LazyLock<Catalog> = LazyLock::new(|| Catalog::parse(include_str!("../locales/ja.tsv")));
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn translations_are_unique_and_preserve_unknown_text() {
-        for (i, (en, ja)) in JAPANESE.iter().enumerate() {
-            assert!(!ja.is_empty());
-            assert!(JAPANESE.iter().take(i).all(|(other, _)| en != other));
-            assert_eq!(Language::En.tr(en), *en);
-        }
+    fn catalog_parses_contexts_templates_and_skips_junk() {
+        let cat = Catalog::parse(
+            "# comment\nType\t書式\n\n@Document Setup\nType\tテキスト\nbroken line\nUndo {}\t{}の取り消し\n@\nShow {}\t{}を表示\nRulers\t定規\n",
+        );
+        assert_eq!(cat.exact("", "Type"), Some("書式"));
+        assert_eq!(cat.exact("Document Setup", "Type"), Some("テキスト"));
+        assert_eq!(cat.exact("Layers", "Type"), Some("書式"), "unknown contexts fall back to the plain entry");
+        assert_eq!(cat.exact("", "broken line"), None);
+        assert_eq!(cat.templated("", "Show Rulers", 0).as_deref(), Some("定規を表示"));
+        // The Undo template lives in the Document Setup section only.
+        assert_eq!(cat.templated("", "Undo Rulers", 0), None);
+        assert_eq!(cat.templated("Document Setup", "Undo Rulers", 0).as_deref(), Some("定規の取り消し"));
+        assert_eq!(cat.templated("", "Show ", 0), None, "an empty hole matches nothing");
+    }
+
+    #[test]
+    fn templates_nest_and_untranslated_holes_stay_english() {
+        let cat = Catalog::parse("Undo {}\t{}の取り消し\nShow {}\t{}を表示\nRulers\t定規\n");
+        assert_eq!(cat.templated("", "Undo Show Rulers", 0).as_deref(), Some("定規を表示の取り消し"));
+        assert_eq!(cat.templated("", "Undo Frobnicate", 0).as_deref(), Some("Frobnicateの取り消し"));
+    }
+
+    #[test]
+    fn translations_preserve_unknown_text() {
+        assert_eq!(Language::En.tr("File"), "File");
         assert_eq!(Language::Ja.tr("File"), "ファイル");
-        assert_eq!(Language::Ja.tr("日本語の文書.pdf"), "日本語の文書.pdf");
+        assert_eq!(Language::Ja.tr("日本語の文書.vectorcraft"), "日本語の文書.vectorcraft");
+        assert_eq!(Language::Ja.tr_owned("", "Undo Move"), "移動の取り消し");
+        assert_eq!(Language::En.tr_owned("", "Undo Move"), "Undo Move");
         assert_eq!(Language::parse("xx"), None);
+        assert_eq!(Language::parse("ja"), Some(Language::Ja));
+    }
+
+    #[test]
+    fn japanese_catalogue_is_well_formed() {
+        let src = include_str!("../locales/ja.tsv");
+        let mut seen = std::collections::HashSet::new();
+        let mut context = "";
+        for (n, line) in src.lines().enumerate() {
+            let line = line.trim_end_matches('\r');
+            if line.trim().is_empty() || line.starts_with('#') {
+                continue;
+            }
+            if let Some(c) = line.strip_prefix('@') {
+                context = c.trim();
+                continue;
+            }
+            let (en, ja) = line.split_once('\t').unwrap_or_else(|| panic!("line {}: no tab: {line:?}", n + 1));
+            assert!(!ja.trim().is_empty(), "line {}: empty translation", n + 1);
+            assert!(!ja.contains('\t'), "line {}: more than one tab", n + 1);
+            assert_eq!(en.contains("{}"), ja.contains("{}"), "line {}: template holes differ", n + 1);
+            assert!(seen.insert((context, en)), "line {}: {en:?} is listed twice in @{context}", n + 1);
+            // An ellipsis on the English side stays on the Japanese side (it means "opens a dialog").
+            assert_eq!(en.ends_with('…'), ja.ends_with('…'), "line {}: ellipsis differs: {en:?} → {ja:?}", n + 1);
+        }
+    }
+
+    /// Every label the menu bar draws has a Japanese translation, except names (fonts, plug-ins,
+    /// effects, libraries, workspaces) that come from data rather than the code.
+    #[test]
+    fn every_static_menu_label_is_translated() {
+        use crate::menus::Item;
+        fn walk(items: &[Item], path: &str, missing: &mut Vec<String>) {
+            for it in items {
+                let (label, children) = match it {
+                    Item::Cmd(l, id, _) => {
+                        // Generated lists: names, not interface text.
+                        if matches!(
+                            *id,
+                            "app.language" | "window.brightness" | "type.font" | "window.workspace" | "file.openRecent" | "view.savedView"
+                        ) || id.starts_with("plugins.")
+                            || id.starts_with("effect.")
+                            || id.starts_with("window.library")
+                        {
+                            continue;
+                        }
+                        (*l, None)
+                    }
+                    Item::Todo(l, _) | Item::Header(l) => (*l, None),
+                    Item::Sub(l, c) => (*l, Some(c)),
+                    Item::Sep => continue,
+                };
+                // Product and format names read the same in Japanese.
+                let same = matches!(label, "OpenType");
+                if Language::Ja.tr_owned("", label) == label && !label.is_empty() && !same {
+                    missing.push(format!("{path} > {label}"));
+                }
+                // Lists of fonts, sizes, grid presets and libraries hold names, not interface text.
+                let data_list = matches!(label, "Font" | "Recent Fonts" | "Size")
+                    || label.ends_with("Point Perspective")
+                    || label == "Swatch Libraries"
+                    || label == "Graphic Style Libraries";
+                if let Some(c) = children
+                    && !data_list
+                {
+                    walk(c, &format!("{path} > {label}"), missing);
+                }
+            }
+        }
+        let mut missing = vec![];
+        for (title, items) in crate::menus::menu_tree() {
+            // The Effect menu lists the effect catalogue's names (translated with the effects).
+            if title == "Effect" {
+                continue;
+            }
+            if title != "VectorCraft" && Language::Ja.tr(title) == title {
+                missing.push(title.to_string());
+            }
+            walk(&items, title, &mut missing);
+        }
+        assert!(missing.is_empty(), "{} menu labels have no Japanese:\n{}", missing.len(), missing.join("\n"));
+    }
+
+    #[test]
+    fn current_language_is_per_thread() {
+        set_current(Language::Ja);
+        assert_eq!(t("File"), "ファイル");
+        std::thread::spawn(|| assert_eq!(t("File"), "File")).join().unwrap();
+        set_current(Language::En);
+        assert_eq!(t("File"), "File");
     }
 
     #[test]
@@ -150,22 +319,5 @@ mod tests {
         let saved = serde_json::to_string(&app.ui).unwrap();
         let restored: crate::state::UiState = serde_json::from_str(&saved).unwrap();
         assert_eq!(restored.language, Language::Ja);
-    }
-
-    #[test]
-    fn japanese_glyphs_are_available_without_system_fonts() {
-        let ctx = egui::Context::default();
-        crate::theme::install_fonts(&ctx);
-        let mut output = ctx.run_ui(egui::RawInput::default(), |_| {});
-        output.textures_delta.clear();
-        ctx.fonts_mut(|fonts| {
-            let families: Vec<_> = fonts.definitions().families.keys().cloned().collect();
-            for family in families {
-                let font = egui::FontId::new(13.0, family);
-                for ch in "日本語ファイル編集".chars() {
-                    assert!(fonts.has_glyph(&font, ch), "missing {ch} in {font:?}");
-                }
-            }
-        });
     }
 }

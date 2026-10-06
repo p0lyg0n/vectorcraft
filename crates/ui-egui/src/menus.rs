@@ -2169,7 +2169,7 @@ fn render_items(app: &VectorcraftApp, ui: &mut egui::Ui, items: &[Item], clicked
                     continue;
                 }
                 let label = dynamic_label(app, id, label);
-                let label = app.ui.language.tr(&label).to_string();
+                let label = app.ui.language.tr_owned("", &label);
                 let sc = item_shortcut(id, p).map(pretty_shortcut).unwrap_or_default();
                 let chk = checked(app, id, p);
                 let text = match chk {
