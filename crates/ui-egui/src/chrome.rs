@@ -62,7 +62,7 @@ pub fn app_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
             ui.painter().rect_filled(wr, CornerRadius::same(4), if wresp.hovered() { t.hover } else { t.panel });
             ui.painter().with_clip_rect(wr.shrink2(vec2(4.0, 0.0))).galley(wr.left_center() + vec2(10.0, -ws.size().y / 2.0), ws, t.text);
             icons::paint(ui, "chevron-down", egui::Rect::from_center_size(wr.right_center() - vec2(12.0, 0.0), vec2(12.0, 12.0)), t.text_dim);
-            let wresp = wresp.on_hover_text("Switch workspace");
+            let wresp = wresp.on_hover_text(crate::i18n::t("Switch workspace"));
             egui::Popup::menu(&wresp).show(|ui| crate::workspaces::popup(app, ui));
             ui.add_space(8.0);
             // Search box → command palette.
@@ -116,7 +116,7 @@ pub fn control_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                     ui.painter().circle_filled(g.center_top() + vec2(0.0, 2.0 + i as f32 * 4.0), 0.9, t.text_disabled);
                 }
                 let Some(st) = app.session.active() else {
-                    ui.label(egui::RichText::new("No Document").color(t.text_dim));
+                    ui.label(egui::RichText::new(crate::i18n::t("No Document")).color(t.text_dim));
                     return;
                 };
                 let sel = st.selection.objects.clone();
@@ -134,7 +134,7 @@ pub fn control_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                     }
                     _ => crate::panels::appearance::object_label(app),
                 };
-                ui.label(egui::RichText::new(label).font(theme::semibold(12.0)).color(t.text));
+                ui.label(egui::RichText::new(crate::i18n::t_in("Control", label)).font(theme::semibold(12.0)).color(t.text));
                 ui.add_space(6.0);
                 crate::place::control_bar_details(app, ui);
                 crate::toolbar::control_bar_options(app, ui);
@@ -147,7 +147,9 @@ pub fn control_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                 crate::panels::paint_chip(app, ui, true, 22.0, true);
                 // The link opens the Stroke panel as a popover under it; then the weight spinner
                 // (with presets) and the width profile.
-                let link = ui.link(egui::RichText::new("Stroke:").size(12.0).color(t.text).underline()).on_hover_text("Stroke options");
+                let link = ui
+                    .link(egui::RichText::new(crate::i18n::t("Stroke:")).size(12.0).color(t.text).underline())
+                    .on_hover_text(crate::i18n::t("Stroke options"));
                 stroke_panel::popover(app, &link);
                 stroke_panel::weight_field(app, ui, "cb-stroke", weight, 100.0);
                 if let Some(id) = stroke_panel::profile_dropdown(app, ui, shown_stroke.as_ref().and_then(|s| s.profile.as_ref())) {
@@ -155,7 +157,7 @@ pub fn control_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                 }
                 ui.add_space(4.0);
                 ui.separator();
-                if ui.link(egui::RichText::new("Opacity:").size(12.0).color(t.text).underline()).clicked() {
+                if ui.link(egui::RichText::new(crate::i18n::t("Opacity:")).size(12.0).color(t.text).underline()).clicked() {
                     app.ui.open_panel = Some("transparency".into());
                 }
                 if let Some(o) = widgets::plain_field(ui, "cb-opacity", opacity as f64 * 100.0, "%", 0, 56.0)
@@ -166,11 +168,11 @@ pub fn control_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                 if !sel.is_empty() {
                     // Style picker: the selection's graphic style; its menu applies another.
                     ui.add_space(4.0);
-                    if ui.link(egui::RichText::new("Style:").size(12.0).color(t.text).underline()).clicked() {
+                    if ui.link(egui::RichText::new(crate::i18n::t("Style:")).size(12.0).color(t.text).underline()).clicked() {
                         app.ui.open_panel = Some("graphicStyles".into());
                     }
                     let resp = widgets::chip_button(ui, 22.0, true, |ui, r| crate::panels::graphic_styles::paint_linked(app, ui, r))
-                        .on_hover_text("Graphic Style");
+                        .on_hover_text(crate::i18n::t("Graphic Style"));
                     egui::Popup::menu(&resp).show(|ui| crate::panels::graphic_styles::picker(app, ui));
                 }
                 ui.separator();
@@ -211,7 +213,7 @@ pub fn control_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
                         if k == "height" {
                             crate::panels::transform::constrain_link(app, ui);
                         }
-                        ui.label(egui::RichText::new(lbl).size(12.0).color(t.text_dim));
+                        ui.label(egui::RichText::new(crate::i18n::t(lbl)).size(12.0).color(t.text_dim));
                         if let Some(nv) = widgets::num_field(ui, ("cb", k), Some(v), units, 80.0) {
                             app.run("object.setBounds", json!({k: nv, "reference": 4, "proportional": link})).ok();
                         }
@@ -225,10 +227,10 @@ pub fn control_bar(app: &mut VectorcraftApp, ui: &mut Ui) {
 /// "Name* @ 66.67 % (<Opacity Mask>/Opacity Mask)".
 fn tab_title(d: &vectorcraft_engine::DocState, zoom: f64, outline: bool) -> String {
     let mode = if d.doc.mask_edit.is_some() {
-        "<Opacity Mask>/Opacity Mask".to_string()
+        crate::i18n::t("<Opacity Mask>/Opacity Mask").to_string()
     } else {
         let color = if d.doc.color_mode == vectorcraft_doc::ColorMode::Cmyk { "CMYK" } else { "RGB" };
-        format!("{color}/{}", if outline { "Outline" } else { "Preview" })
+        format!("{color}/{}", crate::i18n::t(if outline { "Outline" } else { "Preview" }))
     };
     format!("{}{} @ {} ({mode})", d.title(), if d.is_dirty() { "*" } else { "" }, zoom_label(zoom).replace('%', " %"))
 }

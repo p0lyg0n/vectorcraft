@@ -18,7 +18,7 @@ pub(super) fn field(ui: &mut egui::Ui, d: &mut Dialog, key: &str, label: &str) {
 /// [`field`] `width` points wide.
 pub(super) fn field_w(ui: &mut egui::Ui, d: &mut Dialog, key: &str, label: &str, width: f32) {
     let t = Tokens::get(ui.ctx());
-    ui.label(egui::RichText::new(label).color(t.text_dim));
+    ui.label(egui::RichText::new(crate::i18n::t(label)).color(t.text_dim));
     text(ui, d, key, width);
     ui.end_row();
 }
@@ -26,7 +26,7 @@ pub(super) fn field_w(ui: &mut egui::Ui, d: &mut Dialog, key: &str, label: &str,
 /// A labelled [`length`] field (one grid row).
 pub(super) fn length_field(ui: &mut egui::Ui, d: &mut Dialog, key: &str, label: &str, unit: Unit) {
     let t = Tokens::get(ui.ctx());
-    ui.label(egui::RichText::new(label).color(t.text_dim));
+    ui.label(egui::RichText::new(crate::i18n::t(label)).color(t.text_dim));
     length(ui, d, key, unit, FIELD_W);
     ui.end_row();
 }
@@ -101,7 +101,7 @@ pub(super) fn text_area(ui: &mut egui::Ui, d: &mut Dialog, key: &str, width: f32
 /// A checkbox bound to `d.fields[key]`.
 pub(super) fn check(ui: &mut egui::Ui, d: &mut Dialog, key: &str, label: &str) {
     let mut b = d.bool(key);
-    if ui.checkbox(&mut b, label).changed() {
+    if ui.checkbox(&mut b, crate::i18n::t(label)).changed() {
         d.fields.insert(key.into(), Value::Bool(b));
     }
 }
@@ -304,7 +304,7 @@ pub(super) fn slider_w(
     let v = d.f64(key, 0.0).clamp(min, max);
     let mut new = None;
     ui.horizontal(|ui| {
-        ui.add_sized([label_w, 22.0], egui::Label::new(egui::RichText::new(label).color(t.text)));
+        ui.add_sized([label_w, 22.0], egui::Label::new(egui::RichText::new(crate::i18n::t(label)).color(t.text)));
         if let (Some(x), _) = crate::widgets::color_slider(ui, ("dlg-slider", key), ((v - min) / (max - min)) as f32, SLIDER_WIDTH, track) {
             new = Some((min + x as f64 * (max - min)).round());
         }

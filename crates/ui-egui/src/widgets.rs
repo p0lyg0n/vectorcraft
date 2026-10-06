@@ -404,10 +404,10 @@ pub fn fill_stroke_proxy(ui: &mut Ui, fill: &Paint, stroke: &Paint, mixed: (bool
         None
     };
     ProxyClicks {
-        fill: fill_resp.on_hover_text("Fill (X), double-click for the Color Picker").clicked(),
-        stroke: stroke_resp.on_hover_text("Stroke (X), double-click for the Color Picker").clicked(),
-        swap: swap.on_hover_text("Swap Fill and Stroke (Shift+X)").clicked(),
-        default: def.on_hover_text("Default Fill and Stroke (D)").clicked(),
+        fill: fill_resp.on_hover_text(crate::i18n::t("Fill (X), double-click for the Color Picker")).clicked(),
+        stroke: stroke_resp.on_hover_text(crate::i18n::t("Stroke (X), double-click for the Color Picker")).clicked(),
+        swap: swap.on_hover_text(crate::i18n::t("Swap Fill and Stroke (Shift+X)")).clicked(),
+        default: def.on_hover_text(crate::i18n::t("Default Fill and Stroke (D)")).clicked(),
         pick,
         drop,
     }
@@ -430,7 +430,7 @@ pub fn dropdown_with(
     combo(ui, id, current, width, false, |ui| {
         let mut chosen = None;
         for (i, o) in options.iter().enumerate() {
-            if ui.add_enabled(enabled(i), egui::Button::selectable(*o == current, *o)).clicked() {
+            if ui.add_enabled(enabled(i), egui::Button::selectable(*o == current, crate::i18n::t(o))).clicked() {
                 chosen = Some(i);
             }
         }
@@ -450,13 +450,15 @@ fn combo<R>(
     list: impl FnOnce(&mut Ui) -> Option<R>,
 ) -> Option<R> {
     let t = Tokens::get(ui.ctx());
+    // Choices translate; names in a searchable list (fonts) are shown as they are.
+    let shown = if searchable { current } else { crate::i18n::t(current) };
     egui::Frame::NONE
         .fill(t.input)
         .stroke(Stroke::new(1.0, t.input_border))
         .corner_radius(CornerRadius::same(3))
         .show(ui, |ui| {
             egui::ComboBox::from_id_salt(ui.id().with(id))
-                .selected_text(egui::RichText::new(current).size(12.0))
+                .selected_text(egui::RichText::new(shown).size(12.0))
                 .width(width - 4.0)
                 .close_behavior(if searchable { egui::PopupCloseBehavior::CloseOnClickOutside } else { egui::PopupCloseBehavior::CloseOnClick })
                 .height(if searchable { f32::INFINITY } else { ui.spacing().combo_height })

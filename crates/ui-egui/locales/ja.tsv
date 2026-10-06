@@ -38,7 +38,7 @@ Close	閉じる
 Close All	すべてを閉じる
 Save	保存
 Save As…	別名で保存…
-Save a Copy…	複製を保存…
+Save a Copy…	コピーを保存…
 Save as Template…	テンプレートとして保存…
 Save as PDF…	PDF として保存…
 Save for Office Documents…	Office 用に保存…
@@ -47,7 +47,7 @@ Place…	配置…
 Export	書き出し
 Export for Screens…	スクリーン用に書き出し…
 Export As…	書き出し形式…
-Save for Web (Legacy)…	Web 用に保存（従来）…
+Save for Web (Legacy)…	Web 用に保存 (従来)…
 Export Selection…	選択範囲を書き出し…
 Export As PNG…	PNG として書き出し…
 Export As SVG…	SVG として書き出し…
@@ -96,7 +96,7 @@ Convert to CMYK	CMYK に変換
 Convert to Grayscale	グレースケールに変換
 Convert to RGB	RGB に変換
 Invert Colors	カラー反転
-Overprint Black…	黒をオーバープリント…
+Overprint Black…	オーバープリントブラック…
 Saturate…	彩度調整…
 Vector Halftone…	ベクターハーフトーン…
 Edit Original	オリジナルを編集
@@ -145,10 +145,10 @@ Other Layers	その他のレイヤー
 Expand…	分割・拡張…
 Expand Appearance	アピアランスを分割
 Flatten Transparency…	透明部分を分割・統合…
-Make Pixel Perfect	ピクセルを最適化
+Make Pixel Perfect	ピクセルグリッドに最適化
 Rasterize…	ラスタライズ…
 Create Gradient Mesh…	グラデーションメッシュを作成…
-Create Object Mosaic…	オブジェクトモザイクを作成…
+Create Object Mosaic…	モザイクオブジェクトを作成…
 Create Trim Marks	トリムマークを作成
 Crop Image	画像の切り抜き
 Path	パス
@@ -171,7 +171,7 @@ Make	作成
 Make…	作成…
 Edit Pattern	パターンを編集
 Tile Edge Color…	タイルの境界線のカラー…
-Repeat	繰り返し
+Repeat	リピート
 Radial	ラジアル
 Grid	グリッド
 Mirror	ミラー
@@ -226,7 +226,7 @@ Combine Slices	スライスを結合
 Divide Slices…	スライスを分割…
 Delete All	すべてを削除
 Slice Options…	スライスオプション…
-Clip to Artboard	アートボードでクリップ
+Clip to Artboard	アートボードサイズでクリップ
 
 # Type
 Font	フォント
@@ -245,32 +245,32 @@ Threaded Text	スレッドテキストオプション
 Create	作成
 Release Selection	選択部分をリリース
 Remove Threading	スレッドを解除
-Fit Headline	見出しを合わせる
-Find Font…	フォント検索…
+Fit Headline	ヘッドラインを合わせる
+Find Font…	フォントの検索と置換…
 Change Case	大文字と小文字の変更
 UPPERCASE	すべて大文字
 lowercase	すべて小文字
-Title Case	先頭文字を大文字
-Sentence case	文の先頭文字を大文字
-Smart Punctuation…	句読点の自動修正…
+Title Case	単語の先頭のみ大文字
+Sentence case	文頭のみ大文字
+Smart Punctuation…	欧文用字形の自動置換…
 Create Outlines	アウトラインを作成
-Optical Margin Alignment	光学マージン揃え
+Optical Margin Alignment	最適なマージン揃え
 Type Orientation	組み方向
 Horizontal	横組み
 Vertical	縦組み
 Insert Special Character	特殊文字を挿入
 Insert Whitespace Character	空白文字を挿入
 Insert Break Character	分割文字を挿入
-Fill with Placeholder Text	サンプルテキストを割り付け
-Convert To Area Type	エリア内文字に切り替え
-Convert To Point Type	ポイント文字に切り替え
+Fill with Placeholder Text	サンプルテキストの割り付け
+Convert To Area Type	エリア内文字に切り換え
+Convert To Point Type	ポイント文字に切り換え
 Snap to Glyph	グリフにスナップ
 Show Hidden Characters	制御文字を表示
 Hide Hidden Characters	制御文字を隠す
 
 # Select
 All	すべてを選択
-All on Active Artboard	作業アートボードで全てを選択
+All on Active Artboard	作業アートボードのすべてを選択
 Deselect	選択を解除
 Reselect	再選択
 Inverse	選択範囲を反転
@@ -281,18 +281,18 @@ Appearance	アピアランス
 Appearance Attribute	アピアランス属性
 Blending Mode	描画モード
 Fill & Stroke	塗りと線
-Fill Color	カラー（塗り）
+Fill Color	カラー (塗り)
 Opacity	不透明度
-Stroke Color	カラー（線）
+Stroke Color	カラー (線)
 Stroke Weight	線幅
 Graphic Style	グラフィックスタイル
 Symbol Instance	シンボルインスタンス
 Font Family	フォントファミリー
-Font Family & Style	フォントファミリーとスタイル
-Font Family, Style & Size	フォントファミリー、スタイル、サイズ
+Font Family & Style	フォントファミリー (スタイル)
+Font Family, Style & Size	フォントファミリー (スタイルとサイズ)
 Font Size	フォントサイズ
-Text Fill Color	テキストの塗りカラー
-Text Stroke Color	テキストの線カラー
+Text Fill Color	テキストカラー (塗り)
+Text Stroke Color	テキストカラー (線)
 All on Same Layers	同じレイヤー上のすべて
 Direction Handles	方向線ハンドル
 Bristle Brush Strokes	絵筆ブラシストローク
@@ -329,7 +329,7 @@ Show {}	{}を表示
 Hide {}	{}を隠す
 Lock {}	{}をロック
 Unlock {}	{}のロックを解除
-Edges	エッジ
+Edges	境界線
 Bounding Box	バウンディングボックス
 Transparency Grid	透明グリッド
 Print Tiling	プリント分割
@@ -365,7 +365,7 @@ Full Screen Mode	フルスクリーンモード
 New View…	新規表示…
 Edit Views…	表示の編集…
 Saved View {}	保存した表示 {}
-Reset Rotate View	ビューの回転をリセット
+Reset Rotate View	ビューを回転の初期化
 
 # Window
 New Window	新規ウィンドウ
@@ -635,7 +635,7 @@ Refresh	更新
 Relink…	再リンク…
 Rename	名前を変更
 Reset Panel	パネルをリセット
-Save a Copy	複製を保存
+Save a Copy	コピーを保存
 Save as preset:	プリセットとして保存：
 Select All Unused	未使用項目をすべて選択
 Select a text object	テキストオブジェクトを選択してください
@@ -765,7 +765,7 @@ No Document	ドキュメントがありません
 No document	ドキュメントがありません
 No document open	ドキュメントが開かれていません
 No document open.	ドキュメントが開かれていません。
-No Selection	選択されていません
+No Selection	選択なし
 None	なし
 Objects	オブジェクト
 Only Web Colors	Web セーフカラーのみに制限
@@ -890,6 +890,58 @@ Transparency Flattener Presets	透明の分割・統合プリセット
 Vector Halftone	ベクターハーフトーン
 Width Point Edit	線幅ポイントを編集
 Toggle single/double column	1 列／2 列を切り替え
+
+# Control bar (the selection's kind is drawn in the Control context below)
+Stroke options	線のオプション
+<Opacity Mask>/Opacity Mask	<不透明マスク>/不透明マスク
+Mixed Objects	複合オブジェクト
+Anchor Point	アンカーポイント
+Linked File	リンクファイル
+Embedded	埋め込み
+Image	画像
+Clip Group	クリップグループ
+Layer	レイヤー
+Symbol	シンボル
+Guide	ガイド
+Mesh	メッシュ
+Envelope	エンベロープ
+Rectangle	長方形
+Rounded Rectangle	角丸長方形
+Ellipse	楕円形
+Polygon	多角形
+Line	直線
+
+# Save for Web
+Original	元画像
+Optimized	最適化
+2-Up	2 分割
+4-Up	4 分割
+Interlaced	インターレース
+Progressive	プログレッシブ
+Percent:	%：
+Lossy:	劣化：
+Amount:	量：
+Reduction:	減色アルゴリズム：
+Web Snap:	Web スナップ：
+Metadata:	メタデータ：
+Convert to sRGB	sRGB に変換
+ICC Profile	ICC プロファイル
+Fit in View	全体表示
+Save the settings as a preset	設定をプリセットとして保存
+Delete this saved preset	保存したプリセットを削除
+Slices:	スライス：
+Output:	出力：
+Download	ダウンロード
+Low	低
+Medium	中
+High	高
+Very High	最高
+Maximum	最大
+Black	ブラック
+Transparent	透明
+Other	その他
+Unlock	ロック解除
+Restore	元に戻す
 
 # Words that read differently in one place
 @Document Setup
@@ -1095,3 +1147,11 @@ Medium	中
 Large	大
 Update Links	リンクを更新
 When pasting text	テキストのペースト時
+
+# Window menu
+@Window
+Arrange	アレンジ
+
+# Control bar: the kind of the selection
+@Control
+Type	文字

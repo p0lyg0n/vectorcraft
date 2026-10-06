@@ -49,7 +49,7 @@ impl NativeMenu {
         let mut counter = 0usize;
         for (title, entries) in menus::menu_tree() {
             let sub = Submenu::new(app.ui.language.tr(title), true);
-            build(app, &sub, &entries, &mut items, &mut counter);
+            build(app, &sub, title, &entries, &mut items, &mut counter);
             let _ = menu.append(&sub);
         }
         menu.init_for_nsapp();
@@ -136,6 +136,7 @@ impl NativeMenu {
 fn build(
     app: &VectorcraftApp,
     parent: &Submenu,
+    menu: &str,
     entries: &[Item],
     items: &mut HashMap<String, (String, Value, Handle, String)>,
     counter: &mut usize,
@@ -146,14 +147,14 @@ fn build(
                 let _ = parent.append(&PredefinedMenuItem::separator());
             }
             Item::Header(h) => {
-                let _ = parent.append(&MenuItem::new(app.ui.language.tr(h), false, None));
+                let _ = parent.append(&MenuItem::new(app.ui.language.tr_in(menu, h), false, None));
             }
             Item::Todo(label, sc) => {
-                let _ = parent.append(&MenuItem::new(app.ui.language.tr(label), false, accel(sc)));
+                let _ = parent.append(&MenuItem::new(app.ui.language.tr_in(menu, label), false, accel(sc)));
             }
             Item::Sub(label, children) => {
-                let sub = Submenu::new(app.ui.language.tr(label), true);
-                build(app, &sub, children, items, counter);
+                let sub = Submenu::new(app.ui.language.tr_in(menu, label), true);
+                build(app, &sub, menu, children, items, counter);
                 let _ = parent.append(&sub);
             }
             // Unused saved-view and recent-file slots are left out, as in the in-window menus.
@@ -163,11 +164,11 @@ fn build(
                 let id = format!("dc{counter}");
                 let sc = if params.is_null() { menus::shortcut_of(cmd).and_then(accel) } else { None };
                 let handle = if menus::checked(app, cmd, params).is_some() {
-                    let c = CheckMenuItem::with_id(id.clone(), app.ui.language.tr(label), true, false, sc);
+                    let c = CheckMenuItem::with_id(id.clone(), app.ui.language.tr_in(menu, label), true, false, sc);
                     let _ = parent.append(&c);
                     Handle::Check(c)
                 } else {
-                    let i = MenuItem::with_id(id.clone(), app.ui.language.tr(label), true, sc);
+                    let i = MenuItem::with_id(id.clone(), app.ui.language.tr_in(menu, label), true, sc);
                     let _ = parent.append(&i);
                     Handle::Plain(i)
                 };

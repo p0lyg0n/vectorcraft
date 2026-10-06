@@ -2117,7 +2117,7 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
                 } else {
                     egui::RichText::new(app.ui.language.tr(title)).size(13.0).color(t.text)
                 };
-                ui.menu_button(text, |ui| menu_body(app, ui, items, &mut clicked));
+                ui.menu_button(text, |ui| menu_body(app, ui, title, items, &mut clicked));
             }
             ui.cursor().min.x
         })
@@ -2129,15 +2129,17 @@ pub fn menu_bar(app: &mut VectorcraftApp, ui: &mut egui::Ui) -> f32 {
 }
 
 /// A top-level menu's popup: as wide as its widest item (label plus shortcut), at least 230 pt;
-/// it scrolls when it is taller than the window.
-fn menu_body(app: &VectorcraftApp, ui: &mut egui::Ui, items: &[Item], clicked: &mut Option<(String, Value)>) {
+/// it scrolls when it is taller than the window. `menu` is the top-level menu's title, the
+/// context its labels translate in.
+fn menu_body(app: &VectorcraftApp, ui: &mut egui::Ui, menu: &str, items: &[Item], clicked: &mut Option<(String, Value)>) {
     widgets::menu_scroll(ui, |ui| {
         ui.set_min_width(230.0);
-        render_items(app, ui, items, clicked);
+        render_items(app, ui, menu, items, clicked);
     });
 }
 
-fn render_items(app: &VectorcraftApp, ui: &mut egui::Ui, items: &[Item], clicked: &mut Option<(String, Value)>) {
+fn render_items(app: &VectorcraftApp, ui: &mut egui::Ui, menu: &str, items: &[Item], clicked: &mut Option<(String, Value)>) {
+    let tr = |label: &'static str| app.ui.language.tr_in(menu, label);
     let t = Tokens::get(ui.ctx());
     for it in items {
         match it {
@@ -2145,22 +2147,22 @@ fn render_items(app: &VectorcraftApp, ui: &mut egui::Ui, items: &[Item], clicked
                 ui.separator();
             }
             Item::Header(h) => {
-                ui.label(egui::RichText::new(app.ui.language.tr(h)).size(11.0).color(t.text_dim));
+                ui.label(egui::RichText::new(tr(h)).size(11.0).color(t.text_dim));
             }
             Item::Sub(label, children) => {
-                ui.menu_button(app.ui.language.tr(label), |ui| {
+                ui.menu_button(tr(label), |ui| {
                     widgets::menu_scroll(ui, |ui| {
                         ui.set_min_width(200.0);
-                        render_items(app, ui, children, clicked);
+                        render_items(app, ui, menu, children, clicked);
                     });
                 });
             }
             Item::Todo(label, sc) => {
                 ui.add_enabled_ui(false, |ui| {
-                    ui.add(egui::Button::new(app.ui.language.tr(label)).shortcut_text(pretty_shortcut(sc)));
+                    ui.add(egui::Button::new(tr(label)).shortcut_text(pretty_shortcut(sc)));
                 })
                 .response
-                .on_disabled_hover_text("Coming soon — tracked in the parity plan");
+                .on_disabled_hover_text(crate::i18n::t("Coming soon — tracked in the parity plan"));
             }
             Item::Cmd(label, id, p) => {
                 let en = enabled(app, id);
@@ -2169,7 +2171,7 @@ fn render_items(app: &VectorcraftApp, ui: &mut egui::Ui, items: &[Item], clicked
                     continue;
                 }
                 let label = dynamic_label(app, id, label);
-                let label = app.ui.language.tr_owned("", &label);
+                let label = app.ui.language.tr_owned(menu, &label);
                 let sc = item_shortcut(id, p).map(pretty_shortcut).unwrap_or_default();
                 let chk = checked(app, id, p);
                 let text = match chk {
@@ -2737,7 +2739,7 @@ mod tests {
             let mut out = ctx.run_ui(input, |ui| {
                 egui::Area::new(id).show(ui.ctx(), |ui| {
                     egui::containers::menu::menu_style(ui.style_mut());
-                    ui.with_layout(egui::Layout::top_down_justified(egui::Align::Min), |ui| menu_body(&app, ui, file, &mut None));
+                    ui.with_layout(egui::Layout::top_down_justified(egui::Align::Min), |ui| menu_body(&app, ui, "File", file, &mut None));
                 });
             });
             out.textures_delta.clear();
@@ -2763,7 +2765,7 @@ mod tests {
                 let mut out = ctx.run_ui(input, |ui| {
                     egui::Area::new(id).fixed_pos(egui::pos2(300.0, 30.0)).show(ui.ctx(), |ui| {
                         egui::containers::menu::menu_style(ui.style_mut());
-                        ui.with_layout(egui::Layout::top_down_justified(egui::Align::Min), |ui| menu_body(&app, ui, window, &mut None));
+                        ui.with_layout(egui::Layout::top_down_justified(egui::Align::Min), |ui| menu_body(&app, ui, "Window", window, &mut None));
                     });
                 });
                 out.textures_delta.clear();

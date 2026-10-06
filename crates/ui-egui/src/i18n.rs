@@ -243,6 +243,12 @@ mod tests {
         }
     }
 
+    #[test]
+    fn menus_translate_in_their_own_context() {
+        assert_eq!(Language::Ja.tr_in("Object", "Arrange"), "重ね順");
+        assert_eq!(Language::Ja.tr_in("Window", "Arrange"), "アレンジ");
+    }
+
     /// Every label the menu bar draws has a Japanese translation, except names (fonts, plug-ins,
     /// effects, libraries, workspaces) that come from data rather than the code.
     #[test]
@@ -270,7 +276,9 @@ mod tests {
                 };
                 // Product and format names read the same in Japanese.
                 let same = matches!(label, "OpenType");
-                if Language::Ja.tr_owned("", label) == label && !label.is_empty() && !same {
+                // Labels translate in the context of their top-level menu.
+                let menu = path.split(" > ").next().unwrap_or("");
+                if Language::Ja.tr_owned(menu, label) == label && !label.is_empty() && !same {
                     missing.push(format!("{path} > {label}"));
                 }
                 // Lists of fonts, sizes, grid presets and libraries hold names, not interface text.
