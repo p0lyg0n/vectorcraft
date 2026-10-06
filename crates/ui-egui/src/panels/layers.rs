@@ -18,8 +18,12 @@ use crate::{VectorcraftApp, icons, widgets};
 
 const ROW: f32 = 26.0;
 
-fn expanded_id() -> egui::Id {
-    egui::Id::new("layers-expanded")
+/// Keep the Layers panel's expanded rows with the active document (view state: no undo step,
+/// nothing marked modified; native saves write it).
+fn set_expanded(app: &mut VectorcraftApp, expanded: HashSet<u64>) {
+    if let Some(st) = app.session.active_mut() {
+        st.layers_expanded = Some(expanded.into_iter().map(NodeId).collect());
+    }
 }
 
 pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
@@ -43,7 +47,12 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     let current = st.active_layer;
     // While an opacity mask is edited only its art is listed.
     let mask_layer = doc.mask_edit.map(|m| m.layer);
-    let mut expanded: HashSet<u64> = ui.data(|d| d.get_temp(expanded_id())).unwrap_or_else(|| doc.layers.iter().map(|l| l.id.0).collect());
+    // The document's own expanded rows (saved with it); a document that has none opens its layers.
+    let mut expanded: HashSet<u64> = match &st.layers_expanded {
+        Some(ids) => ids.iter().map(|i| i.0).collect(),
+        None => doc.layers.iter().map(|l| l.id.0).collect(),
+    };
+    let before = expanded.clone();
     let mut actions: Vec<(String, serde_json::Value)> = vec![];
     // Search field ("Search All").
     crate::widgets::search_field(ui, egui::Id::new("layers-search"), "Search All");
@@ -55,7 +64,9 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
             row(ui, &doc, l, 0, false, &sel, target, current, &mut expanded, &mut actions, &t);
         }
     });
-    ui.data_mut(|d| d.insert_temp(expanded_id(), expanded));
+    if expanded != before {
+        set_expanded(app, expanded);
+    }
     if ui.input(|i| i.pointer.any_released()) {
         ui.data_mut(|d| d.remove::<u64>(egui::Id::new("layers-drag")));
     }
@@ -96,13 +107,16 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
     if widgets::icon_button(&mut child, "search", "Locate Object", false, 24.0).clicked() {
         // Expand ancestors of the selection.
         if let Some(st) = app.session.active() {
-            let mut ex: HashSet<u64> = ui.data(|d| d.get_temp(expanded_id())).unwrap_or_default();
+            let mut ex: HashSet<u64> = match &st.layers_expanded {
+                Some(ids) => ids.iter().map(|i| i.0).collect(),
+                None => st.doc.layers.iter().map(|l| l.id.0).collect(),
+            };
             for id in &st.selection.objects {
                 for a in st.doc.ancestry(*id).unwrap_or_default() {
                     ex.insert(a.0);
                 }
             }
-            ui.data_mut(|d| d.insert_temp(expanded_id(), ex));
+            set_expanded(app, ex);
         }
     }
     for (c, p) in actions {

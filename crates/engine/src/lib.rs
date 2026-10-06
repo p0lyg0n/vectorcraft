@@ -128,6 +128,9 @@ pub struct DocState {
     /// The view saved into native files (`Document::last_view`); the UI keeps it current before a
     /// save and restores it when the document opens.
     pub view: Option<vectorcraft_doc::SavedView>,
+    /// The Layers panel's expanded rows (`Document::layers_expanded`): view state, not undoable,
+    /// written back by native saves. None: none chosen yet (the panel opens the layers).
+    pub layers_expanded: Option<std::collections::BTreeSet<NodeId>>,
     /// Restored by Data Recovery: the title says "[Recovered]" and Save asks where to save it
     /// (suggesting `path`, the file it was copied from) instead of overwriting that file.
     pub recovered: bool,
@@ -147,6 +150,7 @@ impl DocState {
         let active_layer = doc.default_layer();
         // The saved view lives here while the document is open (saves write it back).
         let view = doc.last_view.take();
+        let layers_expanded = doc.layers_expanded.take().map(|v| v.into_iter().collect());
         let doc = Arc::new(doc);
         Self {
             saved_doc: doc.clone(),
@@ -167,6 +171,7 @@ impl DocState {
             save_options: Default::default(),
             converted: false,
             view,
+            layers_expanded,
             recovered: false,
             recovery: None,
             print_tiling: false,

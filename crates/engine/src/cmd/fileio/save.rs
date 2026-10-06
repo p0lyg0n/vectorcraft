@@ -216,11 +216,14 @@ fn is_svg(f: &Format) -> bool {
     matches!(f.id, "svg" | "svgz")
 }
 
-/// The document as written: native files carry the view to reopen at.
+/// The document as written: native files carry the view to reopen at and the Layers panel's
+/// expanded rows.
 fn doc_to_save(st: &DocState, f: &Format) -> Arc<Document> {
-    if is_native(f) && st.doc.last_view != st.view {
+    let expanded = st.layers_expanded.as_ref().map(|s| s.iter().copied().collect::<Vec<_>>());
+    if is_native(f) && (st.doc.last_view != st.view || st.doc.layers_expanded != expanded) {
         let mut d = (*st.doc).clone();
         d.last_view = st.view.clone();
+        d.layers_expanded = expanded;
         Arc::new(d)
     } else {
         st.doc.clone()

@@ -541,6 +541,10 @@ pub struct Document {
     /// save time only, so changing the view never marks the document modified.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_view: Option<SavedView>,
+    /// The layers and groups shown expanded in the Layers panel when the document was saved; it
+    /// reopens with the same rows open. Written at save time only, like `last_view`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub layers_expanded: Option<Vec<NodeId>>,
     /// Edit → Assign Profile: the profiles the document is tagged with (files before format v3
     /// kept them in `unknown`, see [`Document::migrate_color_profiles`]).
     #[serde(default, skip_serializing_if = "ColorProfiles::is_empty")]
@@ -632,6 +636,7 @@ impl Document {
             metadata: DocMetadata::default(),
             raster_effects: RasterEffectsSettings::default(),
             last_view: None,
+            layers_expanded: None,
             color_profiles: ColorProfiles::default(),
             export_settings: Default::default(),
             extra: Default::default(),

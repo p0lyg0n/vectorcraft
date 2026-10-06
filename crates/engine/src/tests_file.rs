@@ -233,3 +233,25 @@ fn japanese_file_names_save_open_and_export() {
     }
     let _ = std::fs::remove_dir_all(dir);
 }
+
+/// The Layers panel's expanded rows are view state: they don't mark the document modified, and a
+/// native save keeps them for the next open.
+#[test]
+fn layers_panel_expansion_is_saved_and_restored() {
+    let mut s = session();
+    let g = s.execute("shape.rectangle", &json!({"x": 10, "y": 10, "width": 80, "height": 40})).unwrap()["id"].as_u64().unwrap();
+    let dir = std::env::temp_dir().join(format!("vc-expanded-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let path = dir.join("expanded.vectorcraft");
+    s.execute("document.save", &json!({"path": path.to_string_lossy()})).unwrap();
+    assert!(s.doc().unwrap().layers_expanded.is_none(), "no choice yet");
+    // The user collapses the layer and opens the rectangle's row.
+    let rows: std::collections::BTreeSet<NodeId> = [NodeId(g)].into_iter().collect();
+    s.active_mut().unwrap().layers_expanded = Some(rows.clone());
+    assert!(!s.doc().unwrap().is_dirty(), "expanding rows changes nothing in the document");
+    s.execute("document.save", &json!({"path": path.to_string_lossy()})).unwrap();
+    s.execute("document.close", &json!({})).ok();
+    s.execute("document.open", &json!({"path": path.to_string_lossy()})).unwrap();
+    assert_eq!(s.doc().unwrap().layers_expanded, Some(rows));
+    let _ = std::fs::remove_dir_all(dir);
+}
