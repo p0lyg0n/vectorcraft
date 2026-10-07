@@ -8,6 +8,15 @@
 //! the private data keeps the path itself (`/AI11Text` objects: the `/Art` path before
 //! `/ConfiningPath`, in the format's documented path operators). Only those paths and the
 //! artboards are read here; anything this doesn't understand leaves the import as it was.
+//!
+//! Where each part comes from:
+//! - `PieceInfo` (where editors keep private data): the PDF specification (ISO 32000).
+//! - The path operators (`m`, `l`/`L`, `c`/`C`, `v`/`V`, `y`/`Y`): Adobe's published Illustrator
+//!   file format specification.
+//! - The compression marker (`%AI24_ZStandard_Data`, `%AI12_CompressedData`), the split into
+//!   `AIPrivateData1…N`, `/AI11Text` … `/ConfiningPath` and the artboards' `PositionPoint1/2`:
+//!   observed in files; not in a published specification.
+//! - The text document (the characters and their formatting, numeric keys): not read.
 
 use std::io::Read;
 
