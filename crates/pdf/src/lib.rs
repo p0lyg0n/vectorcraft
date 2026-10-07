@@ -46,6 +46,7 @@ mod export;
 mod forms;
 mod images;
 mod import;
+mod import_aiprivate;
 mod import_color;
 mod import_image;
 mod import_lines;

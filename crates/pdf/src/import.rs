@@ -209,6 +209,8 @@ pub fn import_with_report(bytes: &[u8], opts: &ImportOptions) -> Result<ImportRe
     let mut nesting = Nesting::new();
     // The top-level groups in the order the pages mark them, bottom first.
     let (mut order, mut known) = (vec![], HashSet::new());
+    // Illustrator's own data (`.ai` files), read the first time type on a path needs it.
+    let mut ai_private: Option<Option<crate::import_aiprivate::AiPrivate>> = None;
     for (i, &number) in picked.iter().enumerate() {
         let Some(page) = pages.get(number) else { continue };
         // Artboards on the trim boxes have the bleed boxes round them as the document's bleed
@@ -299,6 +301,15 @@ pub fn import_with_report(bytes: &[u8], opts: &ImportOptions) -> Result<ImportRe
                 ab = Rect::new(ab.x0 + dx, ab.y0, ab.x1 + dx, ab.y1);
             }
             art_right = art.x1 + dx;
+        }
+        // Type on a path set along the path Illustrator kept, not the one rebuilt through the glyphs.
+        if parts.iter().any(|(_, art)| has_type_on_a_path(art))
+            && let Some(frames) =
+                ai_private.get_or_insert_with(|| crate::import_aiprivate::AiPrivate::read(page)).as_ref().and_then(|ai| ai.frames_for(number, ab))
+        {
+            for (_, art) in &mut parts {
+                crate::import_aiprivate::use_frames(art, &frames);
+            }
         }
         let children: Vec<Arc<Node>> = parts.iter().flat_map(|(_, v)| v.iter().cloned()).collect();
         only_text &= ai && is_only_text(&children);
@@ -887,6 +898,14 @@ fn paints(nodes: &[Arc<Node>]) -> Vec<Paint> {
         n.walk(&mut |c| out.extend(c.appearance.items.iter().map(|i| i.paint().clone())));
     }
     out
+}
+
+/// Is there type on a path among `nodes` (in groups too)?
+fn has_type_on_a_path(nodes: &[Arc<Node>]) -> bool {
+    nodes.iter().any(|n| match &n.kind {
+        NodeKind::Text(t) => matches!(t.kind, vectorcraft_doc::TextKind::OnPath { .. }),
+        _ => n.children().is_some_and(|c| has_type_on_a_path(c)),
+    })
 }
 
 /// Visual bounds of `nodes`; `None` when one has none.
