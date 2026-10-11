@@ -26,6 +26,8 @@ use kurbo::{BezPath, ParamCurve, ParamCurveArclen, ParamCurveNearest, Point, Rec
 
 /// The most private data read once decompressed (bytes).
 const MAX_DATA: usize = 768 << 20;
+/// How the uncompressed document text starts.
+const DSC_HEADER: &[u8] = b"%!PS-Adobe"; // brand-ok: the DSC header the document text starts with
 /// The most private data streams read.
 const MAX_STREAMS: usize = 100_000;
 
@@ -61,7 +63,7 @@ impl AiPrivate {
 /// The private data streams of `page`, joined in order.
 fn raw_private_data(page: &Page<'_>) -> Option<Vec<u8>> {
     let piece = page.raw().get::<Dict<'_>>(b"PieceInfo")?;
-    let private = piece.get::<Dict<'_>>(b"Illustrator")?.get::<Dict<'_>>(b"Private")?;
+    let private = piece.get::<Dict<'_>>(b"Illustrator")?.get::<Dict<'_>>(b"Private")?; // brand-ok: the PieceInfo key such files carry
     let mut out = vec![];
     for i in 1..=MAX_STREAMS {
         let Some(s) = private.get::<Stream<'_>>(format!("AIPrivateData{i}").as_bytes()) else { break };
@@ -83,7 +85,7 @@ fn decompress(raw: &[u8]) -> Option<Vec<u8>> {
         dec.take(MAX_DATA as u64 + 1).read_to_end(&mut out).ok()?;
     } else if let Some(z) = after(b"%AI12_CompressedData") {
         flate2::read::ZlibDecoder::new(z).take(MAX_DATA as u64 + 1).read_to_end(&mut out).ok()?;
-    } else if raw.starts_with(b"%!PS-Adobe") {
+    } else if raw.starts_with(DSC_HEADER) {
         out = raw.to_vec();
     } else {
         return None;
