@@ -2966,7 +2966,9 @@ fn render_row(app: &VectorcraftApp, ui: &mut egui::Ui, row: &Row, checks: bool, 
     let sc = row.shortcut.map(pretty_shortcut).unwrap_or_default();
     let Some((id, p)) = row.command else {
         ui.add_enabled_ui(false, |ui| {
-            ui.add(egui::Button::new(row.label.as_ref()).shortcut_text(sc));
+            // Struck through, so an item that isn't built yet isn't taken for one that just
+            // doesn't apply now (fork only).
+            ui.add(egui::Button::new(egui::RichText::new(row.label.as_ref()).strikethrough()).shortcut_text(sc));
         })
         .response
         .on_disabled_hover_text(tl!("Coming soon — tracked in the parity plan"));

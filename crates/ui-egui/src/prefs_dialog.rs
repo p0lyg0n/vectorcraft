@@ -271,7 +271,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
             }
             PrefKind::Bool => bool_row(ui, d, sp.key, sp.label),
             PrefKind::Num { min, max, unit } => {
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let mut x = v.as_f64().unwrap_or(min);
                     let new = if sp.key == "uiScaling" {
                         widgets::slider(ui, egui::Slider::new(&mut x, min..=max).step_by(0.05).text(tl!("Smaller ↔ Larger"))).changed().then_some(x)
@@ -287,14 +287,14 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
                 // In the dialog's own Units choice, so a change there shows right away.
                 let unit = vectorcraft_doc::Unit::named(&d.str(measure.pref_key())).unwrap_or_default();
                 let x = d.f64(sp.key, min);
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     if let Some(x) = widgets::num_field(ui, sp.key, Some(x), unit, 110.0) {
                         d.fields.insert(sp.key.into(), json!(x.clamp(min, max)));
                     }
                 });
             }
             PrefKind::Int { min, max } => {
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let mut x = v.as_i64().unwrap_or(min);
                     let new = if sp.key == "anchorSize" {
                         widgets::slider(ui, egui::Slider::new(&mut x, min..=max).show_value(false).text(tl!("Size"))).changed().then_some(x)
@@ -309,7 +309,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
             // Linux only: the other platforms have a single display server.
             PrefKind::Choice(_) if sp.key == "linuxDisplayServer" && !cfg!(target_os = "linux") => {}
             PrefKind::Choice(opts) => {
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let cur = v.as_str().unwrap_or("");
                     let cur_label = opts.iter().find(|o| o.0 == cur).map(|o| o.1).unwrap_or(cur);
                     let labels: Vec<&str> = opts.iter().map(|o| o.1).collect();
@@ -323,7 +323,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
                 }
             }
             PrefKind::Color => {
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let hex = v.as_str().unwrap_or("#000000");
                     let c = vectorcraft_color::Color::from_hex(hex).map(|c| c.to_rgba8(1.0)).unwrap_or([0, 0, 0, 255]);
                     let mut rgb = [c[0], c[1], c[2]];
@@ -335,7 +335,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
             }
             PrefKind::Text if sp.key == "interfaceLanguage" => {
                 // `auto` plus every registered language, by its own name.
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let cur = v.as_str().unwrap_or("auto");
                     let codes: Vec<&str> = std::iter::once("auto").chain(crate::i18n::Lang::all().map(|l| l.code())).collect();
                     let labels: Vec<&str> = std::iter::once(tl!("Auto")).chain(crate::i18n::Lang::all().map(|l| l.name())).collect();
@@ -348,7 +348,7 @@ fn category_fields(ui: &mut egui::Ui, d: &mut Dialog, cat: &str) {
                 });
             }
             PrefKind::Text => {
-                labeled(ui, sp.label, |ui| {
+                labeled(ui, sp.key, sp.label, |ui| {
                     let mut s = v.as_str().unwrap_or("").to_string();
                     if ui.add(egui::TextEdit::singleline(&mut s).desired_width(260.0)).changed() {
                         d.fields.insert(sp.key.into(), json!(s));
@@ -364,20 +364,55 @@ fn picas_in_use(d: &Dialog) -> bool {
     ["unitsGeneral", "unitsStroke", "unitsType", "unitsAsianType"].iter().any(|k| d.str(k) == vectorcraft_doc::Unit::Picas.key())
 }
 
+/// Preferences that are stored and shown but that nothing reads yet (fork only): the dialog
+/// strikes them through so nobody expects them to work. Take a key off the list when the
+/// preference takes effect; the test checks each is a real key.
+const NOT_APPLIED_YET: &[&str] = &[
+    "highlightAlternateGlyphs",
+    "unitsAsianType",
+    "identifyObjectsBy",
+    "gridSubdivisions",
+    "hyphenationLanguage",
+    "fontsFolder",
+    "scratchPrimary",
+    "scratchSecondary",
+    "openDocumentsAsTabs",
+    "historyStates",
+    "realTimeDrawing",
+    "lowResProxyEps",
+    "copyAicb",
+    "aicbMode",
+    "blackOnScreen",
+    "blackOutput",
+    "touchWorkspace",
+];
+
 fn bool_row(ui: &mut egui::Ui, d: &mut Dialog, key: &str, label: &str) {
     // The app's outlined checkbox (it translates `label`): egui's own has no border at rest.
     let on = d.bool(key);
-    if widgets::check(ui, label, on, ui.is_enabled()) {
+    let r = ui.scope(|ui| widgets::check(ui, label, on, ui.is_enabled()));
+    if r.inner {
         d.fields.insert(key.into(), json!(!on));
+    }
+    if NOT_APPLIED_YET.contains(&key) {
+        // A line through the label, after the box.
+        let rect = r.response.rect;
+        let color = Tokens::get(ui.ctx()).text;
+        ui.painter().line_segment(
+            [egui::pos2(rect.left() + 22.0, rect.center().y), egui::pos2(rect.right(), rect.center().y)],
+            egui::Stroke::new(1.0, color),
+        );
     }
 }
 
-fn labeled(ui: &mut egui::Ui, label: &str, add: impl FnOnce(&mut egui::Ui)) {
+fn labeled(ui: &mut egui::Ui, key: &str, label: &str, add: impl FnOnce(&mut egui::Ui)) {
     let t = Tokens::get(ui.ctx());
     ui.horizontal(|ui| {
         ui.allocate_ui_with_layout(egui::vec2(210.0, 22.0), egui::Layout::left_to_right(egui::Align::Center), |ui| {
             ui.set_min_width(210.0);
-            ui.add(egui::Label::new(egui::RichText::new(format!("{}{}", tl!(label), tl!(":"))).color(t.text)).truncate());
+            let text = egui::RichText::new(format!("{}{}", tl!(label), tl!(":"))).color(t.text);
+            let text = if NOT_APPLIED_YET.contains(&key) { text.strikethrough() } else { text };
+            ui.add(egui::Label::new(text).truncate());
         });
         add(ui);
     });
@@ -388,6 +423,13 @@ mod tests {
     use super::*;
     use crate::Services;
     use vectorcraft_engine::Session;
+
+    #[test]
+    fn preferences_not_applied_yet_are_real_keys() {
+        for k in NOT_APPLIED_YET {
+            assert!(vectorcraft_engine::cmd::prefscmds::spec(k).is_some(), "`{k}` isn't a preference");
+        }
+    }
 
     /// A resting checkbox must have a visible outline in both states and every brightness.
     #[test]
