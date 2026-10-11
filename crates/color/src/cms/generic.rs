@@ -71,6 +71,39 @@ pub fn swop_like() -> GenericCmykParams {
     }
 }
 
+/// Coated sheet-fed offset as printed in Japan: the paper, solids and dot gain are the published
+/// Japan Color 2011 (coated) target values (CIELAB, D50; solids C 53/−36/−52, M 46/76/−3,
+/// Y 89/−6/94, K 16/1/2 on paper 94/0/−1, 14% dot gain at 50%), as given in the Journal of the
+/// Japanese Society of Printing Science and Technology's overview of the Japan Color
+/// certification. The overprints aren't among them: each is worked out here from its inks, their
+/// reflectances multiplied over the paper (a subtractive estimate, not measured data). Total ink
+/// 350%, typical of coated stock in Japan.
+pub fn japan_coated_like() -> GenericCmykParams {
+    let paper = Lab::new(94.0, 0.0, -1.0);
+    let (c, m, y) = (Lab::new(53.0, -36.0, -52.0), Lab::new(46.0, 76.0, -3.0), Lab::new(89.0, -6.0, 94.0));
+    // Inks over each other: their reflectances, relative to the paper, multiply.
+    let over = |inks: &[Lab]| -> Lab {
+        let p = lab_to_xyz(paper);
+        let mut xyz = p;
+        for ink in inks {
+            let i = lab_to_xyz(*ink);
+            for ch in 0..3 {
+                xyz[ch] *= i[ch] / p[ch].max(1e-6);
+            }
+        }
+        xyz_to_lab(xyz)
+    };
+    GenericCmykParams {
+        name: super::JAPAN_CMYK,
+        paper,
+        solids: [c, m, over(&[c, m]), y, over(&[c, y]), over(&[m, y]), over(&[c, m, y])],
+        black: Lab::new(16.0, 1.0, 2.0),
+        dot_gain: [0.14, 0.14, 0.14, 0.14],
+        tac: 3.5,
+        bg: BlackGeneration { start: 0.1, max_k: 0.95, gamma: 1.25 },
+    }
+}
+
 /// Gamut boundary descriptor: max chroma per (L, hue) cell in media-relative Lab.
 struct Gbd {
     cmax: Vec<f32>,

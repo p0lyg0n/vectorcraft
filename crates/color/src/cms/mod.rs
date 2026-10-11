@@ -31,6 +31,8 @@ pub const DISPLAY_P3: &str = "Display P3";
 pub const PROPHOTO_RGB: &str = "ProPhoto RGB";
 /// Our parametric press model (see [`generic`]). Not an Adobe/ECI profile.
 pub const GENERIC_CMYK: &str = "VectorCraft Generic CMYK (SWOP-like)";
+/// Our parametric press model with Japan's coated offset targets (see [`generic::japan_coated_like`]).
+pub const JAPAN_CMYK: &str = "VectorCraft Japan Coated";
 /// Profile-free CMYK (`rgb = (1−c)(1−k)` …): uncalibrated, kept for legacy numbers.
 pub const DEVICE_CMYK: &str = "Device CMYK (uncalibrated)";
 /// The grey space greyscale exports are written in: sRGB's tone curve (a grey shows as on screen).
@@ -38,7 +40,7 @@ pub const GRAY: &str = "Gray (sRGB tone curve)";
 
 /// Built-in RGB and CMYK working spaces, in menu order.
 const BUILTIN_RGB: [&str; 4] = [SRGB, WIDE_GAMUT_RGB, DISPLAY_P3, PROPHOTO_RGB];
-const BUILTIN_CMYK: [&str; 2] = [GENERIC_CMYK, DEVICE_CMYK];
+const BUILTIN_CMYK: [&str; 3] = [GENERIC_CMYK, JAPAN_CMYK, DEVICE_CMYK];
 
 /// Names earlier versions gave built-in profiles: (old name, current name). Settings, documents
 /// and commands that still use an old name get the current profile.
@@ -164,6 +166,11 @@ fn generic() -> Arc<GenericCmyk> {
     G.get_or_init(|| Arc::new(GenericCmyk::new(generic::swop_like()))).clone()
 }
 
+fn japan() -> Arc<GenericCmyk> {
+    static J: OnceLock<Arc<GenericCmyk>> = OnceLock::new();
+    J.get_or_init(|| Arc::new(GenericCmyk::new(generic::japan_coated_like()))).clone()
+}
+
 static USER: RwLock<Vec<Arc<IccProfile>>> = RwLock::new(Vec::new());
 
 fn builtin_rgb_cache(name: &str) -> Option<Arc<IccProfile>> {
@@ -184,6 +191,7 @@ fn user_profile(name: &str) -> Option<Arc<IccProfile>> {
 fn cmyk_space(name: &str) -> Result<CmykSpace, CmsError> {
     match canonical_name(name) {
         GENERIC_CMYK => Ok(CmykSpace::Generic(generic())),
+        JAPAN_CMYK => Ok(CmykSpace::Generic(japan())),
         DEVICE_CMYK => Ok(CmykSpace::Device),
         _ => match user_profile(name) {
             Some(p) if p.kind == ProfileKind::Cmyk => Ok(CmykSpace::Icc(p)),

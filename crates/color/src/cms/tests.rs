@@ -241,3 +241,27 @@ fn lab_colours_round_trip_through_the_cms() {
     let Color::Gray { k } = c.convert(&Color::lab(50.0, 0.0, 0.0), Model::Gray, ri) else { panic!("Gray") };
     assert!((k - 0.53).abs() < 0.01, "{k}");
 }
+
+/// The Japan coated model prints the published targets: its paper, solids and black within a
+/// rounding of them, and it is offered as a built-in CMYK working space.
+#[test]
+fn japan_coated_prints_its_published_targets() {
+    let j = GenericCmyk::new(generic::japan_coated_like());
+    let close = |got: Lab, want: Lab| delta_e76(got, want) < 1.0;
+    for (cmyk, want) in [
+        ([0.0, 0.0, 0.0, 0.0], Lab::new(94.0, 0.0, -1.0)),
+        ([1.0, 0.0, 0.0, 0.0], Lab::new(53.0, -36.0, -52.0)),
+        ([0.0, 1.0, 0.0, 0.0], Lab::new(46.0, 76.0, -3.0)),
+        ([0.0, 0.0, 1.0, 0.0], Lab::new(89.0, -6.0, 94.0)),
+        ([0.0, 0.0, 0.0, 1.0], Lab::new(16.0, 1.0, 2.0)),
+    ] {
+        let got = j.to_lab_abs(cmyk);
+        assert!(close(got, want), "{cmyk:?}: {got:?} vs {want:?}");
+    }
+    // Overprints are darker than either ink.
+    let blue = j.to_lab_abs([1.0, 1.0, 0.0, 0.0]);
+    assert!(blue.l < 46.0 && blue.b < -20.0, "{blue:?}");
+    assert!(profiles().iter().any(|p| p.name == JAPAN_CMYK && p.kind == ProfileKind::Cmyk && p.builtin));
+    let cms = Cms::new(&ColorSettings { cmyk: JAPAN_CMYK.into(), ..ColorSettings::default() }).unwrap();
+    assert_eq!(cms.settings().cmyk, JAPAN_CMYK);
+}
