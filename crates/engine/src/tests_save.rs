@@ -368,3 +368,18 @@ fn a_template_places_like_a_native_file() {
     let st = s.doc().unwrap();
     assert!(st.doc.node_count() > empty && !st.selection.is_empty(), "the template's art is placed and selected");
 }
+
+/// A document with several layers and no saved rows (an imported file) opens with its layers
+/// closed; one with a single layer opens it (fork).
+#[test]
+fn several_layers_open_closed_without_saved_rows() {
+    let mut doc = vectorcraft_doc::Document::new(100.0, 100.0);
+    let only = doc.layers[0].id;
+    let st = crate::DocState::new(doc.clone(), None);
+    assert!(st.layers_open.contains(only));
+    let id = doc.alloc_id();
+    doc.layers.push(std::sync::Arc::new(vectorcraft_doc::Node::layer(id, "Layer 2", vectorcraft_doc::LayerColor::Preset(1))));
+    let st = crate::DocState::new(doc.clone(), None);
+    assert!(!st.layers_open.contains(only) && !st.layers_open.contains(id));
+    assert_eq!(st.layers_open.saved(&st.doc), None, "the default is not saved");
+}

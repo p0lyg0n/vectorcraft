@@ -328,8 +328,8 @@ pub struct DocState {
 static NEXT_DOC_UID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 
 /// The rows open in the Layers panel: the layers, sublayers and groups that show what they hold.
-/// A document opens with the ones it was saved with ([`Document::layers_open`]), else with only
-/// its top-level layers open.
+/// A document opens with the ones it was saved with ([`Document::layers_open`]), else with its
+/// layers closed, or its only layer open (fork: an imported file's many layers stay closed).
 #[derive(Clone, Debug, Default)]
 pub struct OpenRows {
     ids: std::collections::HashSet<NodeId>,
@@ -338,13 +338,21 @@ pub struct OpenRows {
 }
 
 impl OpenRows {
-    /// The rows `saved` in a file, else `doc`'s top-level layers.
+    /// The rows `saved` in a file, else [`Self::default_ids`].
     fn new(doc: &Document, saved: Option<Vec<NodeId>>) -> Self {
         let ids = match saved {
             Some(ids) => ids.into_iter().collect(),
-            None => doc.layers.iter().map(|l| l.id).collect(),
+            None => Self::default_ids(doc).into_iter().collect(),
         };
         Self { ids, generation: 0 }
+    }
+    /// The rows open without saved ones: none, or the layer of a document that has only one (as
+    /// a new document does).
+    fn default_ids(doc: &Document) -> Vec<NodeId> {
+        match doc.layers.as_slice() {
+            [only] => vec![only.id],
+            _ => vec![],
+        }
     }
     pub fn contains(&self, id: NodeId) -> bool {
         self.ids.contains(&id)
@@ -359,7 +367,7 @@ impl OpenRows {
         self.generation
     }
     /// What a native file keeps of the open rows: those of `doc` that hold others, in id order;
-    /// `None` when they are the default (only the top-level layers).
+    /// `None` when they are the default ([`Self::default_ids`]).
     pub fn saved(&self, doc: &Document) -> Option<Vec<NodeId>> {
         let mut ids = vec![];
         doc.walk(|n| {
@@ -368,9 +376,7 @@ impl OpenRows {
             }
         });
         ids.sort_unstable();
-        let mut layers: Vec<NodeId> = doc.layers.iter().map(|l| l.id).collect();
-        layers.sort_unstable();
-        (ids != layers).then_some(ids)
+        (ids != Self::default_ids(doc)).then_some(ids)
     }
 }
 
