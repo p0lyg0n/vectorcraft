@@ -265,3 +265,12 @@ fn japan_coated_prints_its_published_targets() {
     let cms = Cms::new(&ColorSettings { cmyk: JAPAN_CMYK.into(), ..ColorSettings::default() }).unwrap();
     assert_eq!(cms.settings().cmyk, JAPAN_CMYK);
 }
+
+/// Setting the colour settings counts as a change, so what was drawn with them can be redrawn.
+#[test]
+fn setting_the_colour_settings_moves_the_generation_on() {
+    let before = generation();
+    // The defaults again: nothing another test relies on changes.
+    set_active(&active_settings()).unwrap();
+    assert!(generation() > before);
+}

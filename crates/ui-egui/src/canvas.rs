@@ -258,6 +258,7 @@ pub fn show(app: &mut VectorcraftApp, ui: &mut Ui) {
         isolated: st.isolation.map(|id| id.0),
         // Appearance of Black › On Screen: Display All Blacks as Rich Black.
         rich_black: app.session.prefs.black_on_screen == "rich",
+        colors: vectorcraft_color::cms::generation(),
     };
     // Placed documents' bitmaps are being made: draw again when they are ready.
     if vectorcraft_render::placed_document::busy() {

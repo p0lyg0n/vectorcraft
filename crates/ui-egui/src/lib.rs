@@ -327,6 +327,8 @@ pub struct CacheKey {
     pub rich_black: bool,
     /// Colour and style of guide paths ([`vectorcraft_render::RenderOptions::guide`]).
     pub guide: ([u8; 3], bool),
+    /// The colour settings ([`vectorcraft_color::cms::generation`]): other ones redraw the art.
+    pub colors: u64,
 }
 
 #[derive(Clone, Copy, Debug, Default)]

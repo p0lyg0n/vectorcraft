@@ -760,6 +760,14 @@ impl CmykLut {
 static ACTIVE: RwLock<Option<Arc<Cms>>> = RwLock::new(None);
 static RGB_IS_SRGB: AtomicBool = AtomicBool::new(true);
 static CMYK_IS_DEVICE: AtomicBool = AtomicBool::new(false);
+/// Counts the changes of the active settings ([`generation`]).
+static GENERATION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+/// A number that changes whenever the active settings do: what was drawn or worked out with
+/// colours before then is stale.
+pub fn generation() -> u64 {
+    GENERATION.load(Ordering::Relaxed)
+}
 
 /// The active colour-management context (Edit → Color Settings).
 pub fn active() -> Arc<Cms> {
@@ -780,6 +788,7 @@ pub fn set_active(settings: &ColorSettings) -> Result<(), CmsError> {
     RGB_IS_SRGB.store(cms.rgb_is_srgb(), Ordering::Relaxed);
     CMYK_IS_DEVICE.store(matches!(cms.cmyk, CmykSpace::Device), Ordering::Relaxed);
     *ACTIVE.write().unwrap_or_else(|e| e.into_inner()) = Some(Arc::new(cms));
+    GENERATION.fetch_add(1, Ordering::Relaxed);
     Ok(())
 }
 

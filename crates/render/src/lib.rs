@@ -388,6 +388,8 @@ pub struct Renderer {
     /// The [`vectorcraft_text::FontDb::generation`] `texts` was laid out with: type lays out
     /// again when fonts are added or rescanned.
     text_fonts: u64,
+    /// The colour settings' [`vectorcraft_color::cms::generation`] the caches were drawn with.
+    colors: u64,
     /// Clip regions per clipping path (see [`Self::clip_of`]).
     clips: FrameCache<usize, ClipEntry>,
     /// Context reused when rendering single-threaded (`threads == 0`).
@@ -523,6 +525,7 @@ impl Renderer {
         Self {
             texts: FrameCache::new(lru::TEXT_BUDGET, 1024),
             text_fonts: 0,
+            colors: vectorcraft_color::cms::generation(),
             clips: FrameCache::new(lru::CLIP_BUDGET, 256),
             ctx_st: None,
             threads: default_threads(),
@@ -568,6 +571,13 @@ impl Renderer {
     /// [`Self::render`], or with `inks` the ink amounts in the working CMYK space instead of
     /// screen colours (4 bytes a pixel, see [`Self::render_region_inks`]).
     fn render_as(&mut self, doc: &Document, width: u32, height: u32, view: Affine, opts: &RenderOptions, inks: bool) -> Rendered {
+        // Other colour settings: what was drawn with the old ones goes.
+        let colors = vectorcraft_color::cms::generation();
+        if colors != self.colors {
+            let threads = self.threads;
+            *self = Self::new();
+            self.threads = threads;
+        }
         let start = now();
         if opts.supersample && opts.anti_alias == AntiAlias::Art && opts.mask_view.is_none() {
             let (w, h) = (width.clamp(1, u16::MAX as u32), height.clamp(1, u16::MAX as u32));
