@@ -3456,6 +3456,52 @@ theme	Appearance	外観
 	Display All Blacks as Rich Black: 100% black ink alone shows as the deepest black the screen has, like a rich black (inks mixed under black). Rich blacks, tints of black and placed images show as they are, and the document's colours don't change.	すべてのブラックをリッチブラックとして表示：K100% の墨ベタだけを、リッチブラック（墨に他のインキを重ねた黒）と同じように、画面で出せるいちばん深い黒で表示します。リッチブラック、墨の網、配置画像はそのまま表示され、ドキュメントのカラー値は変わりません。
 	Display All Blacks Accurately: 100% black ink shows as the dark grey it prints as, and a rich black (inks mixed under black) as the deeper black it is.	すべてのブラックを正確に表示：K100% の墨ベタは印刷されるとおりの濃いグレーで、リッチブラック（墨に他のインキを重ねた黒）はより深い黒で表示します。
 	Details	詳細
+# Swatches panel: the default swatches' names (shown in the UI language; documents keep them)
+swatch	[None]	[なし]
+swatch	[Registration]	[レジストレーション]
+swatch	White	ホワイト
+swatch	Black	ブラック
+swatch	Red	レッド
+swatch	Orange Red	オレンジレッド
+swatch	Orange	オレンジ
+swatch	Amber	アンバー
+swatch	Yellow	イエロー
+swatch	Yellow Green	イエローグリーン
+swatch	Lime	ライム
+swatch	Green	グリーン
+swatch	Emerald	エメラルド
+swatch	Teal	ティール
+swatch	Aqua	アクア
+swatch	Cyan Green	シアングリーン
+swatch	Cyan	シアン
+swatch	Azure	アジュール
+swatch	Blue	ブルー
+swatch	Indigo	インディゴ
+swatch	Violet	バイオレット
+swatch	Purple	パープル
+swatch	Magenta	マゼンタ
+swatch	Rose	ローズ
+swatch	Pink	ピンク
+swatch	Brown	ブラウン
+swatch	Tan	タン
+swatch	Coffee	コーヒー
+swatch	Chocolate	チョコレート
+swatch	Sand	サンド
+swatch	Copper	カッパー
+swatch	Rust	ラスト
+swatch	Walnut	ウォルナット
+swatch	Espresso	エスプレッソ
+swatch	White, Black	ホワイト、ブラック
+swatch	Radial White, Black	円形 ホワイト、ブラック
+swatch	Sunset	サンセット
+swatch	Ocean	オーシャン
+swatch	Grays	グレー
+swatch	Brights	ビビッド
+swatch	Bright Red	ビビッドレッド
+swatch	Bright Yellow	ビビッドイエロー
+swatch	Bright Green	ビビッドグリーン
+swatch	Bright Blue	ビビッドブルー
+swatch	Bright Violet	ビビッドバイオレット
 @msg	Reset {_1}	{_1} をリセットしました
 @msg	Saving	保存中
 @msg	Saving {_1}	{_1} を保存中
