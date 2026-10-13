@@ -3453,7 +3453,7 @@ theme	Appearance	外観
 # Fork: Preferences ▸ Appearance of Black samples
 	Black (K100%) Sample	ブラック（K100%）のサンプル
 	Rich Black Sample	リッチブラックのサンプル
-	Display All Blacks as Rich Black: 100% black ink shows as the deepest black the screen has, like a rich black (inks mixed under black), and the colours between it and white follow. The document's colours don't change.	すべてのブラックをリッチブラックとして表示：K100% の墨ベタも、リッチブラック（墨に他のインキを重ねた黒）と同じように、画面で出せるいちばん深い黒で表示します。白までの間の色もそれに合わせて表示されます。ドキュメントのカラー値は変わりません。
+	Display All Blacks as Rich Black: 100% black ink alone shows as the deepest black the screen has, like a rich black (inks mixed under black). Rich blacks, tints of black and placed images show as they are, and the document's colours don't change.	すべてのブラックをリッチブラックとして表示：K100% の墨ベタだけを、リッチブラック（墨に他のインキを重ねた黒）と同じように、画面で出せるいちばん深い黒で表示します。リッチブラック、墨の網、配置画像はそのまま表示され、ドキュメントのカラー値は変わりません。
 	Display All Blacks Accurately: 100% black ink shows as the dark grey it prints as, and a rich black (inks mixed under black) as the deeper black it is.	すべてのブラックを正確に表示：K100% の墨ベタは印刷されるとおりの濃いグレーで、リッチブラック（墨に他のインキを重ねた黒）はより深い黒で表示します。
 	Details	詳細
 @msg	Reset {_1}	{_1} をリセットしました

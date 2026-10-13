@@ -388,7 +388,7 @@ fn black_samples(ui: &mut egui::Ui, d: &Dialog) {
     ui.add_space(10.0);
     ui.label(egui::RichText::new(crate::i18n::t("Details")).font(theme::semibold(12.5)).color(t.text_strong));
     let about = if rich {
-        "Display All Blacks as Rich Black: 100% black ink shows as the deepest black the screen has, like a rich black (inks mixed under black), and the colours between it and white follow. The document's colours don't change."
+        "Display All Blacks as Rich Black: 100% black ink alone shows as the deepest black the screen has, like a rich black (inks mixed under black). Rich blacks, tints of black and placed images show as they are, and the document's colours don't change."
     } else {
         "Display All Blacks Accurately: 100% black ink shows as the dark grey it prints as, and a rich black (inks mixed under black) as the deeper black it is."
     };
